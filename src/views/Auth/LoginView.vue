@@ -1,210 +1,172 @@
 <template>
+  <div class="background-layer" aria-hidden="true">
+    <!-- gradiente + luces por CSS -->
+    <canvas ref="canvasEl" class="bg-canvas"></canvas>
+  </div>
+
   <div class="auth-container">
-    <!-- Panel Izquierdo - Hero Section -->
-    <div class="hero-panel">
-      <div class="hero-content">
-        <!-- Logo y Título -->
-        <div class="brand-section">
-          <div class="logo-wrapper">
-            <img
-              src="../../assets/logo-black.png"
-              alt="Logo RentUs"
-              class="logo-icon"
-            />
-            <h1 class="brand-name">
-              <span class="brand-rent">Rent</span>
-              <span class="brand-us">Us</span>
-            </h1>
-          </div>
-          <p class="brand-tagline">Tu hogar ideal te está esperando</p>
-        </div>
+    <!-- Fondo con imagen/gradiente -->
 
-        <!-- Mensajes Dinámicos -->
-        <div class="welcome-section">
-          <transition name="slide-fade" mode="out-in">
-            <div :key="currentMessageIndex" class="dynamic-message">
-              <h2 class="welcome-title">{{ currentMessage.title }}</h2>
-              <p class="welcome-text">{{ currentMessage.text }}</p>
-            </div>
-          </transition>
-
-          <!-- Indicadores de mensaje -->
-          <div class="message-indicators">
-            <button 
-              v-for="(_, index) in messages" 
-              :key="index"
-              @click="currentMessageIndex = index"
-              class="indicator-dot"
-              :class="{ active: currentMessageIndex === index }"
-            ></button>
-          </div>
+    <!-- Contenido sobre el fondo -->
+    <div class="content-wrapper">
+      <div class="brand-section">
+        <div class="logo-wrapper">
+          <img src="../../assets/logo-black.png" alt="Logo RentUs" class="logo-icon" />
+          <h1 class="brand-name">
+            <span class="brand-rent">Rent</span>
+            <span class="brand-us">Us</span>
+          </h1>
         </div>
       </div>
-
-      <!-- Decorative Elements -->
-      <div class="hero-decoration">
-        <div class="deco-circle deco-1"></div>
-        <div class="deco-circle deco-2"></div>
-        <div class="deco-circle deco-3"></div>
-      </div>
-    </div>
-
-    <!-- Panel Derecho - Form Section -->
-    <div class="form-panel">
-      <div class="form-container">
-        <!-- Back Button -->
-        <button @click="goBack" class="btn-back">
-          <span class="back-icon">←</span>
-          <span class="back-text">Volver</span>
-        </button>
-
-        <!-- Tabs -->
-        <div class="tabs-container">
-          <button 
-            class="tab-btn" 
-            :class="{ active: activeTab === 'login' }"
-            @click="setTab('login')"
-          >
-            Iniciar Sesión
-          </button>
-          <button 
-            class="tab-btn" 
-            :class="{ active: activeTab === 'register' }"
-            @click="setTab('register')"
-          >
-            Registrarse
-          </button>
-        </div>
-
-        <!-- Form Header -->
-        <div class="form-header">
-          <h2 class="form-title">Accede a tu cuenta</h2>
-          <p class="form-subtitle">Ingresa tus credenciales para continuar</p>
-        </div>
-
-        <!-- Error Message -->
-        <transition name="fade">
-          <div v-if="errorMessage" class="alert-error">
-            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-            <span class="alert-text">{{ errorMessage }}</span>
+      <!-- Texto dinámico en la parte inferior -->
+      <div class="dynamic-text-section">
+        <transition name="slide-fade" mode="out-in">
+          <div :key="currentMessageIndex" class="dynamic-message">
+            <h2 class="welcome-title">{{ currentMessage.title }}</h2>
+            <p class="welcome-text">{{ currentMessage.text }}</p>
           </div>
         </transition>
 
-        <!-- Login Form -->
-        <form class="login-form" @submit.prevent="handleLogin">
-          <div class="form-group">
-            <label for="email" class="form-label">Correo electrónico</label>
-            <div class="input-wrapper">
-              <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="4" width="20" height="16" rx="2"/>
-                <path d="m2 7 10 7 10-7"/>
-              </svg>
-              <input
-                id="email"
-                v-model="email"
-                type="email"
-                class="form-input"
-                placeholder="tu@email.com"
-                required
-              />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="password" class="form-label">Contraseña</label>
-            <div class="input-wrapper">
-              <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-              <input
-                id="password"
-                v-model="password"
-                :type="showPassword ? 'text' : 'password'"
-                class="form-input"
-                placeholder="••••••••"
-                required
-              />
-              <button 
-                type="button" 
-                class="toggle-password"
-                @click="showPassword = !showPassword"
-              >
-                <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                  <line x1="1" y1="1" x2="23" y2="23"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <div class="form-options">
-            <label class="checkbox-wrapper">
-              <input type="checkbox" v-model="rememberMe" />
-              <span class="checkbox-label">Recordarme</span>
-            </label>
-            <a href="#" class="link-forgot">¿Olvidaste tu contraseña?</a>
-          </div>
-
-          <button type="submit" class="btn-submit" :disabled="isLoading">
-            <span v-if="!isLoading" class="btn-content">
-              <span class="btn-text">Iniciar Sesión</span>
-              <svg class="btn-arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"/>
-                <polyline points="12 5 19 12 12 19"/>
-              </svg>
-            </span>
-            <span v-else class="btn-loader">
-              <div class="spinner"></div>
-              <span>Iniciando...</span>
-            </span>
-          </button>
-        </form>
-
-        <!-- Divider -->
-        <div class="divider">
-          <span class="divider-line"></span>
-          <span class="divider-text">O continúa con</span>
-          <span class="divider-line"></span>
+        <div class="message-indicators">
+          <button v-for="(_, index) in messages" :key="index" @click="currentMessageIndex = index" class="indicator-dot"
+            :class="{ active: currentMessageIndex === index }"></button>
         </div>
-
-        <!-- Social Login -->
-        <div class="social-buttons">
-          <button class="social-btn" @click="socialLogin('google')">
-            <img src="https://img.icons8.com/color/48/google-logo.png" alt="Google" />
-            <span>Google</span>
-          </button>
-          <button class="social-btn" @click="socialLogin('facebook')">
-            <img src="https://img.icons8.com/color/48/facebook-new.png" alt="Facebook" />
-            <span>Facebook</span>
-          </button>
-          <button class="social-btn" @click="socialLogin('apple')">
-            <img src="https://img.icons8.com/ios-filled/50/mac-os.png" alt="Apple" />
-            <span>Apple</span>
-          </button>
-        </div>
-
-        <!-- Footer Text -->
-        <p class="form-footer">
-          ¿No tienes una cuenta?
-          <button @click="setTab('register')" class="link-register">
-            Regístrate gratis
-          </button>
-        </p>
       </div>
+
+      <!-- Modal flotante del formulario -->
+      <div class="floating-form-modal">
+        <div class="form-container">
+          <!-- Back Button -->
+          <button @click="goBack" class="btn-back">
+            <span class="back-icon">←</span>
+            <span class="back-text">Volver</span>
+          </button>
+
+          <!-- Tabs -->
+          <div class="tabs-container">
+            <button class="tab-btn" :class="{ active: activeTab === 'login' }" @click="setTab('login')">
+              Iniciar Sesión
+            </button>
+            <button class="tab-btn" :class="{ active: activeTab === 'register' }" @click="setTab('register')">
+              Registrarse
+            </button>
+          </div>
+
+          <!-- Form Header -->
+          <div class="form-header">
+            <h2 class="form-title">Accede a tu cuenta</h2>
+            <p class="form-subtitle">Ingresa tus credenciales para continuar</p>
+          </div>
+
+          <!-- Error Message -->
+          <transition name="fade">
+            <div v-if="errorMessage" class="alert-error">
+              <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span class="alert-text">{{ errorMessage }}</span>
+            </div>
+          </transition>
+
+          <!-- Login Form -->
+          <form class="login-form" @submit.prevent="handleLogin">
+            <div class="form-group">
+              <label for="email" class="form-label">Correo electrónico</label>
+              <div class="input-wrapper">
+                <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="2" />
+                  <path d="m2 7 10 7 10-7" />
+                </svg>
+                <input id="email" v-model="email" type="email" class="form-input" placeholder="tu@email.com" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="password" class="form-label">Contraseña</label>
+              <div class="input-wrapper">
+                <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <input id="password" v-model="password" :type="showPassword ? 'text' : 'password'" class="form-input"
+                  placeholder="••••••••" required />
+                <button type="button" class="toggle-password" @click="showPassword = !showPassword">
+                  <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-options">
+              <label class="checkbox-wrapper">
+                <input type="checkbox" v-model="rememberMe" />
+                <span class="checkbox-label">Recordarme</span>
+              </label>
+              <a href="#" class="link-forgot">¿Olvidaste tu contraseña?</a>
+            </div>
+
+            <button type="submit" class="btn-submit" :disabled="isLoading">
+              <span v-if="!isLoading" class="btn-content">
+                <span class="btn-text">Iniciar Sesión</span>
+                <svg class="btn-arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </span>
+              <span v-else class="btn-loader">
+                <div class="spinner"></div>
+                <span>Iniciando...</span>
+              </span>
+            </button>
+          </form>
+
+          <!-- Divider -->
+          <div class="divider">
+            <span class="divider-line"></span>
+            <span class="divider-text">O continúa con</span>
+            <span class="divider-line"></span>
+          </div>
+
+          <!-- Social Login -->
+          <div class="social-buttons">
+            <button class="social-btn" @click="socialLogin('google')">
+              <img src="https://img.icons8.com/color/48/google-logo.png" alt="Google" />
+              <span>Google</span>
+            </button>
+          </div>
+
+          <!-- Footer Text -->
+          <p class="form-footer">
+            ¿No tienes una cuenta?
+            <button @click="setTab('register')" class="link-register">
+              Regístrate gratis
+            </button>
+          </p>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+/* -------------------- TU SCRIPT ORIGINAL -------------------- */
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useAuth } from "../../events/useAuth";
 import { useRouter } from "vue-router";
@@ -222,68 +184,39 @@ const { login } = useAuth();
 // Mensajes dinámicos
 const currentMessageIndex = ref(0);
 const messages = [
-  {
-    title: "Bienvenido de nuevo",
-    text: "Retoma tu búsqueda donde la dejaste y sigue construyendo tu futuro hogar."
-  },
-  {
-    title: "Encuentra tu hogar ideal",
-    text: "Accede a miles de propiedades disponibles en tu ciudad y comienza tu búsqueda hoy mismo."
-  },
-  {
-    title: "Transacciones seguras",
-    text: "Tu seguridad es nuestra prioridad. Realiza todas tus gestiones con total confianza."
-  },
-  {
-    title: "Búsqueda inteligente",
-    text: "Usa nuestros filtros avanzados para encontrar exactamente lo que necesitas en segundos."
-  }
+  { title: "Bienvenido de nuevo", text: "Retoma tu búsqueda donde la dejaste y sigue construyendo tu futuro hogar." },
+  { title: "Encuentra tu hogar ideal", text: "Accede a miles de propiedades disponibles en tu ciudad y comienza tu búsqueda hoy mismo." },
+  { title: "Transacciones seguras", text: "Tu seguridad es nuestra prioridad. Realiza todas tus gestiones con total confianza." },
+  { title: "Búsqueda inteligente", text: "Usa nuestros filtros avanzados para encontrar exactamente lo que necesitas en segundos." }
 ];
-
 const currentMessage = computed(() => messages[currentMessageIndex.value]);
 
 let messageInterval: number | null = null;
 
 onMounted(() => {
-  // Cambiar mensaje cada 5 segundos
   messageInterval = window.setInterval(() => {
     currentMessageIndex.value = (currentMessageIndex.value + 1) % messages.length;
   }, 5000);
 });
 
 onUnmounted(() => {
-  if (messageInterval) {
-    clearInterval(messageInterval);
-  }
+  if (messageInterval) clearInterval(messageInterval);
 });
 
 const handleLogin = async () => {
   errorMessage.value = "";
   isLoading.value = true;
-
   try {
-    const response = await login({
-      email: email.value,
-      password: password.value,
-    });
-
+    const response = await login({ email: email.value, password: password.value });
     if (response?.token && response?.user) {
       localStorage.setItem("token", response.token);
       localStorage.setItem("user", JSON.stringify({ name: response.user.name }));
-      
-      // Verificar si hay una URL de redirección guardada
       const redirectUrl = localStorage.getItem('redirectAfterLogin');
-      if (redirectUrl) {
-        localStorage.removeItem('redirectAfterLogin');
-        router.push(redirectUrl);
-      } else {
-        router.push("/");
-      }
+      redirectUrl ? (localStorage.removeItem('redirectAfterLogin'), router.push(redirectUrl)) : router.push("/");
     } else {
       errorMessage.value = "Correo o contraseña incorrectos.";
     }
-  } catch (err) {
-    console.error("Error al iniciar sesión:", err);
+  } catch {
     errorMessage.value = "Error al iniciar sesión. Intenta nuevamente.";
   } finally {
     isLoading.value = false;
@@ -292,18 +225,94 @@ const handleLogin = async () => {
 
 const setTab = (tab: string) => {
   activeTab.value = tab;
-  if (tab === "register") router.push("/register");
-  if (tab === "login") router.push("/login");
+  tab === "register" && router.push("/register");
+  tab === "login" && router.push("/login");
 };
 
-const goBack = () => {
-  router.push("/");
-};
+const goBack = () => router.push("/");
+const socialLogin = (provider: string) => console.log(`Login con ${provider}`);
 
-const socialLogin = (provider: string) => {
-  console.log(`Login con ${provider}`);
-  // Implementar lógica de login social
-};
+/* -------------------- ANIMACIÓN DE FONDO CON CANVAS -------------------- */
+const canvasEl = ref<HTMLCanvasElement | null>(null);
+let ctx: CanvasRenderingContext2D | null = null;
+let animationId: number | null = null;
+let particles: any[] = [];
+const PARTICLE_COUNT = 45;
+
+class Particle {
+  constructor(public w: number, public h: number, public dpr: number) { this.reset(); }
+  reset() {
+    this.x = Math.random() * this.w;
+    this.y = Math.random() * this.h;
+    this.vx = (Math.random() - 0.5) * 0.18;
+    this.vy = (Math.random() - 0.5) * 0.25 - 0.08;
+    this.radius = (Math.random() * 10 + 4) * this.dpr;
+    this.alpha = Math.random() * 0.4 + 0.05;
+    this.phase = Math.random() * Math.PI * 2;
+    this.speedPhase = 0.002 + Math.random() * 0.003;
+  }
+  update(delta: number) {
+    this.phase += this.speedPhase * delta;
+    this.x += this.vx * delta;
+    this.y += this.vy * delta + Math.sin(this.phase * 1.2) * 0.02 * delta;
+    if (this.x < -50) this.x = this.w + 50;
+    if (this.x > this.w + 50) this.x = -50;
+    if (this.y < -60) this.y = this.h + 60;
+    if (this.y > this.h + 60) this.y = -60;
+  }
+  draw() {
+    if (!ctx) return;
+    const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 1.5);
+    g.addColorStop(0, `rgba(255,255,255,${this.alpha})`);
+    g.addColorStop(0.3, `rgba(255,255,255,${this.alpha * 0.3})`);
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.beginPath();
+    ctx.fillStyle = g;
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function resize(canvas: HTMLCanvasElement) {
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = `${rect.width}px`;
+  canvas.style.height = `${rect.height}px`;
+  ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { w: rect.width, h: rect.height, dpr };
+}
+
+onMounted(() => {
+  const canvas = canvasEl.value;
+  if (!canvas) return;
+  ctx = canvas.getContext("2d");
+  let { w, h, dpr } = resize(canvas);
+
+  particles = Array.from({ length: PARTICLE_COUNT }, () => new Particle(w, h, dpr));
+  const onResize = () => {
+    const r = resize(canvas);
+    w = r.w; h = r.h; dpr = r.dpr;
+    particles.forEach(p => p.reset());
+  };
+  window.addEventListener("resize", onResize);
+
+  let last = performance.now();
+  const animate = (now: number) => {
+    const delta = Math.min(50, now - last);
+    last = now;
+    ctx?.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => (p.update(delta), p.draw()));
+    animationId = requestAnimationFrame(animate);
+  };
+  animationId = requestAnimationFrame(animate);
+
+  onUnmounted(() => {
+    cancelAnimationFrame(animationId!);
+    window.removeEventListener("resize", onResize);
+  });
+});
 </script>
 
 <style scoped>
@@ -314,45 +323,91 @@ const socialLogin = (provider: string) => {
 }
 
 .auth-container {
-  display: flex;
+  position: relative;
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-}
-
-/* ========== HERO PANEL ========== */
-.hero-panel {
-  flex: 1;
-  background: linear-gradient(135deg, #DED5C4 0%, #C4B5A0 100%);
-  padding: 4rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  position: relative;
   overflow: hidden;
 }
 
-.hero-content {
-  position: relative;
+.background-layer {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #DED5C4 0%, #C4B5A0 50%, #B8A890 100%);
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.background-layer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.12) 0%, transparent 55%),
+    radial-gradient(circle at 80% 80%, rgba(77, 47, 36, 0.1) 0%, transparent 55%);
+  animation: breathe 8s ease-in-out infinite;
+  opacity: 0.9;
+  z-index: 1;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.02); opacity: 1; }
+}
+
+.bg-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   z-index: 2;
+  pointer-events: none;
+}
+
+/* contenedor de login (debes adaptar a tu UI real) */
+.auth-container {
+  position: relative;
+  z-index: 10;
+  color: #272727;
+}
+.error { color: red; margin-top: 5px; }
+
+
+/* Contenedor principal */
+.content-wrapper {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  padding: 3rem;
+  z-index: 1;
+}
+
+/* Texto dinámico en la parte inferior izquierda */
+.dynamic-text-section {
+  position: absolute;
+  bottom: 4rem;
+  left: 4rem;
   max-width: 600px;
+  z-index: 2;
 }
 
 .brand-section {
-  margin-bottom: 4rem;
+  margin-bottom: 2rem;
 }
 
 .logo-wrapper {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .logo-icon {
   width: 56px;
   height: auto;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
 }
 
 .brand-name {
@@ -371,39 +426,26 @@ const socialLogin = (provider: string) => {
   color: #4D2F24;
 }
 
-.brand-tagline {
-  color: #4D2F24;
-  font-size: 1rem;
-  font-weight: 500;
-  opacity: 0.9;
-  margin-left: 72px;
-}
-
-.welcome-section {
-  margin-top: 3rem;
+.dynamic-message {
+  min-height: 160px;
 }
 
 .welcome-title {
-  font-size: 3rem;
+  font-size: 3.5rem;
   font-weight: 800;
   color: #2c3e50;
   margin-bottom: 1rem;
-  line-height: 1.2;
+  line-height: 1.1;
+  text-shadow: 0 2px 20px rgba(255, 255, 255, 0.3);
 }
 
 .welcome-text {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   color: #4D2F24;
   line-height: 1.7;
-  max-width: 500px;
-  opacity: 0.9;
-}
-
-.dynamic-message {
-  min-height: 200px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  max-width: 550px;
+  opacity: 0.95;
+  text-shadow: 0 1px 4px rgba(255, 255, 255, 0.3);
 }
 
 .message-indicators {
@@ -426,81 +468,44 @@ const socialLogin = (provider: string) => {
 .indicator-dot.active {
   background: #4D2F24;
   transform: scale(1.3);
+  box-shadow: 0 0 12px rgba(77, 47, 36, 0.5);
 }
 
 .indicator-dot:hover {
   background: rgba(77, 47, 36, 0.6);
 }
 
-/* Transiciones para mensajes dinámicos */
-.slide-fade-enter-active {
-  transition: all 0.4s ease;
-}
-
-.slide-fade-leave-active {
-  transition: all 0.3s ease;
-}
-
-.slide-fade-enter-from {
-  transform: translateX(-20px);
-  opacity: 0;
-}
-
-.slide-fade-leave-to {
-  transform: translateX(20px);
-  opacity: 0;
-}
-
-/* Decorative Elements */
-.hero-decoration {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.deco-circle {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+/* Modal flotante del formulario */
+.floating-form-modal {
+  position: relative;
+  margin-left: auto;
+  margin-right: 4rem;
+  width: 100%;
+  max-width: 700px;
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(20px);
+  border-radius: 24px;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.5);
+  z-index: 10;
+  animation: modalFloat 0.6s ease-out;
 }
 
-.deco-1 {
-  width: 300px;
-  height: 300px;
-  top: -100px;
-  right: -50px;
-}
+@keyframes modalFloat {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
 
-.deco-2 {
-  width: 200px;
-  height: 200px;
-  bottom: 10%;
-  left: -50px;
-}
-
-.deco-3 {
-  width: 150px;
-  height: 150px;
-  top: 50%;
-  right: 15%;
-}
-
-/* ========== FORM PANEL ========== */
-.form-panel {
-  flex: 1;
-  background: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .form-container {
-  width: 100%;
-  max-width: 480px;
+  padding: 2.5rem;
 }
 
 .btn-back {
@@ -514,7 +519,7 @@ const socialLogin = (provider: string) => {
   font-weight: 600;
   cursor: pointer;
   padding: 0.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   transition: all 0.3s ease;
 }
 
@@ -534,7 +539,7 @@ const socialLogin = (provider: string) => {
   background: #f3f4f6;
   padding: 0.5rem;
   border-radius: 16px;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
 }
 
 .tab-btn {
@@ -557,11 +562,11 @@ const socialLogin = (provider: string) => {
 }
 
 .form-header {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-title {
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 800;
   color: #2c3e50;
   margin-bottom: 0.5rem;
@@ -569,7 +574,7 @@ const socialLogin = (provider: string) => {
 
 .form-subtitle {
   color: #6b7280;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 /* Alert */
@@ -609,8 +614,8 @@ const socialLogin = (provider: string) => {
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-group {
@@ -768,7 +773,9 @@ const socialLogin = (provider: string) => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Divider */
@@ -776,7 +783,7 @@ const socialLogin = (provider: string) => {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin: 2rem 0;
+  margin: 1.5rem 0;
 }
 
 .divider-line {
@@ -794,9 +801,9 @@ const socialLogin = (provider: string) => {
 /* Social Buttons */
 .social-buttons {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
 }
 
 .social-btn {
@@ -804,7 +811,7 @@ const socialLogin = (provider: string) => {
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  padding: 1rem;
+  padding: 0.875rem;
   background: #f9fafb;
   border: 2px solid #e5e7eb;
   border-radius: 12px;
@@ -851,29 +858,60 @@ const socialLogin = (provider: string) => {
   opacity: 0.8;
 }
 
+/* Transiciones para mensajes */
+.slide-fade-enter-active {
+  transition: all 0.4s ease;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-fade-enter-from {
+  transform: translateX(-20px);
+  opacity: 0;
+}
+
+.slide-fade-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
+}
+
 /* ========== RESPONSIVE ========== */
 @media (max-width: 1024px) {
-  .auth-container {
+  .content-wrapper {
     flex-direction: column;
+    justify-content: flex-start;
+    padding: 2rem;
   }
 
-  .hero-panel {
-    min-height: 40vh;
-    padding: 3rem 2rem;
+  .dynamic-text-section {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    margin-bottom: 2rem;
+    max-width: 100%;
+  }
+
+  .floating-form-modal {
+    margin: 0 auto;
+    max-width: 480px;
   }
 
   .welcome-title {
     font-size: 2.5rem;
   }
-
-  .form-panel {
-    padding: 3rem 2rem;
-  }
 }
 
 @media (max-width: 640px) {
-  .hero-panel {
-    padding: 2rem 1.5rem;
+  .content-wrapper {
+    padding: 1.5rem;
+  }
+
+  .dynamic-text-section {
+    bottom: 2rem;
+    left: 1.5rem;
+    right: 1.5rem;
   }
 
   .welcome-title {
@@ -884,8 +922,13 @@ const socialLogin = (provider: string) => {
     font-size: 1rem;
   }
 
+  .floating-form-modal {
+    margin-right: 0;
+    border-radius: 20px;
+  }
+
   .form-container {
-    max-width: 100%;
+    padding: 2rem 1.5rem;
   }
 
   .social-buttons {
