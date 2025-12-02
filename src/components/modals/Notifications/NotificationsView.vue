@@ -258,5 +258,5 @@ const close = () => {
 </script>
 
 <style scoped>
-@import "../../../assets/css/NotificationsView.css";
+@import "../../../assets/css/components/NotificationsView.css";
 </style>

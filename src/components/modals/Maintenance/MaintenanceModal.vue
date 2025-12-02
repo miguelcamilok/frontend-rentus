@@ -316,5 +316,5 @@ export default {
 </script>
 
 <style scoped>
-@import "../../../assets/css/MaintenanceModal.css";
+@import "../../../assets/css/components/MaintenanceModal.css";
 </style>

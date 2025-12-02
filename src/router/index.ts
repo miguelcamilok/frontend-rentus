@@ -2,9 +2,10 @@
 import { createRouter, createWebHistory } from "vue-router";
 import MainLayout from '../layouts/MainLayout.vue';
 import HomeView from '../views/HomeView.vue';
-import MapView from '../components/MapView.vue';
+import MapView from '../components/modals/Maps/MapView.vue';
 import PropertyDetail from '../views/Property/PropertyDetail.vue';
 import LoginView from '../views/Auth/LoginView.vue';
+import { authService } from "../services/auth";
 
 const routes = [
   {
@@ -30,6 +31,7 @@ const routes = [
     component: LoginView,
     meta: { title: 'Iniciar Sesión' }
   },
+  
   // Rutas sin layout (para que no muestren navbar ni footer)
   //{ path: "/login", name: "Login", component: LoginView },
   // { path: "/register", name: "Register", component: RegisterView },
@@ -47,6 +49,87 @@ const router = createRouter({
       return { top: 0, behavior: 'smooth' };
     }
   },
+});
+
+router.beforeEach(async (to, from, next) => {
+  console.log(`🧭 Navegando de ${from.path} → ${to.path}`);
+
+  // Actualizar título de la página
+  if (to.meta.title) {
+    document.title = `${to.meta.title} | RentUs`;
+  } else {
+    document.title = 'RentUs - Encuentra tu hogar ideal';
+  }
+
+  const isAuthenticated = authService.isAuthenticated();
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  const hideForAuth = to.matched.some(record => record.meta.hideForAuth);
+
+  // ==================== CASO 1: Ruta requiere autenticación ====================
+  if (requiresAuth && !isAuthenticated) {
+    console.log('🔒 Ruta protegida, redirigiendo a login');
+
+    // Guardar la ruta a la que intentaba acceder
+    localStorage.setItem('redirectAfterLogin', to.fullPath);
+
+    next({
+      name: 'Login',
+      query: { redirect: to.fullPath }
+    });
+    return;
+  }
+
+  // ==================== CASO 2: Usuario autenticado intenta acceder a login/register ====================
+  if (hideForAuth && isAuthenticated) {
+    console.log('👤 Usuario autenticado, redirigiendo a inicio');
+    next({ name: 'home' });
+    return;
+  }
+
+  // ==================== CASO 3: Verificar validez del token en rutas protegidas ====================
+  if (isAuthenticated && requiresAuth) {
+    try {
+      // Intentar obtener el usuario para validar el token
+      await authService.getMe();
+      console.log('✅ Token válido, permitiendo acceso');
+      next();
+    } catch (error) {
+      console.error('❌ Token inválido:', error);
+
+      // Token inválido, limpiar y redirigir a login
+      await authService.logout();
+      localStorage.setItem('redirectAfterLogin', to.fullPath);
+
+      next({
+        name: 'Login',
+        query: { redirect: to.fullPath }
+      });
+    }
+    return;
+  }
+
+  // ==================== CASO 4: Permitir navegación ====================
+  console.log('✅ Navegación permitida');
+  next();
+});
+
+// ==================== Guard después de cada navegación ====================
+router.afterEach((to, from) => {
+  // Log para debugging en desarrollo
+  if (import.meta.env.DEV) {
+    console.log(`📍 Navegación completada: ${from.path} → ${to.path}`);
+  }
+
+  // Aquí puedes agregar analytics, tracking, etc.
+  // Ejemplo: trackPageView(to.path);
+});
+
+// ==================== Manejo de errores de navegación ====================
+router.onError((error) => {
+  console.error('❌ Error en navegación:', error);
+
+  // Puedes mostrar un mensaje al usuario o registrar el error
+  // Ejemplo: notifyError('Error al cargar la página');
 });
 
 export default router;

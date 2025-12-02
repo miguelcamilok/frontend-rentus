@@ -249,5 +249,5 @@ const getStatusText = (status) => {
 </script>
 
 <style scoped>
-@import "../../../assets/css/MyRequestsModal.css";
+@import "../../../assets/css/components/MyRequestsModal.css";
 </style>

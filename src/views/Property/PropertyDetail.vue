@@ -30,28 +30,15 @@
         <div class="carousel-container">
           <!-- Main Image -->
           <div class="carousel-main-image">
-            <img 
-              :src="currentImage" 
-              :alt="property.title"
-              @error="onImgError"
-              class="main-image"
-            />
-            
+            <img :src="currentImage" :alt="property.title" @error="onImgError" class="main-image" />
+
             <!-- Navigation Arrows -->
-            <button 
-              v-if="propertyImages.length > 1"
-              @click="previousImage" 
-              class="carousel-arrow carousel-arrow-left"
-              :disabled="currentImageIndex === 0"
-            >
+            <button v-if="propertyImages.length > 1" @click="previousImage" class="carousel-arrow carousel-arrow-left"
+              :disabled="currentImageIndex === 0">
               ‹
             </button>
-            <button 
-              v-if="propertyImages.length > 1"
-              @click="nextImage" 
-              class="carousel-arrow carousel-arrow-right"
-              :disabled="currentImageIndex === propertyImages.length - 1"
-            >
+            <button v-if="propertyImages.length > 1" @click="nextImage" class="carousel-arrow carousel-arrow-right"
+              :disabled="currentImageIndex === propertyImages.length - 1">
               ›
             </button>
 
@@ -68,13 +55,8 @@
 
           <!-- Thumbnails -->
           <div v-if="propertyImages.length > 1" class="carousel-thumbnails">
-            <div 
-              v-for="(image, index) in propertyImages" 
-              :key="index"
-              @click="currentImageIndex = index"
-              class="thumbnail"
-              :class="{ active: currentImageIndex === index }"
-            >
+            <div v-for="(image, index) in propertyImages" :key="index" @click="currentImageIndex = index"
+              class="thumbnail" :class="{ active: currentImageIndex === index }">
               <img :src="image" :alt="`Vista ${index + 1}`" @error="onImgError" />
             </div>
           </div>
@@ -116,18 +98,26 @@
             </div>
             <div class="card-content">
               <p class="location-address">{{ property.address }}</p>
-              <p class="location-city">{{ property.city }}, {{ property.state || 'Risaralda' }}</p>
-              <div v-if="property.lat && property.lng" class="location-actions">
-                <button @click="viewOnMap" class="btn-view-map">
-                  <span class="btn-icon">🗺️</span>
-                  <span class="btn-text">Ver en Mapa</span>
-                </button>
+              <p class="location-city">
+                {{ property.city }}, {{ property.state || 'Risaralda' }}
+              </p>
+
+              <!-- Mostrar mapa automáticamente si hay coordenadas -->
+              <div v-if="property.lat && property.lng" class="location-map-section">
+                <!-- En PropertyDetail.vue, donde usas el MapView -->
+                <MapView :id="property.id" :lat="property.lat" :lng="property.lng" :owner-id="property.user_id" />
+
+
                 <div class="coordinates-info">
                   <span class="coord-label">Coordenadas:</span>
-                  <span class="coord-value">{{ Number(property.lat).toFixed(6) }}, {{ Number(property.lng).toFixed(6) }}</span>
+                  <span class="coord-value">
+                    {{ Number(property.lat).toFixed(6) }},
+                    {{ Number(property.lng).toFixed(6) }}
+                  </span>
                 </div>
               </div>
             </div>
+
           </div>
 
           <!-- Description -->
@@ -203,11 +193,8 @@
             </div>
             <div class="card-content">
               <div class="services-list">
-                <span 
-                  v-for="service in getServicesArray(property.included_services)" 
-                  :key="service" 
-                  class="service-badge"
-                >
+                <span v-for="service in getServicesArray(property.included_services)" :key="service"
+                  class="service-badge">
                   {{ getServiceWithIcon(service) }}
                 </span>
               </div>
@@ -220,30 +207,27 @@
           <!-- Contact Card -->
           <div class="contact-card sticky-card">
             <h3 class="contact-title">¿Te interesa esta propiedad?</h3>
-            
+
             <!-- Action Buttons -->
             <div class="action-buttons">
-              <!-- Si está disponible y autenticado -->
-              <button 
-                v-if="property.status === 'available' && isAuthenticated"
-                @click="openRequestVisitModal"
-                class="btn-primary btn-full"
-              >
+              <button v-if="authUser?.id && property?.user_id && authUser.id === property.user_id"
+                class="btn-owner btn-full" :disabled="true">
+                <span class="btn-icon">👑</span>
+                <span class="btn-text">Esta es tu propiedad</span>
+              </button>
+
+              <button v-else-if="property?.status === 'available' && isAuthenticated" @click="openRequestVisitModal"
+                class="btn-primary btn-full">
                 <span class="btn-icon">📅</span>
                 <span class="btn-text">Solicitar Visita</span>
               </button>
 
-              <!-- Si está disponible pero NO autenticado -->
-              <button 
-                v-else-if="property.status === 'available' && !isAuthenticated"
-                @click="openRequestVisitModal"
-                class="btn-login btn-full"
-              >
+              <button v-else-if="property?.status === 'available' && !isAuthenticated" @click="openRequestVisitModal"
+                class="btn-login btn-full">
                 <span class="btn-icon">🔐</span>
                 <span class="btn-text">Iniciar Sesión para Solicitar Visita</span>
               </button>
-              
-              <!-- Si no está disponible -->
+
               <div v-else class="unavailable-message">
                 <span class="unavailable-icon">⏸️</span>
                 <div class="unavailable-text">
@@ -251,6 +235,8 @@
                   <p>Esta propiedad no está disponible actualmente</p>
                 </div>
               </div>
+
+
 
               <button @click="contactAgent" class="btn-secondary btn-full">
                 <span class="btn-icon">📞</span>
@@ -290,12 +276,8 @@
     </div>
 
     <!-- Request Visit Modal -->
-    <RequestVisitModal 
-      :open="showRequestModal" 
-      :property="property" 
-      @close="showRequestModal = false"
-      @success="handleVisitRequestSuccess" 
-    />
+    <RequestVisitModal :open="showRequestModal" :property="property" @close="showRequestModal = false"
+      @success="handleVisitRequestSuccess" />
   </div>
 </template>
 
@@ -304,6 +286,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import RequestVisitModal from '../../components/modals/ModalRequest/RequestVisitModal.vue';
 import api from '../../services/api';
+import MapView from '../../components/modals/Maps/MapView.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -323,23 +306,24 @@ const DEFAULT_PROPERTY_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMC
 
 // Computed
 const isAuthenticated = computed(() => {
-  return authUser.value !== null;
+  return !!localStorage.getItem("auth_token") || !!sessionStorage.getItem("auth_token");
 });
+
 const propertyImages = computed(() => {
   if (!property.value) return [DEFAULT_PROPERTY_IMAGE];
-  
+
   const images = [];
-  
+
   // Agregar imagen principal
   if (property.value.image_url) {
     images.push(property.value.image_url);
   }
-  
+
   // Agregar imágenes adicionales si existen
   if (property.value.additional_images && Array.isArray(property.value.additional_images)) {
     images.push(...property.value.additional_images);
   }
-  
+
   return images.length > 0 ? images : [DEFAULT_PROPERTY_IMAGE];
 });
 
@@ -368,7 +352,7 @@ async function fetchProperty() {
   try {
     const response = await api.get(`/properties/${propertyId}`);
     property.value = response.data;
-    
+
     // Incrementar contador de visitas (opcional)
     // await api.post(`/properties/${propertyId}/view`);
   } catch (err) {
@@ -468,7 +452,7 @@ function getServiceWithIcon(service) {
     'piscina': '🏊',
     'aseo': '🧹',
   };
-  
+
   const serviceLower = service.toLowerCase();
   const icon = Object.keys(serviceIcons).find(key => serviceLower.includes(key));
   return icon ? `${serviceIcons[icon]} ${service}` : `✓ ${service}`;
@@ -523,15 +507,15 @@ function timeAgo(dateString) {
 onMounted(() => {
   // Scroll al inicio de la página
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  
+
   // Verificar autenticación
   checkAuthentication();
-  
+
   // Cargar propiedad
   fetchProperty();
 });
 </script>
 
 <style scoped>
-@import '../../assets/css/PropertyDetail.css';
+@import '../../assets/css/Properties/PropertyDetail.css';
 </style>

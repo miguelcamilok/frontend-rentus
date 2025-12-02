@@ -582,5 +582,5 @@ const getTodayDate = () => {
 };
 </script>
 <style scoped>
-@import "../../../assets/css/RequestsView.css";
+@import "../../../assets/css/components/RequestsView.css";
 </style>

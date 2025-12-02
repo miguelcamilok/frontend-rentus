@@ -77,5 +77,5 @@
 </template>
 
 <style scoped>
-@import "../assets/css/Footer.css";
+@import "../assets/css/components/Footer.css";
 </style>

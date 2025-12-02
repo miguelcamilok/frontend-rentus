@@ -81,7 +81,7 @@
       
       <div class="user-details">
         <div class="user-greeting">Hola, {{ firstName }}</div>
-        <div class="user-role">Inquilino</div>
+        <div class="user-role"></div>
       </div>
       
       <div class="dropdown-arrow" :class="{ rotated: showDropdown }">
@@ -94,13 +94,24 @@
       <transition name="dropdown-fade">
         <div v-if="showDropdown" class="user-dropdown-menu" @click.stop>
           <div class="dropdown-header">
+            <!-- Botón cerrar (solo mobile) -->
+            <button 
+              class="dropdown-close-btn" 
+              @click="closeDropdown"
+              aria-label="Cerrar menú"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-linecap="round"/>
+              </svg>
+            </button>
+            
             <div class="dropdown-avatar">
               <img v-if="profilePhoto" :src="profilePhoto" alt="Usuario" />
               <img v-else src="/img/default.webp" alt="Usuario" />
             </div>
             <div class="dropdown-user-info">
               <div class="dropdown-name">{{ fullName }}</div>
-              <div class="dropdown-email">usuario@ejemplo.com</div>
+              <div class="dropdown-email">{{ userEmail }}</div>
             </div>
           </div>
           
@@ -152,7 +163,7 @@
               <div class="item-text">Ajustes</div>
             </div>
             
-            <div @click="logout" class="dropdown-item logout-item">
+            <div @click="handleLogout" class="dropdown-item logout-item">
               <div class="item-icon">🚪</div>
               <div class="item-text">Cerrar Sesión</div>
             </div>
@@ -162,6 +173,13 @@
     </div>
   </header>
 
+  <!-- Backdrop para cerrar dropdown en mobile -->
+  <div 
+    class="dropdown-backdrop" 
+    :class="{ active: showDropdown }"
+    @click="closeDropdown"
+  ></div>
+
   <router-view v-slot="{ Component }">
     <transition name="fade" mode="out-in">
       <component :is="Component" />
@@ -169,127 +187,142 @@
   </router-view>
 
   <!-- MODAL DE MANTENIMIENTO -->
-  <MaintenanceModal :is-visible="showMaintenanceModal" @close="showMaintenanceModal = false"
-    @submitted="handleMaintenanceSubmitted" />
+  <MaintenanceModal 
+    :is-visible="showMaintenanceModal" 
+    @close="showMaintenanceModal = false"
+    @submitted="handleMaintenanceSubmitted" 
+  />
 
   <!-- MODAL DE SOLICITUDES -->
-  <RequestsView :open="showRequestModal" @close="showRequestModal = false" />
+  <RequestsView 
+    :open="showRequestModal" 
+    @close="showRequestModal = false" 
+  />
 
-  <NotificationsView :open="showNotificaciontModal" @close="showNotificaciontModal = false" />
+  <!-- MODAL DE NOTIFICACIONES -->
+  <NotificationsView 
+    :open="showNotificaciontModal" 
+    @close="showNotificaciontModal = false" 
+  />
 
-  <MyRequestsModal :open="showMyRequestsModal" @close="showMyRequestsModal = false" />
-
+  <!-- MODAL DE MIS SOLICITUDES -->
+  <MyRequestsModal 
+    :open="showMyRequestsModal" 
+    @close="showMyRequestsModal = false" 
+  />
 </template>
 
-<script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
-import { useRouter } from "vue-router";
-import api from "../services/api";
+<script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { authService } from "../services/auth";
+import type { User } from "../services/auth";
 import { notificationService } from "../services/notificationService";
-import MaintenanceModal from '../components/modals/Maintenance/MaintenanceModal.vue'
+import MaintenanceModal from '../components/modals/Maintenance/MaintenanceModal.vue';
 import RequestsView from "../components/modals/ModalRequest/RequestsView.vue";
 import NotificationsView from "../components/modals/Notifications/NotificationsView.vue";
 import MyRequestsModal from "../components/modals/ModalRequest/MyRequestsModal.vue";
 import { eventBus, EVENTS } from '../events/eventBus';
 
 const router = useRouter();
+const route = useRoute();
+
+// Estado de autenticación
 const isLoggedIn = ref(false);
-const showDropdown = ref(false);
-const showMobileMenu = ref(false);
+const currentUser = ref<User | null>(null);
 const fullName = ref("Usuario");
 const firstName = ref("Usuario");
+const userEmail = ref("");
 const profilePhoto = ref("");
-const showMaintenanceModal = ref(false)
-const showRequestModal = ref(false)
-const showNotificaciontModal = ref(false)
-const showMyRequestsModal = ref(false)
-const unreadCount = ref(0)
 
-// Toggle mobile menu
-const toggleMobileMenu = () => {
-  showMobileMenu.value = !showMobileMenu.value;
-};
+// Estado de UI
+const showDropdown = ref(false);
+const showMobileMenu = ref(false);
+const showMaintenanceModal = ref(false);
+const showRequestModal = ref(false);
+const showNotificaciontModal = ref(false);
+const showMyRequestsModal = ref(false);
+const unreadCount = ref(0);
 
-const closeMobileMenu = () => {
-  showMobileMenu.value = false;
-};
+// ==================== Funciones de autenticación ====================
 
-// Cargar contador de notificaciones
-const loadUnreadCount = async () => {
+/**
+ * Verificar y cargar datos del usuario
+ */
+const checkAuthAndLoadUser = async () => {
   try {
-    const response = await notificationService.getUnreadCount();
-    unreadCount.value = response.count;
-  } catch (error) {
-    console.error("Error cargando contador:", error);
-  }
-};
-
-// Manejar actualizaciones desde el modal de notificaciones
-const handleNotificationUpdate = (event) => {
-  if (event.action === "refresh_count") {
-    loadUnreadCount();
-  } else if (event.action === "open_requests") {
-    showRequestModal.value = true;
-  } else if (event.action === "open_my_requests") {
-    showMyRequestsModal.value = true;
-  }
-};
-
-const openMaintenanceModal = () => {
-  showMaintenanceModal.value = true
-  showDropdown.value = false
-}
-
-const handleMaintenanceSubmitted = (data) => {
-  console.log('Solicitud de mantenimiento enviada:', data)
-}
-
-const openSolicitudesModal = () => {
-  showRequestModal.value = true
-  showDropdown.value = false
-}
-
-const openMyRequestsModalFn = () => {
-  showMyRequestsModal.value = true
-  showDropdown.value = false
-}
-
-const openNotificaciones = () => {
-  showNotificaciontModal.value = true
-  showDropdown.value = false
-}
-
-// Funciones de API
-async function fetchUserData() {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    // Verificar si está autenticado
+    if (!authService.isAuthenticated()) {
       isLoggedIn.value = false;
+      currentUser.value = null;
       return;
     }
-    isLoggedIn.value = true;
 
-    const response = await api.get("/auth/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    const user = response.data;
-    fullName.value = user.name || "Usuario";
-    firstName.value = fullName.value.split(" ")[0];
-
-    if (firstName.value.length > 10) {
-      firstName.value = firstName.value.slice(0, 10) + "...";
+    // Obtener usuario del storage primero (más rápido)
+    const storedUser = authService.getUser();
+    if (storedUser) {
+      updateUserData(storedUser);
+      isLoggedIn.value = true;
     }
 
-    profilePhoto.value = user.photo || "";
-    localStorage.setItem("user", JSON.stringify(user));
-  } catch (error) {
-    console.error("Error obteniendo usuario:", error);
-    logout();
-  }
-}
+    // Luego verificar con el servidor
+    const user = await authService.getMe();
+    updateUserData(user);
+    currentUser.value = user;
+    isLoggedIn.value = true;
 
-// Funciones de navegación
+    // Cargar notificaciones si está logueado
+    await loadUnreadCount();
+
+  } catch (error) {
+    console.error("Error verificando autenticación:", error);
+    // Si falla, limpiar todo
+    await handleLogout();
+  }
+};
+
+/**
+ * Actualizar datos del usuario en la UI
+ */
+const updateUserData = (user: User) => {
+  fullName.value = user.name || "Usuario";
+  firstName.value = fullName.value.split(" ")[0];
+  userEmail.value = user.email || "";
+
+  // Truncar nombre si es muy largo
+  if (firstName.value.length > 10) {
+    firstName.value = firstName.value.slice(0, 10) + "...";
+  }
+
+  profilePhoto.value = user.photo || "";
+};
+
+/**
+ * Manejar cierre de sesión
+ */
+const handleLogout = async () => {
+  try {
+    await authService.logout();
+    console.log('✅ Sesión cerrada exitosamente');
+  } catch (error) {
+    console.error("Error al cerrar sesión:", error);
+  } finally {
+    // Limpiar estado local
+    isLoggedIn.value = false;
+    currentUser.value = null;
+    fullName.value = "Usuario";
+    firstName.value = "Usuario";
+    userEmail.value = "";
+    profilePhoto.value = "";
+    showDropdown.value = false;
+    
+    // Redirigir a login
+    router.push("/login");
+  }
+};
+
+// ==================== Funciones de navegación ====================
+
 const goHome = () => {
   router.push("/");
   closeMobileMenu();
@@ -302,95 +335,192 @@ const goLogin = () => {
 
 const goPerfil = () => {
   router.push('/perfil');
-  showDropdown.value = false;
+  closeDropdown();
+  closeMobileMenu();
 };
 
 const goContratos = () => {
   router.push("/contratos");
-  showDropdown.value = false;
+  closeDropdown();
+  closeMobileMenu();
 };
 
 const goPagos = () => {
   router.push("/pagos");
-  showDropdown.value = false;
+  closeDropdown();
+  closeMobileMenu();
 };
 
 const goAjustes = () => {
   router.push("/ajustes");
-  showDropdown.value = false;
+  closeDropdown();
+  closeMobileMenu();
+};
+
+// ==================== Funciones de UI ====================
+
+const toggleMobileMenu = () => {
+  showMobileMenu.value = !showMobileMenu.value;
+  if (showMobileMenu.value) {
+    showDropdown.value = false; // Cerrar dropdown al abrir menú móvil
+  }
+};
+
+const closeMobileMenu = () => {
+  showMobileMenu.value = false;
 };
 
 const toggleUserDropdown = () => {
   showDropdown.value = !showDropdown.value;
+  if (showDropdown.value) {
+    showMobileMenu.value = false; // Cerrar menú móvil al abrir dropdown
+    // Prevenir scroll en mobile
+    if (window.innerWidth <= 768) {
+      document.body.classList.add('dropdown-open');
+    }
+  } else {
+    document.body.classList.remove('dropdown-open');
+  }
 };
 
-const logout = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-  isLoggedIn.value = false;
+const closeDropdown = () => {
   showDropdown.value = false;
-  router.push("/login");
+  document.body.classList.remove('dropdown-open');
 };
 
-// Event handlers
-function handleClickOutsideDropdown(event) {
+// ==================== Funciones de modales ====================
+
+const openMaintenanceModal = () => {
+  showMaintenanceModal.value = true;
+  closeDropdown();
+};
+
+const handleMaintenanceSubmitted = (data: any) => {
+  console.log('Solicitud de mantenimiento enviada:', data);
+  // Aquí puedes agregar lógica adicional
+};
+
+const openSolicitudesModal = () => {
+  showRequestModal.value = true;
+  closeDropdown();
+};
+
+const openMyRequestsModalFn = () => {
+  showMyRequestsModal.value = true;
+  closeDropdown();
+};
+
+const openNotificaciones = () => {
+  showNotificaciontModal.value = true;
+  closeDropdown();
+};
+
+// ==================== Funciones de notificaciones ====================
+
+/**
+ * Cargar contador de notificaciones no leídas
+ */
+const loadUnreadCount = async () => {
+  try {
+    if (!isLoggedIn.value) return;
+    
+    const response = await notificationService.getUnreadCount();
+    unreadCount.value = response.count;
+  } catch (error) {
+    console.error("Error cargando contador de notificaciones:", error);
+  }
+};
+
+/**
+ * Manejar actualización de foto de perfil
+ */
+const handlePhotoUpdate = (newPhoto: string) => {
+  profilePhoto.value = newPhoto;
+
+  // Actualizar en el storage
+  if (currentUser.value) {
+    currentUser.value.photo = newPhoto;
+    const isRemembered = !!localStorage.getItem("auth_token");
+    const storage = isRemembered ? localStorage : sessionStorage;
+    storage.setItem("user", JSON.stringify(currentUser.value));
+  }
+};
+
+// ==================== Event handlers ====================
+
+/**
+ * Cerrar dropdown/menú al hacer clic fuera
+ */
+const handleClickOutside = (event: MouseEvent) => {
   const userMenu = document.getElementById("userToggle");
   const dropdown = document.querySelector(".user-dropdown-menu");
   const hamburger = document.querySelector(".hamburger-btn");
   const mobileNav = document.querySelector(".navigation-section");
 
-  if (!userMenu || !dropdown) return;
-
+  // Cerrar dropdown de usuario
   if (
-    !userMenu.contains(event.target) &&
-    !dropdown.contains(event.target) &&
+    userMenu && 
+    dropdown && 
+    !userMenu.contains(event.target as Node) &&
+    !dropdown.contains(event.target as Node) &&
     showDropdown.value
   ) {
-    showDropdown.value = false;
+    closeDropdown();
   }
 
-  // Cerrar menú móvil al hacer clic fuera
+  // Cerrar menú móvil
   if (
     hamburger &&
     mobileNav &&
-    !hamburger.contains(event.target) &&
-    !mobileNav.contains(event.target) &&
+    !hamburger.contains(event.target as Node) &&
+    !mobileNav.contains(event.target as Node) &&
     showMobileMenu.value
   ) {
     showMobileMenu.value = false;
   }
-}
-
-const handlePhotoUpdate = (newPhoto) => {
-  profilePhoto.value = newPhoto;
-
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  user.photo = newPhoto;
-  localStorage.setItem("user", JSON.stringify(user));
 };
 
-// Lifecycle hooks
-onMounted(async () => {
-  await fetchUserData();
-  await loadUnreadCount();
-  document.addEventListener("click", handleClickOutsideDropdown);
+// ==================== Watchers ====================
 
+/**
+ * Observar cambios en la ruta para recargar datos si es necesario
+ */
+watch(() => route.path, async () => {
+  // Verificar autenticación al cambiar de ruta
+  if (authService.isAuthenticated() && !isLoggedIn.value) {
+    await checkAuthAndLoadUser();
+  }
+});
+
+// ==================== Lifecycle hooks ====================
+
+onMounted(async () => {
+  // Cargar datos del usuario al montar
+  await checkAuthAndLoadUser();
+
+  // Escuchar eventos
+  document.addEventListener("click", handleClickOutside);
   eventBus.on(EVENTS.PROFILE_PHOTO_UPDATED, handlePhotoUpdate);
 
-  // Actualizar contador cada 30 segundos
-  setInterval(() => {
+  // Actualizar contador de notificaciones cada 30 segundos
+  const notificationInterval = setInterval(() => {
     if (isLoggedIn.value) {
       loadUnreadCount();
     }
   }, 30000);
-});
 
-onBeforeUnmount(() => {
-  document.removeEventListener("click", handleClickOutsideDropdown);
-  eventBus.off(EVENTS.PROFILE_PHOTO_UPDATED, handlePhotoUpdate);
+  // Limpiar intervalo al desmontar
+  onBeforeUnmount(() => {
+    clearInterval(notificationInterval);
+    document.removeEventListener("click", handleClickOutside);
+    eventBus.off(EVENTS.PROFILE_PHOTO_UPDATED, handlePhotoUpdate);
+    // Limpiar clases de body
+    document.body.classList.remove('dropdown-open');
+    document.body.classList.remove('mobile-menu-open');
+  });
 });
 </script>
 
 <style scoped>
-@import "../assets/css/navbar.css";
+@import "../assets/css/components/navbar.css";
 </style>
