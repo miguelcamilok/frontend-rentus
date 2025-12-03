@@ -21,7 +21,6 @@ export interface RegisterData {
   phone: string;
   email: string;
   password: string;
-  password_confirmation: string;
   address: string;
   id_documento: string;
   status?: string;
@@ -314,7 +313,6 @@ class AuthService {
       email: "Correo electrónico",
       phone: "Teléfono",
       password: "Contraseña",
-      password_confirmation: "Confirmación de contraseña",
       address: "Dirección",
       id_documento: "Documento de identidad",
       status: "Estado"

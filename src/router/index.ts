@@ -6,6 +6,7 @@ import MapView from '../components/modals/Maps/MapView.vue';
 import PropertyDetail from '../views/Property/PropertyDetail.vue';
 import LoginView from '../views/Auth/LoginView.vue';
 import { authService } from "../services/auth";
+import RegisterView from "../views/Auth/RegisterView.vue";
 
 const routes = [
   {
@@ -31,7 +32,12 @@ const routes = [
     component: LoginView,
     meta: { title: 'Iniciar Sesión' }
   },
-  
+  {
+    path: "/register",
+    name: "Register",
+    component: RegisterView,
+    meta: { title: 'Registro' }
+  },
   // Rutas sin layout (para que no muestren navbar ni footer)
   //{ path: "/login", name: "Login", component: LoginView },
   // { path: "/register", name: "Register", component: RegisterView },

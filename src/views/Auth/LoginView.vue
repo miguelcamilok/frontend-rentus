@@ -90,7 +90,7 @@
 
           <form class="login-form" @submit.prevent="handleLogin" novalidate>
             <div class="form-group">
-              <label for="email" class="form-label"></label>
+              <label for="email" class="form-label">Correo electrónico</label>
               <div class="input-wrapper">
                 <svg
                   class="input-icon"
@@ -113,7 +113,7 @@
                   type="email"
                   class="form-input"
                   :class="{ 'input-error': validationErrors.email }"
-                  placeholder="Correo electrónico"
+                  placeholder="rentus@gmail.com"
                   autocomplete="email"
                   @blur="validateField('email')"
                   @input="clearFieldError('email')"
@@ -126,7 +126,7 @@
             </div>
 
             <div class="form-group">
-              <label for="password" class="form-label"></label>
+              <label for="password" class="form-label">Contraseña</label>
               <div class="input-wrapper">
                 <svg
                   class="input-icon"
