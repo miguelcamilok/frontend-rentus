@@ -498,31 +498,30 @@ watch(() => route.path, async () => {
 });
 
 // ==================== Lifecycle hooks ====================
+let notificationInterval: number | undefined;
 
 onMounted(async () => {
-  // Cargar datos del usuario al montar
   await checkAuthAndLoadUser();
 
-  // Escuchar eventos
   document.addEventListener("click", handleClickOutside);
   eventBus.on(EVENTS.PROFILE_PHOTO_UPDATED, handlePhotoUpdate);
 
-  // Actualizar contador de notificaciones cada 30 segundos
-  const notificationInterval = setInterval(() => {
+  // Inicializar intervalo
+  notificationInterval = window.setInterval(() => {
     if (isLoggedIn.value) {
       loadUnreadCount();
     }
   }, 30000);
+});
 
-  // Limpiar intervalo al desmontar
-  onBeforeUnmount(() => {
-    clearInterval(notificationInterval);
-    document.removeEventListener("click", handleClickOutside);
-    eventBus.off(EVENTS.PROFILE_PHOTO_UPDATED, handlePhotoUpdate);
-    // Limpiar clases de body
-    document.body.classList.remove('dropdown-open');
-    document.body.classList.remove('mobile-menu-open');
-  });
+onBeforeUnmount(() => {
+  if (notificationInterval) clearInterval(notificationInterval);
+
+  document.removeEventListener("click", handleClickOutside);
+  eventBus.off(EVENTS.PROFILE_PHOTO_UPDATED, handlePhotoUpdate);
+
+  document.body.classList.remove("dropdown-open");
+  document.body.classList.remove("mobile-menu-open");
 });
 </script>
 
