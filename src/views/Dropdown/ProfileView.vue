@@ -404,10 +404,6 @@ const handlePhotoUpload = async (event: Event) => {
   }
 };
 
-const showNotification = (message: string, type: 'success' | 'error') => {
-  alert(message);
-};
-
 const saveBio = async () => {
   if (bioText.value.trim() === profileData.value.bio) {
     editingBio.value = false;
