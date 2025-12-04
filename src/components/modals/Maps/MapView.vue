@@ -14,7 +14,7 @@
 <script setup lang="ts">
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { onMounted, onUnmounted, defineProps, ref, watch, computed } from "vue";
+import { onMounted, onUnmounted, ref, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 import api from "../../../services/api";
 import iconUrl from "leaflet/dist/images/marker-icon.png";

@@ -79,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, defineProps, defineEmits } from "vue";
+import { ref, computed, watch } from "vue";
 import { rentalRequestService } from "../../../services/rentalRequestService";
 
 interface Property {
