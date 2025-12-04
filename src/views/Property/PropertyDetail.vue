@@ -333,8 +333,14 @@ const currentImage = computed(() => {
 
 // Methods
 function checkAuthentication() {
-  // Intenta obtener el usuario del localStorage
-  const userStr = localStorage.getItem('user');
+  // Intentar cargar desde localStorage
+  let userStr = localStorage.getItem('user');
+
+  // Si no está, intentar cargar desde sessionStorage
+  if (!userStr) {
+    userStr = sessionStorage.getItem('user');
+  }
+
   if (userStr) {
     try {
       authUser.value = JSON.parse(userStr);
@@ -343,6 +349,7 @@ function checkAuthentication() {
     }
   }
 }
+
 
 async function fetchProperty() {
   const propertyId = route.params.id;

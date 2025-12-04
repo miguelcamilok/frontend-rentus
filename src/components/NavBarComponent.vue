@@ -20,29 +20,34 @@
     <!-- Barra de navegación con menú móvil -->
     <nav class="navigation-section" :class="{ 'mobile-active': showMobileMenu }">
       <div class="nav-links">
+        
+        <!-- LINK INICIO -->
         <router-link 
           to="/" 
-          class="nav-link" 
-          active-class="active" 
-          exact
+          class="nav-link"
+          :class="{ active: isActive('/') }"
           @click="closeMobileMenu"
         >
           <span class="nav-icon">🏠</span>
           <span class="nav-text">Inicio</span>
         </router-link>
+
+        <!-- LINK PROPIEDADES -->
         <router-link 
           to="/propiedades" 
-          class="nav-link" 
-          active-class="active"
+          class="nav-link"
+          :class="{ active: isActive('/propiedades') }"
           @click="closeMobileMenu"
         >
           <span class="nav-icon">🏢</span>
           <span class="nav-text">Propiedades</span>
         </router-link>
+
+        <!-- LINK NOSOTROS -->
         <router-link 
           to="/sobre-nosotros" 
-          class="nav-link" 
-          active-class="active"
+          class="nav-link"
+          :class="{ active: isActive('/sobre-nosotros') }"
           @click="closeMobileMenu"
         >
           <span class="nav-icon">👥</span>
@@ -71,7 +76,7 @@
       Iniciar Sesión
     </button>
 
-    <!-- Si está logueado - Dropdown -->
+    <!-- DROPDOWN USUARIO -->
     <div v-else class="user-profile" id="userToggle" @click="toggleUserDropdown">
       <div class="user-avatar">
         <img v-if="profilePhoto" :src="profilePhoto" alt="Usuario" class="avatar-img" />
@@ -94,7 +99,6 @@
       <transition name="dropdown-fade">
         <div v-if="showDropdown" class="user-dropdown-menu" @click.stop>
           <div class="dropdown-header">
-            <!-- Botón cerrar (solo mobile) -->
             <button 
               class="dropdown-close-btn" 
               @click="closeDropdown"
@@ -173,7 +177,6 @@
     </div>
   </header>
 
-  <!-- Backdrop para cerrar dropdown en mobile -->
   <div 
     class="dropdown-backdrop" 
     :class="{ active: showDropdown }"
@@ -186,31 +189,28 @@
     </transition>
   </router-view>
 
-  <!-- MODAL DE MANTENIMIENTO -->
   <MaintenanceModal 
     :is-visible="showMaintenanceModal" 
     @close="showMaintenanceModal = false"
     @submitted="handleMaintenanceSubmitted" 
   />
 
-  <!-- MODAL DE SOLICITUDES -->
   <RequestsView 
     :open="showRequestModal" 
     @close="showRequestModal = false" 
   />
 
-  <!-- MODAL DE NOTIFICACIONES -->
   <NotificationsView 
     :open="showNotificaciontModal" 
     @close="showNotificaciontModal = false" 
   />
 
-  <!-- MODAL DE MIS SOLICITUDES -->
   <MyRequestsModal 
     :open="showMyRequestsModal" 
     @close="showMyRequestsModal = false" 
   />
 </template>
+
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch } from "vue";
@@ -243,6 +243,10 @@ const showRequestModal = ref(false);
 const showNotificaciontModal = ref(false);
 const showMyRequestsModal = ref(false);
 const unreadCount = ref(0);
+
+const isActive = (path: string) => {
+  return route.path === path;
+};
 
 // ==================== Funciones de autenticación ====================
 
@@ -320,6 +324,7 @@ const handleLogout = async () => {
     router.push("/login");
   }
 };
+
 
 // ==================== Funciones de navegación ====================
 
