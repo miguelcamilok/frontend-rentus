@@ -19,6 +19,7 @@
   gap: 0.5rem;
   color: white;
   z-index: 1002;
+  flex-shrink: 0; /* Evita que se reduzca */
 }
 
 .logo img {
@@ -52,6 +53,7 @@
   padding: 0;
   z-index: 1002;
   position: relative;
+  flex-shrink: 0;
 }
 
 .hamburger-btn span {
@@ -76,12 +78,16 @@
   transform: translateY(-10.5px) rotate(-45deg);
 }
 
-/* Barra de navegación */
+/* Barra de navegación - MEJORADO para mantener centrado */
 .navigation-section {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 1rem;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
 }
 
 .nav-links {
@@ -91,6 +97,7 @@
   border-radius: 12px;
   padding: 0.5rem;
   backdrop-filter: blur(10px);
+  flex-shrink: 0; /* Evita que se reduzca */
 }
 
 .nav-link {
@@ -105,6 +112,7 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  white-space: nowrap;
 }
 
 .nav-link::before {
@@ -155,6 +163,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
+  flex-shrink: 0; /* Evita que se reduzca */
 }
 
 .login-btn:hover {
@@ -170,16 +179,20 @@
   display: block;
 }
 
-/* User Profile */
+/* User Profile - MEJORADO */
 .user-profile {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.5rem 1rem;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
+  flex-shrink: 0; /* Importante: no se reduce */
+  min-width: auto;
+  max-width: 220px; /* Límite máximo en desktop */
+  margin-left: auto; /* Empuja hacia la derecha */
 }
 
 .user-profile:hover {
@@ -188,6 +201,7 @@
 
 .user-avatar {
   position: relative;
+  flex-shrink: 0; /* No se encoje */
 }
 
 .avatar-img {
@@ -197,6 +211,7 @@
   object-fit: cover;
   border: 2px solid #da9c5f;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
 }
 
 .status-indicator {
@@ -213,23 +228,33 @@
 .user-details {
   display: flex;
   flex-direction: column;
+  min-width: 0; /* IMPORTANTE: permite truncado */
+  flex: 1;
 }
 
 .user-greeting {
   color: #fff;
   font-weight: 600;
   font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px; /* Máximo antes de truncar */
 }
 
 .user-role {
   color: #da9c5f;
   font-size: 0.8rem;
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dropdown-arrow {
   color: #f0e5db;
   transition: transform 0.3s ease;
+  flex-shrink: 0;
 }
 
 .dropdown-arrow.rotated {
@@ -432,7 +457,7 @@
 }
 
 /* ============================================================
-   RESPONSIVE DESIGN
+   RESPONSIVE DESIGN - MEJORADO
    ============================================================ */
 
 /* Tablets grandes (1024px - 1280px) */
@@ -440,6 +465,10 @@
   .user-dropdown-menu {
     min-width: 260px;
     max-width: 300px;
+  }
+  
+  .user-profile {
+    max-width: 200px;
   }
 }
 
@@ -465,6 +494,7 @@
   .user-profile {
     padding: 0.5rem;
     gap: 0.5rem;
+    max-width: auto;
   }
 
   .dropdown-arrow {
@@ -510,6 +540,10 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     max-height: calc(100vh - 65px);
     overflow-y: auto;
+    left: 0;
+    transform: translateY(-100%);
+    right: 0;
+    width: 100%;
   }
 
   .navigation-section.mobile-active {
@@ -559,6 +593,21 @@
 
   .logo-text {
     font-size: 1.3rem;
+  }
+
+  /* User profile en móvil */
+  .user-profile {
+    padding: 0.5rem;
+    max-width: auto;
+  }
+  
+  .user-details {
+    display: none; /* Ocultar detalles en móvil */
+  }
+  
+  .avatar-img {
+    width: 40px;
+    height: 40px;
   }
 
   /* Dropdown responsive en mobile */
