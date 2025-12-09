@@ -8,6 +8,7 @@ import LoginView from '../views/Auth/LoginView.vue';
 import { authService } from "../services/auth";
 import RegisterView from "../views/Auth/RegisterView.vue";
 import ProfileView from "../views/Dropdown/ProfileView.vue";
+import PropertyView from "../views/Property/PropertyView.vue";
 
 const routes = [
   {
@@ -16,7 +17,8 @@ const routes = [
     children: [
       { path: '', name: 'home', component: HomeView, meta: { title: 'Inicio' } },
       { path: 'properties/:id', name: 'PropertyDetail', component: PropertyDetail, meta: { title: 'Detalle de Propiedad' } },
-      { path: '/perfil', name: 'ProfileView', component: ProfileView, meta: { title: 'Perfil'}}
+      { path: '/perfil', name: 'ProfileView', component: ProfileView, meta: { title: 'Perfil'}},
+      { path: '/propiedades', name: 'PropertyView', component: PropertyView, meta: { title: 'Propiedades'}},
     ]
   },
 
