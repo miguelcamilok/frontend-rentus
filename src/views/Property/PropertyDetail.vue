@@ -361,7 +361,7 @@ async function fetchProperty() {
     property.value = response.data;
 
     // Incrementar contador de visitas (opcional)
-    // await api.post(`/properties/${propertyId}/view`);
+    await api.post(`/properties/${propertyId}/view`);
   } catch (err) {
     console.error('Error al cargar la propiedad:', err);
     error.value = err.response?.data?.message || 'No se pudo cargar la propiedad';
