@@ -4,16 +4,20 @@ import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
 
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { faDownload } from '@fortawesome/free-solid-svg-icons'
+
+library.add(faDownload)
+
 const app = createApp(App);
 
-// 1️⃣ Crear Pinia
 const pinia = createPinia();
 app.use(pinia);
 
-// 2️⃣ Usar router
 app.use(router);
+app.component('font-awesome-icon', FontAwesomeIcon)
 
-// 3️⃣ Montar la app
 app.mount('#app');
 
 // --- Código para título dinámico y favicon ---
