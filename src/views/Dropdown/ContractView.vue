@@ -13,16 +13,27 @@
 
       <!-- Carrusel de Contratos Paginado -->
       <div v-else-if="contracts.length > 0">
-        <!-- Ir a Contrato 
-        <div class="go-to-contract">
-          <label for="contract-select">Ir a contrato:</label>
-          <select id="contract-select" v-model="selectedContractId" @change="goToContract">
-            <option value="">Seleccionar...</option>
-            <option v-for="contract in contracts" :key="contract.id" :value="contract.id">
-              {{ contract.title }} - {{ contract.propertyAddress }}
-            </option>
-          </select>
-        </div> -->
+        <!-- Ir a Contrato - Versión Compacta -->
+        <div class="quick-nav">
+          <button class="quick-nav-btn" @click="showQuickNav = !showQuickNav">
+            <i class="fas fa-search"></i>
+            Buscar contrato
+          </button>
+          <div v-if="showQuickNav" class="quick-nav-dropdown">
+            <input type="text" v-model="searchQuery" placeholder="Buscar por ID o dirección..."
+              class="quick-nav-search" />
+            <div class="quick-nav-list">
+              <div v-for="contract in filteredContracts" :key="contract.id" class="quick-nav-item"
+                @click="goToContractById(contract.id)">
+                <span class="contract-id">#{{ contract.id }}</span>
+                <span class="contract-info">{{ contract.propertyAddress }}</span>
+              </div>
+              <div v-if="filteredContracts.length === 0" class="no-results">
+                No se encontraron contratos
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div class="carousel">
           <div v-for="(contract, index) in paginatedContracts" :key="contract.id" class="card" :class="{
@@ -305,12 +316,24 @@ const loading = ref(true);
 const contractAccepted = ref(false);
 const acceptLoading = ref(false);
 const currentUserId = ref<number | null>(null);
-//const selectedContractId = ref<string>("");
+const showQuickNav = ref(false);
+const searchQuery = ref("");
 
 const contractStats = ref({
   active: 0,
   pending: 0,
   total: 0,
+});
+
+// Computed: Contratos filtrados para búsqueda
+const filteredContracts = computed(() => {
+  if (!searchQuery.value) return contracts.value;
+
+  const query = searchQuery.value.toLowerCase();
+  return contracts.value.filter(c =>
+    c.id.toString().includes(query) ||
+    c.propertyAddress?.toLowerCase().includes(query)
+  );
 });
 
 // Computed: Contratos paginados
@@ -375,36 +398,27 @@ const nextContract = () => {
   }
 };
 
-// NUEVA: Ir a contrato específico
-// const goToContract = () => {
-//   if (!selectedContractId.value) return;
+const goToContractById = (contractId: number) => {
+  const contractIndex = contracts.value.findIndex(c => c.id === contractId);
 
-//   const contractId = parseInt(selectedContractId.value);
-//   const contractIndex = contracts.value.findIndex(c => c.id === contractId);
+  if (contractIndex !== -1) {
+    const targetPage = Math.floor(contractIndex / itemsPerPage);
+    const indexInPage = contractIndex % itemsPerPage;
 
-//   if (contractIndex !== -1) {
-//     // Calcular en qué página está el contrato
-//     const targetPage = Math.floor(contractIndex / itemsPerPage);
-//     const indexInPage = contractIndex % itemsPerPage;
+    currentPage.value = targetPage;
 
-//     // Cambiar a la página correcta
-//     currentPage.value = targetPage;
+    setTimeout(() => {
+      activeIndex.value = indexInPage;
+      showQuickNav.value = false;
+      searchQuery.value = "";
 
-//     // Esperar a que se actualice la vista y luego activar el contrato
-//     setTimeout(() => {
-//       activeIndex.value = indexInPage;
-
-//       // Scroll suave hacia el contrato
-//       const cardElement = document.querySelector('.card.active');
-//       if (cardElement) {
-//         cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-//       }
-//     }, 100);
-//   }
-
-//   // Reset del selector
-//   selectedContractId.value = "";
-// };
+      const cardElement = document.querySelector('.card.active');
+      if (cardElement) {
+        cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+  }
+};
 
 // NUEVA: Manejar error de imagen
 const handleImageError = (event: Event) => {
