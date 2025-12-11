@@ -223,7 +223,7 @@ const restoreCurrentIndex = () => {
 // Navegar a la propiedad
 const goToProperty = (property) => {
   if (!property || !property.id) return;
-  router.push(`/propiedades/${property.id}`);
+  router.push(`/properties/${property.id}`);
 };
 
 // Actualizar posición de miniaturas
