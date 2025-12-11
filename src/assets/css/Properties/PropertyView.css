@@ -809,10 +809,6 @@
     z-index: 1;
     font-size: 1rem;
 }
-.search-header-icon {
-  font-size: 1.8rem;
-  color: #3b251d;
-}
 
 .modern-search-section {
   margin-top: -80px;
@@ -836,11 +832,6 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 32px;
-}
-
-.search-header-icon {
-  font-size: 1.8rem;
-  color: #3b251d;
 }
 
 .search-header h3 {

@@ -61,7 +61,6 @@
         </section>
         <section class="search-section">
             <div class="search-wrapper">
-                <font-awesome-icon :icon="['fas', 'home']" class="search-header-icon" />
                 <p class="search-title">Encuentra Tu Propiedad Ideal</p>
                 <div class="search-bar">
                     <!-- Search Input -->
