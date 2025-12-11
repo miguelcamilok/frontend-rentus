@@ -1,3 +1,4 @@
+// composables/useAuth.ts
 import { ref, computed } from "vue";
 import {
   authService,
@@ -6,6 +7,7 @@ import {
   type RegisterData,
 } from "../services/auth";
 
+// Estado global del usuario (singleton)
 const user = ref<User | null>(null);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
@@ -30,6 +32,8 @@ export function useAuth() {
     } catch (err: unknown) {
       if (err instanceof Error) {
         error.value = err.message;
+      } else {
+        error.value = "Error desconocido al iniciar sesión";
       }
       throw err;
     } finally {
@@ -48,6 +52,8 @@ export function useAuth() {
     } catch (err: unknown) {
       if (err instanceof Error) {
         error.value = err.message;
+      } else {
+        error.value = "Error desconocido en el registro";
       }
       throw err;
     } finally {
@@ -61,15 +67,21 @@ export function useAuth() {
     try {
       await authService.logout();
       user.value = null;
+      error.value = null;
     } catch (err: unknown) {
       console.error("Error en logout:", err);
+      // Limpiar de todas formas
+      user.value = null;
     } finally {
       isLoading.value = false;
     }
   };
 
   const fetchUser = async () => {
-    if (!authService.isAuthenticated()) return;
+    if (!authService.isAuthenticated()) {
+      user.value = null;
+      return;
+    }
 
     isLoading.value = true;
     error.value = null;
@@ -80,8 +92,11 @@ export function useAuth() {
     } catch (err: unknown) {
       if (err instanceof Error) {
         error.value = err.message;
+      } else {
+        error.value = "Error al obtener usuario";
       }
-      await logout(); // token probablemente expirado
+      // Token probablemente expirado
+      await logout();
     } finally {
       isLoading.value = false;
     }
@@ -93,12 +108,15 @@ export function useAuth() {
     } catch (err: unknown) {
       if (err instanceof Error) {
         error.value = err.message;
+      } else {
+        error.value = "Error al refrescar token";
       }
       await logout();
       throw err;
     }
   };
 
+  // Cargar usuario automáticamente si hay token
   if (authService.isAuthenticated() && !user.value) {
     fetchUser();
   }

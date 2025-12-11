@@ -11,6 +11,7 @@ import ProfileView from "../views/Dropdown/ProfileView.vue";
 import PropertyView from "../views/Property/PropertyView.vue";
 import AboutUsView from "../views/AboutUsView.vue";
 import ContractView from "../views/Dropdown/ContractView.vue";
+import SettingsView from "../views/Dropdown/SettingsView.vue";
 
 const routes = [
   {
@@ -23,6 +24,7 @@ const routes = [
       { path: '/propiedades', name: 'PropertyView', component: PropertyView, meta: { title: 'Propiedades'}},
       { path: '/sobre-nosotros', name: 'AboutUsView', component: AboutUsView, meta: { title: 'Sobre Nosotros'}},
       { path: '/contratos', name: 'ContractView', component: ContractView, meta: { title: 'Contratos'}},
+      { path: '/ajustes', name: 'SettingsView', component: SettingsView, meta: { title: 'Ajustes de Cuenta'}},
     ]
   },
 
