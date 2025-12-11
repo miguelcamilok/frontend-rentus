@@ -1,75 +1,153 @@
 <template>
   <div class="container">
-    <section class="property-hero">
-      <div class="property-hero-content">
-        <section class="hero">
-          <div class="hero-text">
-            <h1>El hogar ideal existe, y te ayudamos a encontrarlo</h1>
-            <p>
-              Te acompañamos en cada paso para que encuentres una casa que
-              encaje con tu vida y tus planes.
-            </p>
-          </div>
-        </section>
+    <!-- Partículas de fondo animadas -->
+    <div class="particles-background">
+      <div class="particle" v-for="n in 20" :key="n" :style="getParticleStyle(n)"></div>
+    </div>
 
-        <!-- Estadísticas -->
-        <div class="property-hero-stats">
-          <div class="stat-item">
-            <span class="stat-number">
-              <template v-if="loadingProperties">
-                <div class="circle-loader"></div>
-              </template>
-              <template v-else>{{ propertyCount.toLocaleString() }}</template>
-            </span>
-            <span class="stat-label">Propiedades</span>
-          </div>
-
-          <div class="stat-item">
-            <span class="stat-number">
-              <template v-if="loadingProperties">
-                <div class="circle-loader"></div>
-              </template>
-              <template v-else>{{ activeClientsCount.toLocaleString() }}</template>
-            </span>
-            <span class="stat-label">Clientes Activos</span>
-          </div>
-
-          <div class="stat-item">
-            <span class="stat-number">1+</span>
-            <span class="stat-label">Años de experiencia</span>
-          </div>
-        </div>
+    <!-- Hero Section Moderna -->
+    <section class="modern-hero">
+      <div class="hero-background">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
       </div>
 
-      <div class="hero-gradient-overlay"></div>
-    </section>
+      <div class="hero-content-wrapper">
+        <div class="hero-text-section" data-aos="fade-right">
+          <div class="hero-badge">
+            <font-awesome-icon :icon="['fas', 'star']" class="badge-icon" />
+            <span>Tu hogar ideal te espera</span>
+          </div>
 
-    <!-- Buscador -->
-    <section class="search-section">
-      <div class="search-wrapper">
-        <p class="search-title">Encuentra tu propiedad ideal</p>
-        <div class="search-bar">
-          <div class="search-input location-input">
-            <input type="text" placeholder="¿Dónde quieres vivir?" v-model="searchFilters.location"
-              @focus="searchFilters.location.length > 2 ? showSuggestions = true : null" @blur="hideSuggestions" />
-            <span class="search-icon">🏠</span>
+          <h1 class="hero-title">
+            Encuentra el
+            <span class="gradient-text"> hogar perfecto</span>
+            <br />para tu estilo de vida
+          </h1>
 
-            <div v-if="showSuggestions && locationSuggestions.length > 0" class="suggestions-dropdown">
-              <div v-for="suggestion in locationSuggestions" :key="suggestion.place_id" class="suggestion-item"
-                @mousedown="selectLocationSuggestion(suggestion)">
-                <span class="suggestion-icon">📍</span>
-                <span class="suggestion-text">{{ suggestion.description }}</span>
+          <p class="hero-description">
+            Te acompañamos en cada paso para que encuentres una casa que
+            encaje con tu vida y tus planes. Descubre propiedades exclusivas.
+          </p>
+
+          <!-- Stats en el hero -->
+          <div class="hero-stats-inline">
+            <div class="stat-inline-item">
+              <div class="stat-inline-icon">
+                <font-awesome-icon :icon="['fas', 'home']" />
+              </div>
+              <div class="stat-inline-content">
+                <div class="stat-inline-number">
+                  <template v-if="loadingProperties">
+                    <div class="mini-loader"></div>
+                  </template>
+                  <template v-else>{{ propertyCount.toLocaleString() }}+</template>
+                </div>
+                <div class="stat-inline-label">Propiedades</div>
               </div>
             </div>
 
-            <div v-if="loadingSuggestions" class="suggestions-loading">
-              🔍 Buscando ubicaciones...
+            <div class="stat-inline-item">
+              <div class="stat-inline-icon">
+                <font-awesome-icon :icon="['fas', 'check-circle']" />
+              </div>
+              <div class="stat-inline-content">
+                <div class="stat-inline-number">
+                  <template v-if="loadingProperties">
+                    <div class="mini-loader"></div>
+                  </template>
+                  <template v-else>{{ activeClientsCount.toLocaleString() }}+</template>
+                </div>
+                <div class="stat-inline-label">Clientes Felices</div>
+              </div>
+            </div>
+
+            <div class="stat-inline-item">
+              <div class="stat-inline-icon">
+                <font-awesome-icon :icon="['fas', 'star']" />
+              </div>
+              <div class="stat-inline-content">
+                <div class="stat-inline-number">1+</div>
+                <div class="stat-inline-label">Años de Experiencia</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Imagen decorativa con efecto -->
+        <div class="hero-image-section" data-aos="fade-left">
+          <div class="floating-card card-1">
+            <font-awesome-icon :icon="['fas', 'home']" class="card-icon" />
+            <div class="card-text">Propiedades Verificadas</div>
+          </div>
+          <div class="floating-card card-2">
+            <font-awesome-icon :icon="['fas', 'star']" class="card-icon" />
+            <div class="card-text">Mejor Valoradas</div>
+          </div>
+          <div class="hero-image-placeholder">
+            <div class="image-grid">
+              <div class="grid-item item-1"></div>
+              <div class="grid-item item-2"></div>
+              <div class="grid-item item-3"></div>
+              <div class="grid-item item-4"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- <PropertyCarousel :properties="properties" :loading-properties="loadingProperties" /> -->
+
+    <!-- Buscador Moderno Flotante -->
+    <!-- <section class="modern-search-section" data-aos="fade-up">
+      <div class="search-container">
+        <div class="search-header">
+          <font-awesome-icon :icon="['fas', 'home']" class="search-header-icon" />
+          <h3>Encuentra tu próximo hogar</h3>
+        </div>
+
+        <div class="search-grid">
+          <div class="search-field">
+            <label class="search-label">
+              <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
+              Ubicación
+            </label>
+            <div class="input-wrapper">
+              <input
+                type="text"
+                placeholder="¿Dónde quieres vivir?"
+                v-model="searchFilters.location"
+                @focus="searchFilters.location.length > 2 ? showSuggestions = true : null"
+                @blur="hideSuggestions"
+              />
+              
+              <div v-if="showSuggestions && locationSuggestions.length > 0" class="suggestions-dropdown">
+                <div
+                  v-for="suggestion in locationSuggestions"
+                  :key="suggestion.place_id"
+                  class="suggestion-item"
+                  @mousedown="selectLocationSuggestion(suggestion)"
+                >
+                  <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="suggestion-icon" />
+                  <span class="suggestion-text">{{ suggestion.description }}</span>
+                </div>
+              </div>
+
+              <div v-if="loadingSuggestions" class="suggestions-loading">
+                <div class="mini-loader"></div>
+                Buscando ubicaciones...
+              </div>
             </div>
           </div>
 
-          <div class="search-input">
+          <div class="search-field">
+            <label class="search-label">
+              <font-awesome-icon :icon="['fas', 'home']" />
+              Tipo de Propiedad
+            </label>
             <select v-model="searchFilters.type" @change="filterProperties">
-              <option value="">Tipo de propiedad</option>
+              <option value="">Todos los tipos</option>
               <option value="casa">Casa</option>
               <option value="apartamento">Apartamento</option>
               <option value="local">Local Comercial</option>
@@ -77,174 +155,196 @@
             </select>
           </div>
 
-          <div class="search-input">
-            <input type="number" placeholder="Presupuesto máximo" v-model="searchFilters.maxPrice"
-              @input="filterProperties" />
-            <span class="search-icon">💰</span>
+          <div class="search-field">
+            <label class="search-label">
+              <font-awesome-icon :icon="['fas', 'calendar']" />
+              Presupuesto Máximo
+            </label>
+            <input
+              type="number"
+              placeholder="Ej: 2,000,000"
+              v-model="searchFilters.maxPrice"
+              @input="filterProperties"
+            />
           </div>
 
-          <button class="search-btn" @click="filterProperties">
-            <span class="btn-text">Buscar Propiedades</span>
-            <span class="btn-icon">🔍</span>
+          <button class="search-btn-modern" @click="filterProperties">
+            <span>Buscar</span>
+            <font-awesome-icon :icon="['fas', 'arrow-right']" class="btn-arrow" />
           </button>
         </div>
       </div>
-    </section>
+    </section> -->
 
-    <!-- Propiedades -->
-    <section class="properties-section">
+    <!-- Propiedades Section -->
+    <section class="properties-modern-section">
       <div class="properties-container">
-        <div class="section-header">
-          <h2 class="section-title">Propiedades Exclusivas</h2>
-          <p class="section-subtitle">Descubre nuestras mejores opciones seleccionadas para ti</p>
+        <div class="section-header-modern" data-aos="fade-up">
+          <div class="header-content">
+            <span class="section-subtitle-badge">
+              <font-awesome-icon :icon="['fas', 'star']" />
+              Propiedades Destacadas
+            </span>
+            <h2 class="section-title-modern">
+              Descubre Nuestras
+              <span class="gradient-text">Mejores Opciones</span>
+            </h2>
+            <p class="section-description">
+              Propiedades cuidadosamente seleccionadas para ti
+            </p>
+          </div>
         </div>
 
         <!-- Loading -->
-        <div v-if="loadingProperties" class="loading-container">
-          <div class="loading-spinner"></div>
-          <p>Cargando propiedades...</p>
+        <div v-if="loadingProperties" class="loading-modern" data-aos="fade-up">
+          <div class="loading-spinner-modern"></div>
+          <p>Cargando propiedades increíbles...</p>
         </div>
 
         <!-- Error -->
-        <div v-else-if="errorProperties" class="error-container">
-          <p>¡Ups! Algo salió mal: {{ errorProperties }}</p>
-          <button @click="fetchAllData" class="retry-btn">Intentar de nuevo</button>
+        <div v-else-if="errorProperties" class="error-modern" data-aos="fade-up">
+          <font-awesome-icon :icon="['fas', 'times-circle']" class="error-icon" />
+          <p>{{ errorProperties }}</p>
+          <button @click="fetchAllData" class="retry-btn-modern">
+            <font-awesome-icon :icon="['fas', 'arrow-right']" />
+            Intentar de nuevo
+          </button>
         </div>
 
-        <!-- Grid de propiedades -->
-        <div v-else-if="displayedProperties.length > 0" class="properties-grid">
-          <div v-for="property in displayedProperties" :key="property.id" class="property-card"
-            :class="{ 'featured-card': property.featured }">
-            <!-- Badge de estado -->
-            <div class="property-status-badge" :class="property.status">
+        <!-- Grid de propiedades moderno -->
+        <div v-else-if="displayedProperties.length > 0" class="properties-grid-modern">
+          <div v-for="(property, index) in displayedProperties" :key="property.id" class="property-card-modern"
+            :class="{ 'featured-modern': property.featured }" :data-aos="'fade-up'" :data-aos-delay="index * 100">
+            <!-- Badge de estado moderno -->
+            <div class="status-badge-modern" :class="property.status">
+              <span class="status-dot-modern"></span>
               {{ getStatusText(property.status) }}
             </div>
 
             <!-- Badge destacado -->
-            <div v-if="property.featured" class="property-badge">
-              ⭐ Propiedad Exclusiva
+            <div v-if="property.featured" class="featured-badge-modern">
+              <font-awesome-icon :icon="['fas', 'star']" />
+              Exclusiva
             </div>
 
-            <!-- Imagen de la propiedad -->
-            <div class="property-image-container">
-              <img v-if="property.image_url" :src="property.image_url" alt="Imagen propiedad" class="property-image"
-                @error="onImgError" />
-              <div v-else class="image-placeholder">
-                <div class="placeholder-icon">🏠</div>
-                <div class="placeholder-text">Imagen de la propiedad</div>
-                <div class="placeholder-subtext">{{ property.title }}</div>
+            <!-- Imagen -->
+            <div class="property-image-modern">
+              <img v-if="property.image_url" :src="property.image_url" :alt="property.title" @error="onImgError" />
+              <div v-else class="image-placeholder-modern">
+                <font-awesome-icon :icon="['fas', 'home']" class="placeholder-icon-modern" />
               </div>
 
-              <!-- Overlay de acciones -->
-              <div class="property-overlay">
-                <div class="property-actions">
-                  <button class="action-btn fav-btn" @click.stop="toggleFavorite(property)"
-                    :class="{ active: property.is_favorite }"
-                    :title="property.is_favorite ? 'Quitar de favoritos' : 'Agregar a favoritos'">
-                    ❤️
-                  </button>
-                  <button class="action-btn compare-btn" @click.stop="addToCompare(property)"
-                    title="Comparar propiedad">⚖️</button>
-                  <button class="action-btn share-btn" @click.stop="shareProperty(property)"
-                    title="Compartir propiedad">📤</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Contenido de la propiedad -->
-            <div class="property-content">
-              <div class="property-header">
-                <h3 class="property-title">{{ property.title || 'Propiedad exclusiva' }}</h3>
-                <div class="property-price">
-                  {{ formatPrice(property.monthly_price) }}
-                  <span class="price-period">/mes</span>
-                </div>
-              </div>
-
-              <div class="property-location">
-                📍 {{ property.address }}, {{ property.city }}
-              </div>
-
-              <div class="property-features">
-                <div class="feature-item" v-if="property.num_bedrooms">
-                  <span class="feature-icon">🛏</span>
-                  <span class="feature-text">{{ property.num_bedrooms }} Habitaciones</span>
-                </div>
-                <div class="feature-item" v-if="property.num_bathrooms">
-                  <span class="feature-icon">🛁</span>
-                  <span class="feature-text">{{ property.num_bathrooms }} Baños</span>
-                </div>
-                <div class="feature-item" v-if="property.area_m2">
-                  <span class="feature-icon">📐</span>
-                  <span class="feature-text">{{ property.area_m2 }} m²</span>
-                </div>
-                <div class="feature-item" v-if="property.parking_spaces">
-                  <span class="feature-icon">🚗</span>
-                  <span class="feature-text">{{ property.parking_spaces }} Parqueaderos</span>
-                </div>
-              </div>
-
-              <div class="property-description">
-                {{ truncateDescription(property.description) }}
-              </div>
-
-              <div class="property-tags">
-                <span class="property-type-tag">{{ getTypeText(property.type) }}</span>
-                <span v-if="property.new_construction" class="property-new-tag">Nueva Construcción</span>
-                <span v-if="property.pet_friendly" class="property-pet-tag">🐾 Mascotas</span>
-              </div>
-
-              <div class="property-footer">
-                <button class="details-btn" @click.stop="viewPropertyDetails(property)">
-                  <span class="btn-text">Ver Detalles</span>
-                  <span class="btn-arrow">→</span>
+              <!-- Overlay con acciones -->
+              <div class="image-overlay-modern">
+                <button class="action-btn-modern" @click.stop="toggleFavorite(property)"
+                  :class="{ 'active': property.is_favorite }">
+                  <font-awesome-icon :icon="['fas', 'star']" />
                 </button>
-                <button class="contact-btn" @click.stop="contactAgent(property)">📞 Contactar</button>
+                <button class="action-btn-modern" @click.stop="shareProperty(property)">
+                  <font-awesome-icon :icon="['fas', 'arrow-right']" />
+                </button>
+              </div>
+            </div>
+
+            <!-- Contenido -->
+            <div class="property-content-modern">
+              <div class="property-header-modern">
+                <div class="property-type-badge">{{ getTypeText(property.type) }}</div>
+                <div class="property-price-modern">
+                  {{ formatPrice(property.monthly_price) }}
+                  <span>/mes</span>
+                </div>
               </div>
 
-              <div class="property-meta">
-                <span class="meta-item">🕒 Publicado: {{ formatDate(property.created_at) }}</span>
-                <span class="meta-item">👁️ {{ property.views || 0 }} visitas</span>
+              <h3 class="property-title-modern">{{ property.title || 'Propiedad exclusiva' }}</h3>
+
+              <div class="property-location-modern">
+                <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
+                {{ property.address }}, {{ property.city }}
               </div>
+
+              <div class="property-features-modern">
+                <div class="feature-modern" v-if="property.num_bedrooms">
+                  <font-awesome-icon :icon="['fas', 'bed']" />
+                  <span>{{ property.num_bedrooms }}</span>
+                </div>
+                <div class="feature-modern" v-if="property.num_bathrooms">
+                  <font-awesome-icon :icon="['fas', 'bath']" />
+                  <span>{{ property.num_bathrooms }}</span>
+                </div>
+                <div class="feature-modern" v-if="property.area_m2">
+                  <font-awesome-icon :icon="['fas', 'ruler-combined']" />
+                  <span>{{ property.area_m2 }} m²</span>
+                </div>
+              </div>
+
+              <button class="view-details-btn-modern" @click.stop="viewPropertyDetails(property)">
+                <span>Ver Detalles</span>
+                <font-awesome-icon :icon="['fas', 'arrow-right']" class="btn-icon-modern" />
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- Empty -->
-        <div v-else class="empty-state">
-          <div class="empty-icon">🏡</div>
-          <h3>No encontramos propiedades con esos filtros</h3>
-          <p>Intenta ajustar tus criterios de búsqueda o revisa todas nuestras propiedades disponibles</p>
-          <button @click="clearFilters" class="clear-filters-btn">🔄 Limpiar filtros de búsqueda</button>
+        <!-- Empty State -->
+        <div v-else class="empty-state-modern" data-aos="fade-up">
+          <font-awesome-icon :icon="['fas', 'home']" class="empty-icon-modern" />
+          <h3>No encontramos propiedades</h3>
+          <p>Intenta ajustar tus criterios de búsqueda</p>
+          <button @click="clearFilters" class="clear-filters-btn-modern">
+            <font-awesome-icon :icon="['fas', 'times']" />
+            Limpiar filtros
+          </button>
         </div>
 
-        <!-- Ver más propiedades -->
-        <div v-if="!loadingProperties && filteredProperties.length > PROPERTIES_LIMIT" class="view-more-section">
-          <div class="results-info">
-            <p class="properties-count">
-              Visualizando <strong>{{ displayedProperties.length }}</strong> de
-              <strong>{{ filteredProperties.length }}</strong> propiedades encontradas
+        <!-- Ver más -->
+        <div v-if="!loadingProperties && filteredProperties.length > PROPERTIES_LIMIT" class="view-more-modern"
+          data-aos="fade-up">
+          <div class="view-more-info">
+            <p>
+              Mostrando <strong>{{ displayedProperties.length }}</strong> de
+              <strong>{{ filteredProperties.length }}</strong> propiedades
             </p>
-            <p class="results-note">¿No encuentras lo que buscas?</p>
           </div>
-          <button @click="goToProperties" class="view-more-btn">
-            <span class="btn-text">Explorar Todas las Propiedades</span>
-            <span class="btn-icon">🔍</span>
+          <button @click="goToProperties" class="view-all-btn-modern">
+            <span>Explorar Todas las Propiedades</span>
+            <font-awesome-icon :icon="['fas', 'arrow-right']" />
           </button>
         </div>
       </div>
     </section>
 
-    <!-- MODAL DE DETALLES MEJORADO -->
+    <!-- CTA Section Moderna -->
+    <section class="cta-modern-section" data-aos="fade-up">
+      <div class="cta-background">
+        <div class="cta-orb cta-orb-1"></div>
+        <div class="cta-orb cta-orb-2"></div>
+      </div>
+      <div class="cta-content">
+        <font-awesome-icon :icon="['fas', 'star']" class="cta-icon" />
+        <h2>¿Listo para encontrar tu hogar ideal?</h2>
+        <p>Contáctanos y te ayudaremos a encontrar la propiedad perfecta para ti</p>
+        <div class="cta-buttons">
+          <button class="cta-btn primary" @click="goToProperties">
+            <span>Ver Propiedades</span>
+            <font-awesome-icon :icon="['fas', 'arrow-right']" />
+          </button>
+          <button class="cta-btn secondary">
+            <font-awesome-icon :icon="['fas', 'phone']" />
+            <span>Contactar</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modal (mantén tu modal existente) -->
     <Transition name="modal">
       <div v-if="modalOpen && selectedProperty" class="modal-backdrop" @click.self="closeModal">
         <div class="modal-box" @click.stop>
-
           <button class="modal-close" @click="closeModal" type="button">
-            <span class="close-icon">✕</span>
+            <font-awesome-icon :icon="['fas', 'times']" />
           </button>
 
-          <!-- Encabezado del modal -->
           <div class="modal-header">
             <div class="property-status-badge" :class="selectedProperty.status || 'available'">
               <span class="status-dot" :class="selectedProperty.status || 'available'"></span>
@@ -252,30 +352,25 @@
             </div>
             <h2 class="modal-title">{{ selectedProperty.title || 'Propiedad' }}</h2>
             <div class="property-price-highlight">
-              <span class="price-amount">${{ (selectedProperty.monthly_price || 0).toLocaleString() }}</span>
+              <span class="price-amount">{{ formatPrice(selectedProperty.monthly_price) }}</span>
               <span class="price-period">/mes</span>
             </div>
           </div>
 
-          <!-- Galería de imágenes -->
           <div class="modal-gallery">
-            <img 
-              :src="selectedProperty.image_url || DEFAULT_PROPERTY_IMAGE" 
-              class="modal-main-image"
-              :alt="selectedProperty.title"
-              @error="onImgError" 
-            />
+            <img :src="selectedProperty.image_url || DEFAULT_PROPERTY_IMAGE" class="modal-main-image"
+              :alt="selectedProperty.title" @error="onImgError" />
             <div class="image-badge">
-              <span class="badge-icon">📸</span>
+              <font-awesome-icon :icon="['fas', 'camera']" class="badge-icon" />
               <span class="badge-text">Galería</span>
             </div>
           </div>
 
-          <!-- Información principal en tarjetas -->
           <div class="modal-details-grid">
-            <!-- Tarjeta de ubicación -->
             <div class="detail-card location-card">
-              <div class="card-icon">📍</div>
+              <div class="card-icon">
+                <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
+              </div>
               <div class="card-content">
                 <h3 class="card-title">Ubicación</h3>
                 <p class="card-text">{{ selectedProperty.address || 'No disponible' }}</p>
@@ -283,9 +378,10 @@
               </div>
             </div>
 
-            <!-- Tarjeta de características -->
             <div class="detail-card features-card">
-              <div class="card-icon">📐</div>
+              <div class="card-icon">
+                <font-awesome-icon :icon="['fas', 'ruler-combined']" />
+              </div>
               <div class="card-content">
                 <h3 class="card-title">Características</h3>
                 <div class="features-list">
@@ -305,13 +401,15 @@
               </div>
             </div>
 
-            <!-- Tarjeta de servicios -->
             <div class="detail-card services-card">
-              <div class="card-icon">🛠️</div>
+              <div class="card-icon">
+                <font-awesome-icon :icon="['fas', 'check-circle']" />
+              </div>
               <div class="card-content">
                 <h3 class="card-title">Servicios Incluidos</h3>
                 <div class="services-tags" v-if="getServicesArray(selectedProperty.included_services).length > 0">
-                  <span v-for="service in getServicesArray(selectedProperty.included_services)" :key="service" class="service-tag">
+                  <span v-for="service in getServicesArray(selectedProperty.included_services)" :key="service"
+                    class="service-tag">
                     {{ service.trim() }}
                   </span>
                 </div>
@@ -319,9 +417,10 @@
               </div>
             </div>
 
-            <!-- Tarjeta de publicación -->
             <div class="detail-card publication-card">
-              <div class="card-icon">📅</div>
+              <div class="card-icon">
+                <font-awesome-icon :icon="['fas', 'calendar']" />
+              </div>
               <div class="card-content">
                 <h3 class="card-title">Publicación</h3>
                 <p class="card-text">{{ formatModalDate(selectedProperty.publication_date) }}</p>
@@ -330,18 +429,19 @@
             </div>
           </div>
 
-          <!-- Descripción expandida -->
           <div class="description-section">
             <h3 class="section-title">Descripción</h3>
             <p class="description-text">{{ selectedProperty.description || 'Sin descripción disponible' }}</p>
           </div>
 
-          <!-- Ubicación en mapa -->
           <div v-if="selectedProperty.lat && selectedProperty.lng" class="location-section">
             <div class="section-header">
-              <h3 class="section-title">📍 Ubicación Exacta</h3>
+              <h3 class="section-title">
+                <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
+                Ubicación Exacta
+              </h3>
               <button class="btn-map-preview" @click="viewOnMap(selectedProperty)" type="button">
-                <span class="btn-icon">🗺️</span>
+                <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="btn-icon" />
                 <span class="btn-text">Ver en Mapa Completo</span>
               </button>
             </div>
@@ -358,58 +458,50 @@
           </div>
 
           <div v-else class="no-location-section">
-            <div class="no-location-icon">🗺️</div>
+            <div class="no-location-icon">
+              <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
+            </div>
             <p class="no-location-text">Esta propiedad aún no tiene ubicación registrada</p>
           </div>
 
-          <!-- Acciones del modal -->
           <div class="modal-actions">
-            <!-- Botón para solicitar visita -->
-            <button 
-              v-if="selectedProperty.status === 'available'"
-              class="btn-request-visit" 
-              @click="openRequestVisitModal(selectedProperty)"
-              type="button"
-            >
-              <span class="btn-icon">📅</span>
+            <button v-if="selectedProperty.status === 'available'" class="btn-request-visit"
+              @click="openRequestVisitModal(selectedProperty)" type="button">
+              <font-awesome-icon :icon="['fas', 'calendar']" class="btn-icon" />
               <span class="btn-text">Solicitar Cita de Visita</span>
             </button>
 
-            <!-- Si no está disponible -->
             <div v-else class="unavailable-notice">
-              <div class="notice-icon">⏸️</div>
+              <div class="notice-icon">
+                <font-awesome-icon :icon="['fas', 'times-circle']" />
+              </div>
               <div class="notice-content">
                 <h4>Propiedad No Disponible</h4>
                 <p>Actualmente esta propiedad no está disponible para visitas</p>
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </Transition>
 
-    <RequestVisitModal 
-      :open="showRequestModal" 
-      :property="propertyForRequest" 
-      @close="showRequestModal = false"
-      @success="handleVisitRequestSuccess" 
-    />
-
+    <RequestVisitModal :open="showRequestModal" :property="propertyForRequest" @close="showRequestModal = false"
+      @success="handleVisitRequestSuccess" />
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
 import RequestVisitModal from "../components/modals/ModalRequest/RequestVisitModal.vue";
 import { useRouter } from "vue-router";
 import { mapsService } from "../services/mapsService";
 import api from "../services/api";
+// import PropertyCarousel from "../views/Property/PropertyCarousel.vue";
 
 const DEFAULT_PROPERTY_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjE4IiBmaWxsPSIjNmM3NTdkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2VuIG5vIGRpc3BvbmlibGU8L3RleHQ+PC9zdmc+";
 
-function onImgError(event) {
-  const img = event.target;
+function onImgError(event: Event) {
+  const img = event.target as HTMLImageElement;
   if (img && img.src !== DEFAULT_PROPERTY_IMAGE) {
     img.src = DEFAULT_PROPERTY_IMAGE;
     img.onerror = null;
@@ -418,15 +510,22 @@ function onImgError(event) {
 
 const router = useRouter();
 
-// Estados
-const properties = ref([]);
-const selectedProperty = ref(null);
-
-// Para la solicitud de visitas
-const propertyForRequest = ref(null);
+const properties = ref<any[]>([]);
+const selectedProperty = ref<any>(null);
+const propertyForRequest = ref<any>(null);
 const showRequestModal = ref(false);
+const loadingProperties = ref(false);
+const errorProperties = ref<string | null>(null);
+const activeClientsCount = ref(0);
+const propertyCount = ref(0);
+const PROPERTIES_LIMIT = 3;
+const modalOpen = ref(false);
+const searchFilters = ref({ location: "", type: "", maxPrice: null as number | null });
+const locationSuggestions = ref<any[]>([]);
+const showSuggestions = ref(false);
+const loadingSuggestions = ref(false);
 
-const openRequestVisitModal = (property) => {
+const openRequestVisitModal = (property: any) => {
   if (!property) return;
   propertyForRequest.value = property;
   showRequestModal.value = true;
@@ -435,26 +534,9 @@ const openRequestVisitModal = (property) => {
 
 const handleVisitRequestSuccess = () => {
   showRequestModal.value = false;
-  // Aquí puedes agregar lógica adicional si es necesario
   console.log('Solicitud de visita enviada con éxito');
 };
 
-const loadingProperties = ref(false);
-const errorProperties = ref(null);
-const activeClientsCount = ref(0);
-const propertyCount = ref(0);
-const PROPERTIES_LIMIT = 4;
-
-// Estados para el modal
-const modalOpen = ref(false);
-
-// Filtros y búsqueda
-const searchFilters = ref({ location: "", type: "", maxPrice: null });
-const locationSuggestions = ref([]);
-const showSuggestions = ref(false);
-const loadingSuggestions = ref(false);
-
-// Computed
 const filteredProperties = computed(() => {
   let filtered = properties.value;
 
@@ -469,7 +551,7 @@ const filteredProperties = computed(() => {
     filtered = filtered.filter(p => p.type?.toLowerCase() === searchFilters.value.type.toLowerCase());
   }
   if (searchFilters.value.maxPrice) {
-    filtered = filtered.filter(p => p.monthly_price <= searchFilters.value.maxPrice);
+    filtered = filtered.filter(p => p.monthly_price <= searchFilters.value.maxPrice!);
   }
   return filtered;
 });
@@ -480,30 +562,19 @@ const displayedProperties = computed(() => {
   return [...featured, ...regular].slice(0, PROPERTIES_LIMIT);
 });
 
-// Funciones del Modal
-const openModal = (property) => {
-  if (!property) return;
-  selectedProperty.value = { ...property };
-  modalOpen.value = true;
-  document.body.classList.add("modal-open");
-};
-
 const closeModal = () => {
   modalOpen.value = false;
   selectedProperty.value = null;
   document.body.classList.remove("modal-open");
 };
 
-// Función para ver en el mapa
-const viewOnMap = (property) => {
+const viewOnMap = (property: any) => {
   closeModal();
-  // Navegar a la vista de MapView con el id de la propiedad
   router.push({ name: 'MapView', params: { id: property.id } });
 };
 
-// MAPEAR STATUS A TEXTO
-const friendlyStatus = (s) => {
-  const statusMap = {
+const friendlyStatus = (s: string) => {
+  const statusMap: Record<string, string> = {
     available: "Disponible",
     rented: "Rentada",
     reserved: "Reservada",
@@ -513,8 +584,7 @@ const friendlyStatus = (s) => {
   return statusMap[s] || s || "Disponible";
 };
 
-// Función para formatear fecha para el modal
-const formatModalDate = (dateString) => {
+const formatModalDate = (dateString: string) => {
   if (!dateString) return 'No disponible';
   const date = new Date(dateString);
   return date.toLocaleDateString('es-ES', {
@@ -524,12 +594,11 @@ const formatModalDate = (dateString) => {
   });
 };
 
-// Función para calcular tiempo transcurrido
-const timeAgo = (dateString) => {
+const timeAgo = (dateString: string) => {
   if (!dateString) return '';
   const date = new Date(dateString);
   const now = new Date();
-  const diffInMs = now - date;
+  const diffInMs = now.getTime() - date.getTime();
   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
   if (diffInDays === 0) return 'hoy';
@@ -540,7 +609,6 @@ const timeAgo = (dateString) => {
   return `hace ${Math.floor(diffInDays / 365)} años`;
 };
 
-// Funciones principales
 async function fetchAllData() {
   loadingProperties.value = true;
   errorProperties.value = null;
@@ -560,8 +628,7 @@ async function fetchAllData() {
   }
 }
 
-// Autocompletado
-async function fetchLocationSuggestions(input) {
+async function fetchLocationSuggestions(input: string) {
   if (!input.trim()) return;
   loadingSuggestions.value = true;
   try {
@@ -576,39 +643,27 @@ async function fetchLocationSuggestions(input) {
   }
 }
 
-function selectLocationSuggestion(suggestion) {
-  searchFilters.value.location = suggestion.description;
-  showSuggestions.value = false;
-  locationSuggestions.value = [];
-}
+// function selectLocationSuggestion(suggestion: any) {
+//   searchFilters.value.location = suggestion.description;
+//   showSuggestions.value = false;
+//   locationSuggestions.value = [];
+// }
 
-function hideSuggestions() {
-  setTimeout(() => (showSuggestions.value = false), 200);
-}
+// function hideSuggestions() {
+//   setTimeout(() => (showSuggestions.value = false), 200);
+// }
 
-// Utilidades
-function formatPrice(price) {
+function formatPrice(price: number) {
   if (!price) return "Consultar precio";
   return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 0 }).format(price);
 }
 
-function truncateDescription(description, maxLength = 120) {
-  if (!description) return "Descripción no disponible";
-  return description.length > maxLength ? description.substring(0, maxLength) + "..." : description;
-}
-
-function formatDate(dateString) {
-  if (!dateString) return "Reciente";
-  const options = { day: "numeric", month: "long", year: "numeric" };
-  return new Date(dateString).toLocaleDateString("es-ES", options);
-}
-
-function getStatusText(status) {
+function getStatusText(status: string) {
   if (!status) return "Disponible";
 
   const key = status.toString().trim().toLowerCase();
 
-  const map = {
+  const map: Record<string, string> = {
     "disponible": "Disponible",
     "ocupado": "Ocupado",
     "en mantenimiento": "En mantenimiento",
@@ -624,75 +679,85 @@ function getStatusText(status) {
   return map[key] || "Disponible";
 }
 
-function getTypeText(type) {
-  const map = { 
-    casa: "Casa", 
-    apartamento: "Apartamento", 
-    local: "Local Comercial", 
-    finca: "Finca" 
+function getTypeText(type: string) {
+  const map: Record<string, string> = {
+    casa: "Casa",
+    apartamento: "Apartamento",
+    local: "Local Comercial",
+    finca: "Finca"
   };
   return map[type] || "Propiedad";
 }
 
-// Función para convertir servicios de string a array
-function getServicesArray(services) {
+function getServicesArray(services: any) {
   if (!services) return [];
-  
-  // Si ya es un array, devolverlo
+
   if (Array.isArray(services)) {
     return services;
   }
-  
-  // Si es un string, dividirlo por comas
+
   if (typeof services === 'string') {
     return services.split(',').map(s => s.trim()).filter(s => s.length > 0);
   }
-  
+
   return [];
 }
 
-// Interacciones
-function filterProperties() {
-  console.log("Filtros aplicados:", searchFilters.value);
-}
+// function filterProperties() {
+//   console.log("Filtros aplicados:", searchFilters.value);
+// }
 
-function viewPropertyDetails(property) {
+function viewPropertyDetails(property: any) {
   router.push({ name: 'PropertyDetail', params: { id: property.id } });
 }
 
-function clearFilters() { 
-  searchFilters.value = { location: "", type: "", maxPrice: null }; 
+function clearFilters() {
+  searchFilters.value = { location: "", type: "", maxPrice: null };
 }
 
-function goToProperties() { 
-  router.push("/propiedades"); 
+function goToProperties() {
+  router.push("/propiedades");
 }
 
-function toggleFavorite(property) { 
-  property.is_favorite = !property.is_favorite; 
+function toggleFavorite(property: any) {
+  property.is_favorite = !property.is_favorite;
 }
 
-function addToCompare(property) { 
-  console.log("Comparar", property.title); 
+function shareProperty(property: any) {
+  console.log("Compartir", property.title);
 }
 
-function shareProperty(property) { 
-  console.log("Compartir", property.title); 
+function getParticleStyle(_n: number) {
+  const duration = 15 + Math.random() * 20;
+  const delay = Math.random() * 5;
+  const size = 4 + Math.random() * 8;
+
+  return {
+    left: `${Math.random() * 100}%`,
+    animationDuration: `${duration}s`,
+    animationDelay: `${delay}s`,
+    width: `${size}px`,
+    height: `${size}px`
+  };
 }
 
-function contactAgent(property) {
-  console.log("Contactar", property.title);
-  closeModal();
-}
-
-// Watchers
 watch(() => searchFilters.value.location, async (val) => {
   if (val.length > 2) await fetchLocationSuggestions(val);
   else locationSuggestions.value = [];
 });
 
-// Lifecycle
-onMounted(fetchAllData);
+onMounted(() => {
+  fetchAllData();
+
+  // Inicializar AOS si está disponible
+  if (typeof window !== 'undefined' && (window as any).AOS) {
+    (window as any).AOS.init({
+      duration: 800,
+      once: true,
+      offset: 100
+    });
+  }
+});
 </script>
 
 <style scoped>

@@ -22,21 +22,27 @@
                 <!-- Quick Stats -->
                 <div class="quick-stats">
                     <div class="stat-box">
-                        <div class="stat-icon">🏠</div>
+                        <div class="stat-inline-icon">
+                            <font-awesome-icon :icon="['fas', 'home']" />
+                        </div>
                         <div class="stat-content">
                             <div class="stat-value">{{ properties.length }}</div>
                             <div class="stat-label">Propiedades</div>
                         </div>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-icon">✓</div>
+                        <div class="stat-inline-icon">
+                            <font-awesome-icon :icon="['fas', 'check-circle']" />
+                        </div>
                         <div class="stat-content">
                             <div class="stat-value">{{ availableCount }}</div>
                             <div class="stat-label">Disponibles</div>
                         </div>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-icon">📍</div>
+                        <div class="stat-inline-icon">
+                            <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
+                        </div>
                         <div class="stat-content">
                             <div class="stat-value">{{ citiesCount }}</div>
                             <div class="stat-label">Ciudades</div>
@@ -55,6 +61,7 @@
         </section>
         <section class="search-section">
             <div class="search-wrapper">
+                <font-awesome-icon :icon="['fas', 'home']" class="search-header-icon" />
                 <p class="search-title">Encuentra Tu Propiedad Ideal</p>
                 <div class="search-bar">
                     <!-- Search Input -->
@@ -131,7 +138,7 @@
 
         </section>
 
-        
+
         <!-- Main Container -->
         <div class="main-container">
             <!-- Properties Section -->
@@ -188,7 +195,7 @@
 
                             <!-- Type Tag -->
                             <div class="type-tag">
-                                <span class="type-icon">{{ getTypeIcon(property.title) }}</span>
+                                <font-awesome-icon :icon="['fas', getTypeIcon(property.title)]" />
                                 <span class="type-text">{{ detectType(property.title) }}</span>
                             </div>
                         </div>
@@ -200,7 +207,7 @@
                                 <div class="card-header-left">
                                     <h3 class="card-title">{{ property.title }}</h3>
                                     <div class="card-location">
-                                        <span class="location-pin">📍</span>
+                                        <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
                                         <span class="location-text">{{ property.city }}</span>
                                     </div>
                                 </div>
@@ -216,8 +223,8 @@
                             <!-- Features -->
                             <div class="features-container">
                                 <div class="feature-item">
-                                    <div class="feature-icon-box">
-                                        <span class="feature-icon">📐</span>
+                                    <div class="feature-modern">
+                                        <font-awesome-icon :icon="['fas', 'ruler-combined']" />
                                     </div>
                                     <div class="feature-content">
                                         <span class="feature-label">Área</span>
@@ -225,8 +232,8 @@
                                     </div>
                                 </div>
                                 <div v-if="property.num_bedrooms" class="feature-item">
-                                    <div class="feature-icon-box">
-                                        <span class="feature-icon">🛏️</span>
+                                    <div class="feature-modern">
+                                        <font-awesome-icon :icon="['fas', 'bed']" />
                                     </div>
                                     <div class="feature-content">
                                         <span class="feature-label">Habitaciones</span>
@@ -234,8 +241,8 @@
                                     </div>
                                 </div>
                                 <div v-if="property.num_bathrooms" class="feature-item">
-                                    <div class="feature-icon-box">
-                                        <span class="feature-icon">🛁</span>
+                                    <div class="feature-modern">
+                                        <font-awesome-icon :icon="['fas', 'bath']" />
                                     </div>
                                     <div class="feature-content">
                                         <span class="feature-label">Baños</span>
@@ -395,13 +402,16 @@ const detectType = (title) => {
 };
 
 const getTypeIcon = (title) => {
-    const t = title.toLowerCase();
-    if (t.includes("casa")) return "🏠";
-    if (t.includes("apartamento") || t.includes("apto")) return "🏢";
-    if (t.includes("local")) return "🏪";
-    if (t.includes("finca")) return "🌳";
-    return "🏡";
+  const t = title.toLowerCase();
+
+  if (t.includes("casa")) return "home";
+  if (t.includes("apartamento") || t.includes("apto")) return "building";
+  if (t.includes("local")) return "store";
+  if (t.includes("finca")) return "tree";
+
+  return "home";
 };
+
 
 const truncateDescription = (description, maxLength = 120) => {
     if (!description) return "Descripción no disponible";
