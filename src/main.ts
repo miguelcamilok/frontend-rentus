@@ -16,7 +16,11 @@ import {
   faTimesCircle,
   faBuilding,
   faStore,
-  faTree
+  faTree,
+  faSearch,
+  faDollarSign,
+  faChevronLeft,
+  faChevronRight
 } from '@fortawesome/free-solid-svg-icons'
 import { 
   faFacebookF, faInstagram, faTwitter, faLinkedinIn 
@@ -28,7 +32,7 @@ library.add(
   faComments, faEnvelope, faPhone, faCalendar, faPlus,
   faBed, faBath, faRulerCombined, faArrowRight, faTrash,
   faFacebookF, faInstagram, faTwitter, faLinkedinIn, faDownload, faEye, faTimesCircle,
-  faBuilding, faStore, faTree
+  faBuilding, faStore, faTree, faSearch, faDollarSign, faChevronLeft, faChevronRight
 )
 
 const app = createApp(App);

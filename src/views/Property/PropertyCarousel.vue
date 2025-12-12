@@ -1,483 +1,680 @@
 <template>
-  <div class="carousel-container">
-    <!-- Carrusel Principal - Solo se muestra si hay propiedades con imagen -->
-    <div class="carousel-wrapper" v-if="carouselProperties.length > 0">
-      <!-- Imagen Actual con efecto de transición -->
-      <transition name="fade" mode="out-in">
+  <div class="modern-carousel" v-if="carouselProperties.length > 0">
+    <!-- Slide Principal -->
+    <div class="carousel-main">
+      <transition name="slide-fade" mode="out-in">
         <div 
           :key="currentIndex" 
           class="carousel-slide"
-          :style="{ backgroundImage: `url(${currentImage})` }"
           @click="goToProperty(currentProperty)"
         >
-          <!-- Overlay con gradiente -->
-          <div class="carousel-overlay"></div>
-          
-          <!-- Información de la propiedad -->
-          <div class="carousel-info">
-            <div class="property-badge">
-              <span class="badge-icon">⭐</span>
+          <!-- Imagen de fondo con parallax -->
+          <div 
+            class="slide-background"
+            :style="{ backgroundImage: `url(${currentImage})` }"
+          ></div>
+
+          <!-- Overlay con gradiente animado -->
+          <div class="slide-overlay"></div>
+
+          <!-- Partículas decorativas -->
+          <div class="particles">
+            <span class="particle" v-for="n in 6" :key="n"></span>
+          </div>
+
+          <!-- Contenido de la propiedad -->
+          <div class="slide-content">
+            <!-- Badge de destacado -->
+            <div class="featured-badge">
+              <font-awesome-icon :icon="['fas', 'star']" class="badge-icon" />
               <span>Propiedad Destacada</span>
+              <div class="badge-glow"></div>
             </div>
-            <h2 class="carousel-title">{{ currentProperty.title }}</h2>
-            <div class="carousel-details">
-              <span class="detail-item">
-                <span class="icon">📍</span>
-                {{ currentProperty.city }}
-              </span>
-              <span class="detail-item">
-                <span class="icon">💰</span>
-                {{ formatPrice(currentProperty.monthly_price) }}
-              </span>
-              <span class="detail-item" v-if="currentProperty.area_m2">
-                <span class="icon">📐</span>
-                {{ currentProperty.area_m2 }} m²
-              </span>
+
+            <!-- Información principal -->
+            <div class="property-main-info">
+              <h2 class="property-title">{{ currentProperty.title }}</h2>
+              
+              <!-- Características principales -->
+              <div class="property-features">
+                <div class="feature-chip" v-if="currentProperty.city">
+                  <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
+                  <span>{{ currentProperty.city }}</span>
+                </div>
+                <div class="feature-chip price-chip">
+                  <font-awesome-icon :icon="['fas', 'dollar-sign']" />
+                  <span>{{ formatPrice(currentProperty.monthly_price) }}</span>
+                </div>
+                <div class="feature-chip" v-if="currentProperty.area_m2">
+                  <font-awesome-icon :icon="['fas', 'ruler-combined']" />
+                  <span>{{ currentProperty.area_m2 }} m²</span>
+                </div>
+              </div>
+
+              <!-- Detalles adicionales -->
+              <div class="property-details" v-if="hasRoomDetails">
+                <div class="detail-item" v-if="currentProperty.num_bedrooms">
+                  <font-awesome-icon :icon="['fas', 'bed']" />
+                  <span>{{ currentProperty.num_bedrooms }} Hab.</span>
+                </div>
+                <div class="detail-item" v-if="currentProperty.num_bathrooms">
+                  <font-awesome-icon :icon="['fas', 'bath']" />
+                  <span>{{ currentProperty.num_bathrooms }} Baños</span>
+                </div>
+                <div class="detail-item" v-if="currentProperty.num_parking">
+                  <font-awesome-icon :icon="['fas', 'car']" />
+                  <span>{{ currentProperty.num_parking }} Parqueos</span>
+                </div>
+              </div>
+
+              <!-- Botón de acción -->
+              <button class="view-details-btn" @click.stop="goToProperty(currentProperty)">
+                <span>Ver Detalles</span>
+                <font-awesome-icon :icon="['fas', 'arrow-right']" class="btn-icon" />
+                <div class="btn-glow"></div>
+              </button>
+            </div>
+
+            <!-- Contador de propiedades -->
+            <div class="properties-counter">
+              <span class="counter-current">{{ currentIndex + 1 }}</span>
+              <span class="counter-separator">/</span>
+              <span class="counter-total">{{ carouselProperties.length }}</span>
             </div>
           </div>
 
-          <!-- Indicador de progreso -->
-          <div class="progress-bar">
+          <!-- Barra de progreso -->
+          <div class="progress-container">
             <div 
-              class="progress-fill" 
+              class="progress-bar" 
               :style="{ width: progressWidth + '%' }"
             ></div>
           </div>
         </div>
       </transition>
 
-      <!-- Botones de navegación -->
+      <!-- Controles de navegación -->
       <button 
-        class="carousel-btn prev-btn" 
+        class="nav-btn prev-btn" 
         @click.stop="prevSlide"
         @mouseenter="pauseAutoplay"
         @mouseleave="resumeAutoplay"
-        aria-label="Anterior"
         v-if="carouselProperties.length > 1"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <font-awesome-icon :icon="['fas', 'chevron-left']" />
       </button>
       
       <button 
-        class="carousel-btn next-btn" 
+        class="nav-btn next-btn" 
         @click.stop="nextSlide"
         @mouseenter="pauseAutoplay"
         @mouseleave="resumeAutoplay"
-        aria-label="Siguiente"
         v-if="carouselProperties.length > 1"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <font-awesome-icon :icon="['fas', 'chevron-right']" />
       </button>
 
-      <!-- Indicadores de puntos -->
-      <div class="carousel-dots" v-if="carouselProperties.length > 1">
+      <!-- Indicadores de navegación -->
+      <div class="nav-indicators" v-if="carouselProperties.length > 1">
         <button
           v-for="(property, index) in carouselProperties"
           :key="property.id"
-          class="dot"
+          class="indicator"
           :class="{ active: index === currentIndex }"
           @click.stop="goToSlide(index)"
           @mouseenter="pauseAutoplay"
           @mouseleave="resumeAutoplay"
-          :aria-label="`Ir a propiedad ${index + 1}`"
-        ></button>
-      </div>
-    </div>
-
-    <!-- Miniaturas -->
-    <div class="thumbnails-wrapper" v-if="carouselProperties.length > 1">
-      <div class="thumbnails-track" :style="{ transform: `translateX(-${thumbnailOffset}px)` }">
-        <div
-          v-for="(property, index) in carouselProperties"
-          :key="property.id"
-          class="thumbnail"
-          :class="{ active: index === currentIndex }"
-          @click="goToSlide(index)"
-          @mouseenter="pauseAutoplay"
-          @mouseleave="resumeAutoplay"
         >
-          <img :src="property.image_url || defaultImage" :alt="property.title" @error="onImgError" />
-          <div class="thumbnail-overlay">
-            <span class="thumbnail-number">{{ index + 1 }}</span>
-          </div>
-        </div>
+          <span class="indicator-line"></span>
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 
-const router = useRouter();
+const router = useRouter()
 
-// Props para recibir las propiedades desde el componente padre
 const props = defineProps({
   properties: {
     type: Array,
     default: () => []
-  },
-  loadingProperties: {
-    type: Boolean,
-    default: false
   }
-});
+})
 
-const DEFAULT_PROPERTY_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjE4IiBmaWxsPSIjNmM3NTdkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2VuIG5vIGRpc3BvbmlibGU8L3RleHQ+PC9zdmc+";
+const DEFAULT_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI2MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2Yzc1N2QiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZW4gbm8gZGlzcG9uaWJsZTwvdGV4dD48L3N2Zz4="
 
-const defaultImage = ref(DEFAULT_PROPERTY_IMAGE);
+// Refs
+const currentIndex = ref(0)
+const progressWidth = ref(0)
+const isPaused = ref(false)
 
-// Manejar error de imagen
-function onImgError(event) {
-  const img = event.target;
-  if (img && img.src !== DEFAULT_PROPERTY_IMAGE) {
-    img.src = DEFAULT_PROPERTY_IMAGE;
-    img.onerror = null;
+let autoplayInterval = null
+let progressInterval = null
+
+const defaultImage = ref(DEFAULT_IMAGE)
+
+// Computed
+const carouselProperties = computed(() => {
+  return props.properties.filter(p => p.image_url && p.image_url.trim() !== '')
+})
+
+const currentProperty = computed(() => {
+  if (carouselProperties.value.length === 0) return {}
+  return carouselProperties.value[currentIndex.value] || {}
+})
+
+const currentImage = computed(() => {
+  return currentProperty.value?.image_url || DEFAULT_IMAGE
+})
+
+const hasRoomDetails = computed(() => {
+  const prop = currentProperty.value
+  return prop.num_bedrooms || prop.num_bathrooms || prop.num_parking
+})
+
+// Methods
+const onImgError = (event) => {
+  const img = event.target
+  if (img && img.src !== DEFAULT_IMAGE) {
+    img.src = DEFAULT_IMAGE
+    img.onerror = null
   }
 }
 
-const currentIndex = ref(0);
-const autoplayInterval = ref(null);
-const progressWidth = ref(0);
-const progressInterval = ref(null);
-const thumbnailOffset = ref(0);
-const isPaused = ref(false);
-
-// Clave única para guardar el índice en sessionStorage
-const CAROUSEL_INDEX_KEY = 'carousel_current_index';
-
-// Filtrar propiedades que tengan imagen
-const carouselProperties = computed(() => {
-  return props.properties.filter(p => p.image_url && p.image_url.trim() !== '');
-});
-
-const currentProperty = computed(() => {
-  if (carouselProperties.value.length === 0) return {};
-  return carouselProperties.value[currentIndex.value] || {};
-});
-
-const currentImage = computed(() => {
-  if (carouselProperties.value.length === 0) return DEFAULT_PROPERTY_IMAGE;
-  return carouselProperties.value[currentIndex.value]?.image_url || DEFAULT_PROPERTY_IMAGE;
-});
-
-// Formatear precio
 const formatPrice = (price) => {
-  if (!price) return 'Consultar precio';
+  if (!price) return 'Consultar precio'
   return new Intl.NumberFormat('es-CO', {
     style: 'currency',
     currency: 'COP',
     minimumFractionDigits: 0
-  }).format(price);
-};
+  }).format(price)
+}
 
-// Navegación
+const truncateText = (text, maxLength) => {
+  if (!text) return ''
+  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
+}
+
 const nextSlide = () => {
-  if (carouselProperties.value.length === 0) return;
-  currentIndex.value = (currentIndex.value + 1) % carouselProperties.value.length;
-  saveCurrentIndex();
-  resetProgress();
-  updateThumbnailPosition();
-};
+  if (carouselProperties.value.length === 0) return
+  currentIndex.value = (currentIndex.value + 1) % carouselProperties.value.length
+  resetProgress()
+}
 
 const prevSlide = () => {
-  if (carouselProperties.value.length === 0) return;
+  if (carouselProperties.value.length === 0) return
   currentIndex.value = currentIndex.value === 0 
     ? carouselProperties.value.length - 1 
-    : currentIndex.value - 1;
-  saveCurrentIndex();
-  resetProgress();
-  updateThumbnailPosition();
-};
+    : currentIndex.value - 1
+  resetProgress()
+}
 
 const goToSlide = (index) => {
-  if (carouselProperties.value.length === 0) return;
-  currentIndex.value = index;
-  saveCurrentIndex();
-  resetProgress();
-  updateThumbnailPosition();
-};
+  if (carouselProperties.value.length === 0) return
+  currentIndex.value = index
+  resetProgress()
+}
 
-// Guardar índice actual en sessionStorage
-const saveCurrentIndex = () => {
-  sessionStorage.setItem(CAROUSEL_INDEX_KEY, currentIndex.value.toString());
-};
-
-// Restaurar índice guardado
-const restoreCurrentIndex = () => {
-  const savedIndex = sessionStorage.getItem(CAROUSEL_INDEX_KEY);
-  if (savedIndex !== null && carouselProperties.value.length > 0) {
-    const index = parseInt(savedIndex, 10);
-    if (index >= 0 && index < carouselProperties.value.length) {
-      currentIndex.value = index;
-      updateThumbnailPosition();
-    }
-  }
-};
-
-// Navegar a la propiedad
 const goToProperty = (property) => {
-  if (!property || !property.id) return;
-  router.push(`/properties/${property.id}`);
-};
+  if (!property || !property.id) return
+  router.push(`/properties/${property.id}`)
+}
 
-// Actualizar posición de miniaturas
-const updateThumbnailPosition = () => {
-  const thumbnailWidth = 120; // ancho + gap
-  const visibleThumbnails = 5;
-  const centerPosition = Math.floor(visibleThumbnails / 2);
-  
-  if (currentIndex.value >= centerPosition) {
-    thumbnailOffset.value = (currentIndex.value - centerPosition) * thumbnailWidth;
-  } else {
-    thumbnailOffset.value = 0;
-  }
-};
-
-// Barra de progreso
+// Progress bar
 const startProgress = () => {
-  progressWidth.value = 0;
-  const duration = 5000; // 5 segundos
-  const interval = 50;
-  const increment = (interval / duration) * 100;
+  progressWidth.value = 0
+  const duration = 10000
+  const interval = 50
+  const increment = (interval / duration) * 100
 
-  progressInterval.value = setInterval(() => {
-    progressWidth.value += increment;
-    if (progressWidth.value >= 100) {
-      clearInterval(progressInterval.value);
+  progressInterval = setInterval(() => {
+    if (!isPaused.value) {
+      progressWidth.value += increment
+      if (progressWidth.value >= 100) {
+        clearInterval(progressInterval)
+      }
     }
-  }, interval);
-};
+  }, interval)
+}
 
 const resetProgress = () => {
-  if (progressInterval.value) {
-    clearInterval(progressInterval.value);
+  if (progressInterval) {
+    clearInterval(progressInterval)
   }
-  startProgress();
-};
+  startProgress()
+}
 
 // Autoplay
 const startAutoplay = () => {
-  if (carouselProperties.value.length <= 1 || isPaused.value) return;
+  if (carouselProperties.value.length <= 1) return
   
-  stopAutoplay(); // Limpiar cualquier intervalo existente
+  stopAutoplay()
   
-  autoplayInterval.value = setInterval(() => {
+  autoplayInterval = setInterval(() => {
     if (!isPaused.value) {
-      nextSlide();
+      nextSlide()
     }
-  }, 5000);
-};
+  }, 10000)
+}
 
 const stopAutoplay = () => {
-  if (autoplayInterval.value) {
-    clearInterval(autoplayInterval.value);
-    autoplayInterval.value = null;
+  if (autoplayInterval) {
+    clearInterval(autoplayInterval)
+    autoplayInterval = null
   }
-};
+}
 
 const pauseAutoplay = () => {
-  isPaused.value = true;
-  stopAutoplay();
-  if (progressInterval.value) {
-    clearInterval(progressInterval.value);
-    progressInterval.value = null;
-  }
-};
+  isPaused.value = true
+}
 
 const resumeAutoplay = () => {
-  isPaused.value = false;
-  if (carouselProperties.value.length > 1) {
-    startAutoplay();
-    startProgress();
-  }
-};
+  isPaused.value = false
+}
 
-// Reiniciar cuando cambien las propiedades
+// Watchers
 watch(() => props.properties, () => {
-  stopAutoplay();
-  if (progressInterval.value) {
-    clearInterval(progressInterval.value);
-    progressInterval.value = null;
+  stopAutoplay()
+  if (progressInterval) {
+    clearInterval(progressInterval)
+    progressInterval = null
   }
   
-  // Restaurar el índice guardado
-  restoreCurrentIndex();
+  currentIndex.value = 0
   
   if (carouselProperties.value.length > 1) {
-    startAutoplay();
-    startProgress();
+    startAutoplay()
+    startProgress()
   }
-}, { deep: true });
+}, { deep: true })
 
 // Lifecycle
 onMounted(() => {
-  // Restaurar el índice al montar
-  restoreCurrentIndex();
-  
   if (carouselProperties.value.length > 1) {
-    startAutoplay();
-    startProgress();
+    startAutoplay()
+    startProgress()
   }
-});
+})
 
 onUnmounted(() => {
-  stopAutoplay();
-  if (progressInterval.value) {
-    clearInterval(progressInterval.value);
-    progressInterval.value = null;
+  stopAutoplay()
+  if (progressInterval) {
+    clearInterval(progressInterval)
+    progressInterval = null
   }
-});
+})
 </script>
 
 <style scoped>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* ==================== ANIMACIONES ==================== */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(180deg);
+  }
 }
 
-.carousel-container {
+@keyframes glow {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== ESTRUCTURA PRINCIPAL ==================== */
+.modern-carousel {
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: linear-gradient(135deg, #1a0e0a 0%, #2e1d17 50%, #3b2416 100%);
+  position: relative;
+  overflow: hidden;
 }
 
-.carousel-wrapper {
+.modern-carousel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url("https://i.pinimg.com/1200x/e2/d2/b7/e2d2b7877ffb88a68d6b72e5ea0bd965.jpg") center center / cover no-repeat;
+  opacity: 0.1;
+  filter: blur(8px);
+  z-index: 0;
+}
+
+/* ==================== SLIDE PRINCIPAL ==================== */
+.carousel-main {
   position: relative;
   width: 100%;
-  height: 600px;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  height: 85vh;
+  min-height: 600px;
+  max-height: 900px;
+  z-index: 1;
 }
 
 .carousel-slide {
   width: 100%;
   height: 100%;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.slide-background {
+  position: absolute;
+  inset: 0;
   background-size: cover;
   background-position: center;
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  cursor: pointer;
-  transition: transform 0.3s ease;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.carousel-slide:hover {
-  transform: scale(1.02);
+.carousel-slide:hover .slide-background {
+  transform: scale(1.05);
 }
 
-.carousel-overlay {
+.slide-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.8) 0%,
-    rgba(0, 0, 0, 0.4) 50%,
-    rgba(0, 0, 0, 0.1) 100%
+    135deg,
+    rgba(26, 14, 10, 0.95) 0%,
+    rgba(46, 29, 23, 0.85) 50%,
+    rgba(59, 36, 22, 0.75) 100%
   );
+  z-index: 1;
 }
 
-.carousel-info {
-  position: relative;
+/* ==================== PARTÍCULAS DECORATIVAS ==================== */
+.particles {
+  position: absolute;
+  inset: 0;
   z-index: 2;
-  padding: 60px;
-  color: white;
-  max-width: 800px;
+  pointer-events: none;
 }
 
-.property-badge {
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #da9c5f;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: float 15s infinite ease-in-out;
+  box-shadow: 0 0 10px #da9c5f;
+}
+
+.particle:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+.particle:nth-child(2) { top: 40%; left: 80%; animation-delay: 2s; }
+.particle:nth-child(3) { top: 60%; left: 30%; animation-delay: 4s; }
+.particle:nth-child(4) { top: 80%; left: 70%; animation-delay: 1s; }
+.particle:nth-child(5) { top: 30%; left: 50%; animation-delay: 3s; }
+.particle:nth-child(6) { top: 70%; left: 90%; animation-delay: 5s; }
+
+/* ==================== CONTENIDO DEL SLIDE ==================== */
+.slide-content {
+  position: relative;
+  z-index: 3;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 8%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.featured-badge {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  padding: 8px 16px;
-  border-radius: 20px;
+  gap: 10px;
+  background: linear-gradient(135deg, rgba(218, 156, 95, 0.3), rgba(200, 169, 126, 0.3));
+  backdrop-filter: blur(20px);
+  padding: 12px 24px;
+  border-radius: 50px;
+  border: 1px solid rgba(218, 156, 95, 0.5);
   font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-weight: 700;
+  color: #da9c5f;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 30px;
+  width: fit-content;
+  position: relative;
+  overflow: hidden;
+  animation: slideIn 0.6s ease 0.2s backwards;
+  box-shadow: 0 8px 25px rgba(218, 156, 95, 0.3);
 }
 
 .badge-icon {
   font-size: 16px;
+  animation: glow 2s infinite;
 }
 
-.carousel-title {
-  font-size: 48px;
-  font-weight: 700;
-  margin-bottom: 20px;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+.badge-glow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(218, 156, 95, 0.5), transparent);
+  animation: shimmer 3s infinite;
+}
+
+.property-main-info {
+  max-width: 800px;
+}
+
+.property-title {
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 800;
+  color: #f0e5db;
+  margin-bottom: 30px;
   line-height: 1.2;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  animation: slideIn 0.6s ease 0.3s backwards;
 }
 
-.carousel-details {
+.property-features {
   display: flex;
-  gap: 30px;
-  font-size: 18px;
+  gap: 16px;
   flex-wrap: wrap;
+  margin-bottom: 24px;
+  animation: slideIn 0.6s ease 0.4s backwards;
+}
+
+.feature-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  padding: 14px 22px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f0e5db;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.feature-chip:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.price-chip {
+  background: linear-gradient(135deg, rgba(218, 156, 95, 0.3), rgba(200, 169, 126, 0.3));
+  border-color: rgba(218, 156, 95, 0.5);
+  color: #da9c5f;
+}
+
+.property-details {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+  animation: slideIn 0.6s ease 0.5s backwards;
 }
 
 .detail-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 12px 20px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 15px;
+  font-weight: 500;
 }
 
-.icon {
-  font-size: 20px;
-}
-
-.carousel-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+.view-details-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #da9c5f, #b8791f);
   color: white;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(218, 156, 95, 0.4);
+  animation: slideIn 0.6s ease 0.6s backwards;
+}
+
+.view-details-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(218, 156, 95, 0.5);
+}
+
+.btn-icon {
+  transition: transform 0.3s ease;
+}
+
+.view-details-btn:hover .btn-icon {
+  transform: translateX(5px);
+}
+
+.btn-glow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+.properties-counter {
+  position: absolute;
+  bottom: 100px;
+  right: 8%;
   display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  padding: 16px 24px;
+  border-radius: 50px;
+  border: 1px solid rgba(218, 156, 95, 0.3);
+  font-size: 18px;
+  font-weight: 700;
+  color: #f0e5db;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.counter-current {
+  font-size: 28px;
+  color: #da9c5f;
+}
+
+.counter-separator {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.counter-total {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ==================== BARRA DE PROGRESO ==================== */
+.progress-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
   z-index: 10;
 }
 
-.carousel-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #da9c5f, #b8791f);
+  transition: width 0.05s linear;
+  box-shadow: 0 0 10px rgba(218, 156, 95, 0.5);
+}
+
+/* ==================== CONTROLES DE NAVEGACIÓN ==================== */
+.nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(218, 156, 95, 0.3);
+  border-radius: 50%;
+  color: #da9c5f;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-btn:hover {
+  background: rgba(218, 156, 95, 0.3);
   transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 8px 25px rgba(218, 156, 95, 0.4);
 }
 
 .prev-btn {
-  left: 30px;
+  left: 40px;
 }
 
 .next-btn {
-  right: 30px;
+  right: 40px;
 }
 
-.carousel-dots {
+.nav-indicators {
   position: absolute;
   bottom: 30px;
   left: 50%;
@@ -487,148 +684,342 @@ onUnmounted(() => {
   z-index: 10;
 }
 
-.dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.4);
-  border: 2px solid rgba(255, 255, 255, 0.6);
+.indicator {
+  width: 40px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  border-radius: 2px;
   cursor: pointer;
   transition: all 0.3s ease;
   padding: 0;
-}
-
-.dot.active {
-  background: white;
-  width: 32px;
-  border-radius: 6px;
-}
-
-.dot:hover {
-  background: rgba(255, 255, 255, 0.7);
-}
-
-.progress-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.2);
-  z-index: 5;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-  transition: width 0.05s linear;
-}
-
-/* Miniaturas */
-.thumbnails-wrapper {
-  margin-top: 20px;
-  overflow: hidden;
-  padding: 10px 0;
-}
-
-.thumbnails-track {
-  display: flex;
-  gap: 16px;
-  transition: transform 0.5s ease;
-}
-
-.thumbnail {
-  min-width: 104px;
-  height: 70px;
-  border-radius: 12px;
-  overflow: hidden;
-  cursor: pointer;
   position: relative;
-  border: 3px solid transparent;
-  transition: all 0.3s ease;
+  overflow: hidden;
 }
 
-.thumbnail:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-}
-
-.thumbnail.active {
-  border-color: #667eea;
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
-}
-
-.thumbnail img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.indicator-line {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #da9c5f, #b8791f);
+  transform: scaleX(0);
+  transform-origin: left;
   transition: transform 0.3s ease;
 }
 
-.thumbnail:hover img {
+.indicator.active .indicator-line {
+  transform: scaleX(1);
+}
+
+.indicator:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* ==================== SECCIÓN DE MINIATURAS ==================== */
+.thumbnails-section {
+  position: relative;
+  padding: 60px 8%;
+  background: linear-gradient(180deg, rgba(26, 14, 10, 0.5), rgba(26, 14, 10, 0.8));
+  border-top: 1px solid rgba(218, 156, 95, 0.2);
+}
+
+.thumbnails-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #f0e5db;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.thumbnails-title svg {
+  color: #da9c5f;
+  font-size: 28px;
+}
+
+.thumbnails-container {
+  position: relative;
+}
+
+.thumbnails-wrapper {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 10px 0;
+  scrollbar-width: thin;
+  scrollbar-color: #da9c5f rgba(255, 255, 255, 0.1);
+}
+
+.thumbnails-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.thumbnails-wrapper::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.thumbnails-wrapper::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #da9c5f, #b8791f);
+  border-radius: 4px;
+}
+
+.thumbnail-card {
+  flex: 0 0 280px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid rgba(218, 156, 95, 0.2);
+  position: relative;
+}
+
+.thumbnail-card:hover {
+  transform: translateY(-8px);
+  border-color: #da9c5f;
+  box-shadow: 0 15px 40px rgba(218, 156, 95, 0.3);
+}
+
+.thumbnail-card.active {
+  border-color: #da9c5f;
+  box-shadow: 0 0 0 4px rgba(218, 156, 95, 0.2), 0 15px 40px rgba(218, 156, 95, 0.4);
+}
+
+.thumbnail-image {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
+}
+
+.thumbnail-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.thumbnail-card:hover .thumbnail-image img {
   transform: scale(1.1);
 }
 
 .thumbnail-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6));
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   transition: opacity 0.3s ease;
+  color: white;
+  font-size: 24px;
 }
 
-.thumbnail:hover .thumbnail-overlay,
-.thumbnail.active .thumbnail-overlay {
+.thumbnail-card:hover .thumbnail-overlay {
   opacity: 1;
 }
 
-.thumbnail-number {
-  color: white;
+.thumbnail-info {
+  padding: 16px;
+}
+
+.thumbnail-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #f0e5db;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.thumbnail-price {
+  font-size: 16px;
   font-weight: 700;
+  color: #da9c5f;
+}
+
+.thumbnail-index {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #da9c5f, #b8791f);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.thumbnail-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  background: rgba(218, 156, 95, 0.3);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(218, 156, 95, 0.5);
+  border-radius: 50%;
+  color: #da9c5f;
   font-size: 18px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Animaciones */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s ease;
+.thumbnail-nav-btn:hover {
+  background: rgba(218, 156, 95, 0.5);
+  transform: translateY(-50%) scale(1.1);
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.thumbnail-nav-btn.prev {
+  left: -20px;
+}
+
+.thumbnail-nav-btn.next {
+  right: -20px;
+}
+
+/* ==================== TRANSICIONES ==================== */
+.slide-fade-enter-active {
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-fade-enter-from {
   opacity: 0;
+  transform: translateX(50px);
 }
 
-/* Responsive */
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateX(-50px);
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1200px) {
+  .slide-content {
+    padding: 0 5%;
+  }
+
+  .properties-counter {
+    right: 5%;
+  }
+}
+
 @media (max-width: 768px) {
-  .carousel-wrapper {
-    height: 400px;
-    border-radius: 16px;
+  .carousel-main {
+    height: 70vh;
+    min-height: 500px;
   }
 
-  .carousel-info {
-    padding: 30px;
+  .slide-content {
+    padding: 0 6%;
   }
 
-  .carousel-title {
+  .property-title {
     font-size: 28px;
   }
 
-  .carousel-details {
-    flex-direction: column;
+  .featured-badge {
+    font-size: 12px;
+    padding: 10px 20px;
+  }
+
+  .property-features {
     gap: 12px;
   }
 
-  .carousel-btn {
+  .feature-chip {
+    padding: 12px 18px;
+    font-size: 14px;
+  }
+
+  .property-details {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .view-details-btn {
+    padding: 14px 28px;
+    font-size: 14px;
+  }
+
+  .properties-counter {
+    bottom: 80px;
+    right: 6%;
+    padding: 12px 20px;
+    font-size: 16px;
+  }
+
+  .counter-current {
+    font-size: 24px;
+  }
+
+  .nav-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 18px;
+  }
+
+  .prev-btn {
+    left: 20px;
+  }
+
+  .next-btn {
+    right: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-main {
+    height: 60vh;
+    min-height: 450px;
+  }
+
+  .property-title {
+    font-size: 24px;
+  }
+
+  .property-features {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .feature-chip {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .property-details {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .properties-counter {
+    position: static;
+    margin-top: 20px;
+    width: fit-content;
+    padding: 10px 18px;
+  }
+
+  .nav-btn {
     width: 44px;
     height: 44px;
+    font-size: 16px;
   }
 
   .prev-btn {
@@ -639,9 +1030,13 @@ onUnmounted(() => {
     right: 15px;
   }
 
-  .thumbnail {
-    min-width: 80px;
-    height: 55px;
+  .nav-indicators {
+    bottom: 20px;
+    gap: 8px;
+  }
+
+  .indicator {
+    width: 30px;
   }
 }
 </style>

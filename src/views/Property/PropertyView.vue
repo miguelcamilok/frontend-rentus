@@ -1,7 +1,7 @@
 <template>
     <div class="properties-view">
         <!-- Hero Banner con Parallax Effect -->
-        <section class="hero-banner">
+        <!-- <section class="hero-banner">
             <div class="hero-particles">
                 <div class="particle" v-for="i in 20" :key="i" :style="{
                     left: Math.random() * 100 + '%',
@@ -19,7 +19,6 @@
                     Explora nuestra colección exclusiva de propiedades diseñadas para tu estilo de vida
                 </p>
 
-                <!-- Quick Stats -->
                 <div class="quick-stats">
                     <div class="stat-box">
                         <div class="stat-inline-icon">
@@ -51,35 +50,74 @@
                 </div>
             </div>
 
-            <!-- Scroll Indicator -->
             <div class="scroll-indicator">
                 <div class="scroll-mouse">
                     <div class="scroll-wheel"></div>
                 </div>
                 <span class="scroll-text">Explorar</span>
             </div>
-        </section>
-        <section class="search-section">
-            <div class="search-wrapper">
-                <p class="search-title">Encuentra Tu Propiedad Ideal</p>
-                <div class="search-bar">
-                    <!-- Search Input -->
-                    <div class="search-input">
-                        <input v-model="filters.search" type="text"
-                            placeholder="Buscar por título, descripción o ubicación..." />
-                        <span class="search-icon">🔍</span>
+        </section> -->
+        
+
+        <PropertyCarousel :properties="properties" :loading-properties="loadingProperties" />
+        
+
+
+        <section class="modern-search-section" data-aos="fade-up">
+            <div class="search-container">
+                <div class="search-header">
+                    <font-awesome-icon :icon="['fas', 'home']" class="search-header-icon" />
+                    <h3>Encuentra tu próximo hogar</h3>
+                </div>
+
+                <div class="search-grid">
+                    <!-- En la sección de búsqueda, cambia: -->
+
+                    <!-- Campo de búsqueda general (reemplaza el campo de título) -->
+                    <div class="search-field">
+                        <label class="search-label">
+                            <font-awesome-icon :icon="['fas', 'search']" />
+                            Buscar
+                        </label>
+                        <input type="text" placeholder="Buscar por título, descripción o ubicación..."
+                            v-model="filters.search" @input="applyFilters" />
                     </div>
 
-                    <!-- City Filter -->
-                    <div class="search-input">
-                        <input v-model="filters.city" type="text" placeholder="Ciudad" />
-                        <span class="search-icon">📍</span>
+                    <!-- Campo de ubicación -->
+                    <div class="search-field">
+                        <label class="search-label">
+                            <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
+                            Ubicación
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="text" placeholder="¿Dónde quieres vivir?" v-model="filters.city"
+                                @focus="filters.city.length > 2 ? showSuggestions = true : null" @blur="hideSuggestions"
+                                @input="applyFilters" />
+
+                            <!-- Sugerencias de ubicación -->
+                            <div v-if="showSuggestions && locationSuggestions.length > 0" class="suggestions-dropdown">
+                                <div v-for="suggestion in locationSuggestions" :key="suggestion.place_id"
+                                    class="suggestion-item" @mousedown="selectLocationSuggestion(suggestion)">
+                                    <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="suggestion-icon" />
+                                    <span class="suggestion-text">{{ suggestion.description }}</span>
+                                </div>
+                            </div>
+
+                            <div v-if="loadingSuggestions" class="suggestions-loading">
+                                <div class="mini-loader"></div>
+                                Buscando ubicaciones...
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Type Filter -->
-                    <div class="search-input">
-                        <select v-model="filters.type">
-                            <option value="">Tipo de Propiedad</option>
+                    <!-- Campo de tipo -->
+                    <div class="search-field">
+                        <label class="search-label">
+                            <font-awesome-icon :icon="['fas', 'home']" />
+                            Tipo de Propiedad
+                        </label>
+                        <select v-model="filters.type" @change="applyFilters">
+                            <option value="">Todos los tipos</option>
                             <option value="casa">Casa</option>
                             <option value="apartamento">Apartamento</option>
                             <option value="local">Local Comercial</option>
@@ -87,45 +125,61 @@
                         </select>
                     </div>
 
-                    <!-- Price Filter -->
-                    <div class="search-input">
-                        <input v-model.number="filters.maxPrice" type="number" min="0"
-                            placeholder="Presupuesto máximo" />
-                        <span class="search-icon">💰</span>
+                    <!-- Campo de precio -->
+                    <div class="search-field">
+                        <label class="search-label">
+                            <font-awesome-icon icon="dollar-sign" class="chip-icon" />
+                            Presupuesto Máximo
+                        </label>
+                        <input type="number" placeholder="Ej: 2,000,000" v-model.number="filters.maxPrice"
+                            @input="applyFilters" />
                     </div>
 
-                    <!-- Search Button -->
-                    <button @click="applyFilters" class="search-btn">
-                        <span class="btn-text">Buscar Propiedades</span>
-                        <span class="btn-icon">🔍</span>
-                    </button>
+                    <!-- Botón de búsqueda -->
+                    <div class="search-field">
+                        <button class="search-btn-modern" @click="applyFilters">
+                            <span>Buscar</span>
+                            <font-awesome-icon :icon="['fas', 'arrow-right']" class="btn-arrow" />
+                        </button>
+                    </div>
                 </div>
-
                 <!-- Active Filters Tags -->
                 <transition name="slide-fade">
                     <div v-if="hasActiveFilters" class="active-filters-bar">
                         <span class="filters-label">Filtros Activos:</span>
                         <div class="filters-chips">
                             <div v-if="filters.search" class="filter-chip">
-                                <span class="chip-icon">🔍</span>
+                                <font-awesome-icon icon="search" class="chip-icon" />
                                 <span class="chip-value">{{ filters.search }}</span>
-                                <button @click="filters.search = ''" class="chip-close">✕</button>
+                                <button @click="filters.search = ''" class="chip-close">
+                                    <font-awesome-icon icon="times" />
+                                </button>
                             </div>
+
                             <div v-if="filters.city" class="filter-chip">
-                                <span class="chip-icon">📍</span>
+                                <font-awesome-icon icon="map-marker-alt" class="chip-icon" />
                                 <span class="chip-value">{{ filters.city }}</span>
-                                <button @click="filters.city = ''" class="chip-close">✕</button>
+                                <button @click="filters.city = ''" class="chip-close">
+                                    <font-awesome-icon icon="times" />
+                                </button>
                             </div>
+
                             <div v-if="filters.type" class="filter-chip">
-                                <span class="chip-icon">🏠</span>
+                                <font-awesome-icon icon="home" class="chip-icon" />
                                 <span class="chip-value">{{ filters.type }}</span>
-                                <button @click="filters.type = ''" class="chip-close">✕</button>
+                                <button @click="filters.type = ''" class="chip-close">
+                                    <font-awesome-icon icon="times" />
+                                </button>
                             </div>
+
                             <div v-if="filters.maxPrice" class="filter-chip">
-                                <span class="chip-icon">💰</span>
+                                <font-awesome-icon icon="dollar-sign" class="chip-icon" />
                                 <span class="chip-value">{{ formatPrice(filters.maxPrice) }}</span>
-                                <button @click="filters.maxPrice = null" class="chip-close">✕</button>
+                                <button @click="filters.maxPrice = null" class="chip-close">
+                                    <font-awesome-icon icon="times" />
+                                </button>
                             </div>
+
                         </div>
                         <button @click="clearFilters" class="btn-clear-all-inline">
                             <span class="icon">↻</span>
@@ -134,7 +188,6 @@
                     </div>
                 </transition>
             </div>
-
         </section>
 
 
@@ -301,6 +354,7 @@
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import api from "../../services/api";
+import PropertyCarousel from "./PropertyCarousel.vue";
 
 const router = useRouter();
 
@@ -401,14 +455,14 @@ const detectType = (title) => {
 };
 
 const getTypeIcon = (title) => {
-  const t = title.toLowerCase();
+    const t = title.toLowerCase();
 
-  if (t.includes("casa")) return "home";
-  if (t.includes("apartamento") || t.includes("apto")) return "building";
-  if (t.includes("local")) return "store";
-  if (t.includes("finca")) return "tree";
+    if (t.includes("casa")) return "home";
+    if (t.includes("apartamento") || t.includes("apto")) return "building";
+    if (t.includes("local")) return "store";
+    if (t.includes("finca")) return "tree";
 
-  return "home";
+    return "home";
 };
 
 

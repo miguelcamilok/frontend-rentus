@@ -810,6 +810,7 @@
     font-size: 1rem;
 }
 
+/* ============= BUSCADOR MODERNO ============= */
 .modern-search-section {
   margin-top: -80px;
   padding: 0 7% 80px;
@@ -818,7 +819,7 @@
 }
 
 .search-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   background: white;
   border-radius: 24px;
@@ -834,6 +835,11 @@
   margin-bottom: 32px;
 }
 
+.search-header-icon {
+  font-size: 1.8rem;
+  color: #3b251d;
+}
+
 .search-header h3 {
   font-size: 1.8rem;
   font-weight: 800;
@@ -843,7 +849,7 @@
 
 .search-grid {
   display: grid;
-  grid-template-columns: 2fr 1.2fr 1.2fr auto;
+  grid-template-columns: 2fr 1.2fr 1.2fr 1fr auto;
   gap: 20px;
   align-items: end;
 }
@@ -952,7 +958,7 @@
 }
 
 .suggestion-icon {
-  color: #3b251d;
+  color: #4D2F24;
   font-size: 0.9rem;
 }
 
