@@ -680,13 +680,13 @@
 }
 
 .btn-login {
-  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  background: linear-gradient(45deg, #da9c5f, #b8791f);
   color: white;
 }
 
 .btn-login:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 8px 25px rgba(218, 156, 95, 0.3);
 }
 
 .btn-secondary {
