@@ -28,7 +28,7 @@
           :class="{ active: isActive('/') }"
           @click="closeMobileMenu"
         >
-          <span class="nav-icon">🏠</span>
+          <font-awesome-icon icon="home" class="nav-icon"/>
           <span class="nav-text">Inicio</span>
         </router-link>
 
@@ -39,7 +39,7 @@
           :class="{ active: isActive('/propiedades') }"
           @click="closeMobileMenu"
         >
-          <span class="nav-icon">🏢</span>
+          <font-awesome-icon icon="building" class="nav-icon"/>
           <span class="nav-text">Propiedades</span>
         </router-link>
 
@@ -50,7 +50,7 @@
           :class="{ active: isActive('/sobre-nosotros') }"
           @click="closeMobileMenu"
         >
-          <span class="nav-icon">👥</span>
+          <font-awesome-icon icon="people-group" class="nav-icon"/>
           <span class="nav-text">Nosotros</span>
         </router-link>
       </div>
@@ -95,10 +95,12 @@
         </svg>
       </div>
 
-      <!-- Dropdown Menu -->
+      <!-- Dropdown Menu ULTRA MODERNO -->
       <transition name="dropdown-fade">
         <div v-if="showDropdown" class="user-dropdown-menu" @click.stop>
+          <!-- Header con efecto glassmorphism -->
           <div class="dropdown-header">
+            <div class="header-background"></div>
             <button 
               class="dropdown-close-btn" 
               @click="closeDropdown"
@@ -109,10 +111,13 @@
               </svg>
             </button>
             
-            <div class="dropdown-avatar">
-              <img v-if="profilePhoto" :src="profilePhoto" alt="Usuario" />
-              <img v-else src="/img/default.webp" alt="Usuario" />
+            <div class="dropdown-avatar-wrapper">
+              <div class="avatar-glow"></div>
+              <img v-if="profilePhoto" :src="profilePhoto" alt="Usuario" class="dropdown-avatar" />
+              <img v-else src="/img/default.webp" alt="Usuario" class="dropdown-avatar" />
+              <div class="avatar-border"></div>
             </div>
+            
             <div class="dropdown-user-info">
               <div class="dropdown-name">{{ fullName }}</div>
               <div class="dropdown-email">{{ userEmail }}</div>
@@ -121,54 +126,145 @@
           
           <div class="dropdown-divider"></div>
           
+          <!-- Items con animaciones stagger -->
           <div class="dropdown-items">
-            <div @click="goPerfil" class="dropdown-item">
-              <div class="item-icon">👤</div>
+            <!-- Mi Perfil -->
+            <div 
+              @click="goPerfil"
+              class="dropdown-item"
+              style="animation-delay: 0s"
+            >
+              <div class="item-icon-wrapper">
+                <font-awesome-icon icon="user" class="item-icon" />
+                <div class="icon-glow"></div>
+              </div>
               <div class="item-text">Mi Perfil</div>
+              <font-awesome-icon icon="chevron-right" class="item-arrow" />
             </div>
             
-            <div @click="openNotificaciones" class="dropdown-item">
-              <div class="item-icon">🔔</div>
+            <!-- Notificaciones -->
+            <div 
+              @click="openNotificaciones"
+              class="dropdown-item"
+              style="animation-delay: 0.05s"
+            >
+              <div class="item-icon-wrapper">
+                <font-awesome-icon icon="bell" class="item-icon" />
+                <div class="icon-glow"></div>
+              </div>
               <div class="item-text">Notificaciones</div>
-              <span v-if="unreadCount > 0" class="notification-badge">{{ unreadCount }}</span>
+              <span v-if="unreadCount > 0" class="notification-badge">
+                {{ unreadCount }}
+              </span>
+              <font-awesome-icon icon="chevron-right" class="item-arrow" />
             </div>
             
-            <div @click="goContratos" class="dropdown-item">
-              <div class="item-icon">📄</div>
+            <!-- Contratos -->
+            <div 
+              @click="goContratos"
+              class="dropdown-item"
+              style="animation-delay: 0.1s"
+            >
+              <div class="item-icon-wrapper">
+                <font-awesome-icon icon="file-alt" class="item-icon" />
+                <div class="icon-glow"></div>
+              </div>
               <div class="item-text">Contratos</div>
+              <font-awesome-icon icon="chevron-right" class="item-arrow" />
             </div>
             
-            <div @click="goPagos" class="dropdown-item">
-              <div class="item-icon">💳</div>
+            <!-- Pagos -->
+            <div 
+              @click="goPagos"
+              class="dropdown-item"
+              style="animation-delay: 0.15s"
+            >
+              <div class="item-icon-wrapper">
+                <font-awesome-icon icon="dollar-sign" class="item-icon" />
+                <div class="icon-glow"></div>
+              </div>
               <div class="item-text">Pagos</div>
+              <font-awesome-icon icon="chevron-right" class="item-arrow" />
             </div>
             
-            <div class="dropdown-section-divider">Solicitudes</div>
+            <!-- Sección Solicitudes -->
+            <div class="dropdown-section-divider" style="animation-delay: 0.2s">
+              <span class="divider-text">Solicitudes</span>
+              <div class="divider-line"></div>
+            </div>
             
-            <div @click="openMaintenanceModal" class="dropdown-item">
-              <div class="item-icon">🔧</div>
+            <!-- Mantenimiento -->
+            <div 
+              @click="openMaintenanceModal"
+              class="dropdown-item"
+              style="animation-delay: 0.25s"
+            >
+              <div class="item-icon-wrapper">
+                <font-awesome-icon icon="wrench" class="item-icon" />
+                <div class="icon-glow"></div>
+              </div>
               <div class="item-text">Mantenimiento</div>
+              <font-awesome-icon icon="chevron-right" class="item-arrow" />
             </div>
             
-            <div @click="openSolicitudesModal" class="dropdown-item">
-              <div class="item-icon">📋</div>
+            <!-- Solicitudes (Dueño) -->
+            <div 
+              @click="openSolicitudesModal"
+              class="dropdown-item"
+              style="animation-delay: 0.3s"
+            >
+              <div class="item-icon-wrapper">
+                <font-awesome-icon icon="clipboard-list" class="item-icon" />
+                <div class="icon-glow"></div>
+              </div>
               <div class="item-text">Solicitudes (Dueño)</div>
+              <font-awesome-icon icon="chevron-right" class="item-arrow" />
             </div>
             
-            <div @click="openMyRequestsModalFn" class="dropdown-item">
-              <div class="item-icon">📅</div>
+            <!-- Mis Solicitudes -->
+            <div 
+              @click="openMyRequestsModalFn"
+              class="dropdown-item"
+              style="animation-delay: 0.35s"
+            >
+              <div class="item-icon-wrapper">
+                <font-awesome-icon icon="calendar-check" class="item-icon" />
+                <div class="icon-glow"></div>
+              </div>
               <div class="item-text">Mis Solicitudes</div>
+              <font-awesome-icon icon="chevron-right" class="item-arrow" />
             </div>
             
-            <div class="dropdown-section-divider">Configuración</div>
+            <!-- Sección Configuración -->
+            <div class="dropdown-section-divider" style="animation-delay: 0.4s">
+              <span class="divider-text">Configuración</span>
+              <div class="divider-line"></div>
+            </div>
             
-            <div @click="goAjustes" class="dropdown-item">
-              <div class="item-icon">⚙️</div>
+            <!-- Ajustes -->
+            <div 
+              @click="goAjustes"
+              class="dropdown-item"
+              style="animation-delay: 0.45s"
+            >
+              <div class="item-icon-wrapper">
+                <font-awesome-icon icon="cog" class="item-icon" />
+                <div class="icon-glow"></div>
+              </div>
               <div class="item-text">Ajustes</div>
+              <font-awesome-icon icon="chevron-right" class="item-arrow" />
             </div>
             
-            <div @click="handleLogout" class="dropdown-item logout-item">
-              <div class="item-icon">🚪</div>
+            <!-- Cerrar Sesión -->
+            <div 
+              @click="handleLogout"
+              class="dropdown-item logout-item"
+              style="animation-delay: 0.5s"
+            >
+              <div class="item-icon-wrapper">
+                <font-awesome-icon icon="sign-out-alt" class="item-icon" />
+                <div class="icon-glow"></div>
+              </div>
               <div class="item-text">Cerrar Sesión</div>
             </div>
           </div>
@@ -209,8 +305,27 @@
     :open="showMyRequestsModal" 
     @close="showMyRequestsModal = false" 
   />
-</template>
 
+  <!-- Alerta personalizada -->
+  <transition name="alert-slide">
+    <div v-if="alert.show" class="custom-alert" :class="`alert-${alert.type}`">
+      <div class="alert-icon">
+        <font-awesome-icon 
+          :icon="alert.type === 'success' ? 'check-circle' : 
+                 alert.type === 'error' ? 'times-circle' : 
+                 'info-circle'" 
+        />
+      </div>
+      <div class="alert-content">
+        <div class="alert-title">{{ alert.title }}</div>
+        <div class="alert-message">{{ alert.message }}</div>
+      </div>
+      <button @click="closeAlert" class="alert-close">
+        <font-awesome-icon icon="times" />
+      </button>
+    </div>
+  </transition>
+</template>
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch } from "vue";
@@ -244,56 +359,75 @@ const showNotificaciontModal = ref(false);
 const showMyRequestsModal = ref(false);
 const unreadCount = ref(0);
 
+// Sistema de alertas
+interface Alert {
+  show: boolean;
+  type: 'success' | 'error' | 'info';
+  title: string;
+  message: string;
+}
+
+const alert = ref<Alert>({
+  show: false,
+  type: 'success',
+  title: '',
+  message: ''
+});
+
+let alertTimeout: number | undefined;
+
+const showAlert = (type: Alert['type'], title: string, message: string) => {
+  alert.value = { show: true, type, title, message };
+  
+  if (alertTimeout) clearTimeout(alertTimeout);
+  alertTimeout = window.setTimeout(() => {
+    closeAlert();
+  }, 5000);
+};
+
+const closeAlert = () => {
+  alert.value.show = false;
+  if (alertTimeout) clearTimeout(alertTimeout);
+};
+
 const isActive = (path: string) => {
   return route.path === path;
 };
 
 // ==================== Funciones de autenticación ====================
 
-/**
- * Verificar y cargar datos del usuario
- */
 const checkAuthAndLoadUser = async () => {
   try {
-    // Verificar si está autenticado
     if (!authService.isAuthenticated()) {
       isLoggedIn.value = false;
       currentUser.value = null;
       return;
     }
 
-    // Obtener usuario del storage primero (más rápido)
     const storedUser = authService.getUser();
     if (storedUser) {
       updateUserData(storedUser);
       isLoggedIn.value = true;
     }
 
-    // Luego verificar con el servidor
     const user = await authService.getMe();
     updateUserData(user);
     currentUser.value = user;
     isLoggedIn.value = true;
 
-    // Cargar notificaciones si está logueado
     await loadUnreadCount();
 
   } catch (error) {
     console.error("Error verificando autenticación:", error);
-    // Si falla, limpiar todo
     await handleLogout();
   }
 };
 
-/**
- * Actualizar datos del usuario en la UI
- */
 const updateUserData = (user: User) => {
   fullName.value = user.name || "Usuario";
   firstName.value = fullName.value.split(" ")[0];
   userEmail.value = user.email || "";
 
-  // Truncar nombre si es muy largo
   if (firstName.value.length > 10) {
     firstName.value = firstName.value.slice(0, 10) + "...";
   }
@@ -301,17 +435,14 @@ const updateUserData = (user: User) => {
   profilePhoto.value = user.photo || "";
 };
 
-/**
- * Manejar cierre de sesión
- */
 const handleLogout = async () => {
   try {
     await authService.logout();
-    console.log('✅ Sesión cerrada exitosamente');
+    showAlert('success', '¡Hasta pronto!', 'Sesión cerrada exitosamente');
   } catch (error) {
     console.error("Error al cerrar sesión:", error);
+    showAlert('error', 'Error', 'No se pudo cerrar la sesión correctamente');
   } finally {
-    // Limpiar estado local
     isLoggedIn.value = false;
     currentUser.value = null;
     fullName.value = "Usuario";
@@ -320,11 +451,9 @@ const handleLogout = async () => {
     profilePhoto.value = "";
     showDropdown.value = false;
     
-    // Redirigir a login
     router.push("/login");
   }
 };
-
 
 // ==================== Funciones de navegación ====================
 
@@ -367,7 +496,7 @@ const goAjustes = () => {
 const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value;
   if (showMobileMenu.value) {
-    showDropdown.value = false; // Cerrar dropdown al abrir menú móvil
+    showDropdown.value = false;
   }
 };
 
@@ -378,8 +507,7 @@ const closeMobileMenu = () => {
 const toggleUserDropdown = () => {
   showDropdown.value = !showDropdown.value;
   if (showDropdown.value) {
-    showMobileMenu.value = false; // Cerrar menú móvil al abrir dropdown
-    // Prevenir scroll en mobile
+    showMobileMenu.value = false;
     if (window.innerWidth <= 768) {
       document.body.classList.add('dropdown-open');
     }
@@ -402,7 +530,7 @@ const openMaintenanceModal = () => {
 
 const handleMaintenanceSubmitted = (data: any) => {
   console.log('Solicitud de mantenimiento enviada:', data);
-  // Aquí puedes agregar lógica adicional
+  showAlert('success', '¡Solicitud enviada!', 'Tu solicitud de mantenimiento ha sido registrada');
 };
 
 const openSolicitudesModal = () => {
@@ -422,9 +550,6 @@ const openNotificaciones = () => {
 
 // ==================== Funciones de notificaciones ====================
 
-/**
- * Cargar contador de notificaciones no leídas
- */
 const loadUnreadCount = async () => {
   try {
     if (!isLoggedIn.value) return;
@@ -436,13 +561,9 @@ const loadUnreadCount = async () => {
   }
 };
 
-/**
- * Manejar actualización de foto de perfil
- */
 const handlePhotoUpdate = (newPhoto: string) => {
   profilePhoto.value = newPhoto;
 
-  // Actualizar en el storage
   if (currentUser.value) {
     currentUser.value.photo = newPhoto;
     const isRemembered = !!localStorage.getItem("auth_token");
@@ -453,16 +574,12 @@ const handlePhotoUpdate = (newPhoto: string) => {
 
 // ==================== Event handlers ====================
 
-/**
- * Cerrar dropdown/menú al hacer clic fuera
- */
 const handleClickOutside = (event: MouseEvent) => {
   const userMenu = document.getElementById("userToggle");
   const dropdown = document.querySelector(".user-dropdown-menu");
   const hamburger = document.querySelector(".hamburger-btn");
   const mobileNav = document.querySelector(".navigation-section");
 
-  // Cerrar dropdown de usuario
   if (
     userMenu && 
     dropdown && 
@@ -473,7 +590,6 @@ const handleClickOutside = (event: MouseEvent) => {
     closeDropdown();
   }
 
-  // Cerrar menú móvil
   if (
     hamburger &&
     mobileNav &&
@@ -487,11 +603,7 @@ const handleClickOutside = (event: MouseEvent) => {
 
 // ==================== Watchers ====================
 
-/**
- * Observar cambios en la ruta para recargar datos si es necesario
- */
 watch(() => route.path, async () => {
-  // Verificar autenticación al cambiar de ruta
   if (authService.isAuthenticated() && !isLoggedIn.value) {
     await checkAuthAndLoadUser();
   }
@@ -506,7 +618,6 @@ onMounted(async () => {
   document.addEventListener("click", handleClickOutside);
   eventBus.on(EVENTS.PROFILE_PHOTO_UPDATED, handlePhotoUpdate);
 
-  // Inicializar intervalo
   notificationInterval = window.setInterval(() => {
     if (isLoggedIn.value) {
       loadUnreadCount();

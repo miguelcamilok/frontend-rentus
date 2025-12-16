@@ -8,7 +8,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 import { faFacebookF, faInstagram, faTwitter, faLinkedinIn } from '@fortawesome/free-brands-svg-icons'
-import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons'
+import { faBell, faClipboardList, faCog, faHeart as faHeartSolid, faLock, faPalette, faPeopleGroup, faSignOutAlt, faUser, faWrench } from '@fortawesome/free-solid-svg-icons'
 import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons'
 
 import { 
@@ -30,7 +30,8 @@ library.add(
   faFacebookF, faInstagram, faTwitter, faLinkedinIn, faDownload, faEye, faTimesCircle,
   faBuilding, faStore, faTree, faSearch, faDollarSign, faChevronLeft, faChevronRight, 
   faSpinner, faImages, faListCheck, faFileAlt, faMap, faCalendarCheck, faShareAlt,
-  faClock, faHashtag, faShieldAlt,   faHeartSolid,faHeartRegular
+  faClock, faHashtag, faShieldAlt,   faHeartSolid,faHeartRegular, faUser, faBell, faWrench,
+  faSignOutAlt, faClipboardList, faCog, faLock, faPalette, faPeopleGroup
 )
 
 const app = createApp(App);
