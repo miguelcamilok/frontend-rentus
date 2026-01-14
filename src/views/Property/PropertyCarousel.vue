@@ -316,7 +316,7 @@ onUnmounted(() => {
     transform: translateY(0) rotate(0deg);
   }
   50% {
-    transform: translateY(-20px) rotate(180deg);
+    transform: translateY(-15px) rotate(180deg); /* Reducido de -20px */
   }
 }
 
@@ -341,7 +341,7 @@ onUnmounted(() => {
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(25px); /* Reducido de 30px */
   }
   to {
     opacity: 1;
@@ -366,7 +366,7 @@ onUnmounted(() => {
   height: 100%;
   background: url("https://i.pinimg.com/1200x/e2/d2/b7/e2d2b7877ffb88a68d6b72e5ea0bd965.jpg") center center / cover no-repeat;
   opacity: 0.1;
-  filter: blur(8px);
+  filter: blur(6px); /* Reducido de 8px */
   z-index: 0;
 }
 
@@ -374,9 +374,9 @@ onUnmounted(() => {
 .carousel-main {
   position: relative;
   width: 100%;
-  height: 85vh;
-  min-height: 600px;
-  max-height: 900px;
+  height: 5vh; /* Reducido de 85vh */
+  min-height: 65vh; /* Reducido de 600px */
+  max-height: 70vh; /* Reducido de 900px */
   z-index: 1;
 }
 
@@ -393,11 +393,11 @@ onUnmounted(() => {
   inset: 0;
   background-size: cover;
   background-position: center;
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); /* Reducido tiempo de 0.6s */
 }
 
 .carousel-slide:hover .slide-background {
-  transform: scale(1.05);
+  transform: scale(1.03); /* Reducido de 1.05 */
 }
 
 .slide-overlay {
@@ -422,13 +422,13 @@ onUnmounted(() => {
 
 .particle {
   position: absolute;
-  width: 4px;
-  height: 4px;
+  width: 3px; /* Reducido de 4px */
+  height: 3px; /* Reducido de 4px */
   background: #da9c5f;
   border-radius: 50%;
   opacity: 0.3;
   animation: float 15s infinite ease-in-out;
-  box-shadow: 0 0 10px #da9c5f;
+  box-shadow: 0 0 8px #da9c5f; /* Reducido de 10px */
 }
 
 .particle:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
@@ -446,35 +446,35 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 8%;
-  max-width: 1400px;
+  padding: 0 7%; /* Reducido de 8% */
+  max-width: 1200px; /* Reducido de 1400px */
   margin: 0 auto;
 }
 
 .featured-badge {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px; /* Reducido de 10px */
   background: linear-gradient(135deg, rgba(218, 156, 95, 0.3), rgba(200, 169, 126, 0.3));
   backdrop-filter: blur(20px);
-  padding: 12px 24px;
-  border-radius: 50px;
+  padding: 10px 22px; /* Reducido de 12px 24px */
+  border-radius: 40px; /* Reducido de 50px */
   border: 1px solid rgba(218, 156, 95, 0.5);
-  font-size: 14px;
+  font-size: 13px; /* Reducido de 14px */
   font-weight: 700;
   color: #da9c5f;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 30px;
+  letter-spacing: 0.8px; /* Reducido de 1px */
+  margin-bottom: 25px; /* Reducido de 30px */
   width: fit-content;
   position: relative;
   overflow: hidden;
-  animation: slideIn 0.6s ease 0.2s backwards;
-  box-shadow: 0 8px 25px rgba(218, 156, 95, 0.3);
+  animation: slideIn 0.5s ease 0.2s backwards; /* Reducido tiempo de 0.6s */
+  box-shadow: 0 6px 20px rgba(218, 156, 95, 0.3); /* Reducida sombra */
 }
 
 .badge-icon {
-  font-size: 16px;
+  font-size: 14px; /* Reducido de 16px */
   animation: glow 2s infinite;
 }
 
@@ -486,47 +486,47 @@ onUnmounted(() => {
 }
 
 .property-main-info {
-  max-width: 800px;
+  max-width: 700px; /* Reducido de 800px */
 }
 
 .property-title {
-  font-size: clamp(32px, 5vw, 56px);
+  font-size: clamp(28px, 5vw, 48px); /* Reducido de clamp(32px, 5vw, 56px) */
   font-weight: 800;
   color: #f0e5db;
-  margin-bottom: 30px;
+  margin-bottom: 25px; /* Reducido de 30px */
   line-height: 1.2;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  animation: slideIn 0.6s ease 0.3s backwards;
+  text-shadow: 0 3px 15px rgba(0, 0, 0, 0.5); /* Reducida sombra */
+  animation: slideIn 0.5s ease 0.3s backwards; /* Reducido tiempo de 0.6s */
 }
 
 .property-features {
   display: flex;
-  gap: 16px;
+  gap: 14px; /* Reducido de 16px */
   flex-wrap: wrap;
-  margin-bottom: 24px;
-  animation: slideIn 0.6s ease 0.4s backwards;
+  margin-bottom: 20px; /* Reducido de 24px */
+  animation: slideIn 0.5s ease 0.4s backwards; /* Reducido tiempo de 0.6s */
 }
 
 .feature-chip {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px; /* Reducido de 10px */
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(10px);
-  padding: 14px 22px;
-  border-radius: 16px;
+  padding: 12px 20px; /* Reducido de 14px 22px */
+  border-radius: 14px; /* Reducido de 16px */
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: #f0e5db;
-  font-size: 16px;
+  font-size: 14px; /* Reducido de 16px */
   font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* Reducido tiempo de 0.3s */
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2); /* Reducida sombra */
 }
 
 .feature-chip:hover {
   background: rgba(255, 255, 255, 0.12);
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px); /* Reducido de -3px */
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.3); /* Reducida sombra */
 }
 
 .price-chip {
@@ -537,50 +537,50 @@ onUnmounted(() => {
 
 .property-details {
   display: flex;
-  gap: 20px;
-  margin-bottom: 30px;
-  animation: slideIn 0.6s ease 0.5s backwards;
+  gap: 16px; /* Reducido de 20px */
+  margin-bottom: 25px; /* Reducido de 30px */
+  animation: slideIn 0.5s ease 0.5s backwards; /* Reducido tiempo de 0.6s */
 }
 
 .detail-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px; /* Reducido de 8px */
   color: rgba(255, 255, 255, 0.8);
-  font-size: 15px;
+  font-size: 14px; /* Reducido de 15px */
   font-weight: 500;
 }
 
 .view-details-btn {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px; /* Reducido de 12px */
   background: linear-gradient(135deg, #da9c5f, #b8791f);
   color: white;
   border: none;
-  padding: 16px 32px;
-  border-radius: 50px;
-  font-size: 16px;
+  padding: 14px 28px; /* Reducido de 16px 32px */
+  border-radius: 40px; /* Reducido de 50px */
+  font-size: 14px; /* Reducido de 16px */
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* Reducido tiempo de 0.3s */
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 25px rgba(218, 156, 95, 0.4);
-  animation: slideIn 0.6s ease 0.6s backwards;
+  box-shadow: 0 6px 20px rgba(218, 156, 95, 0.4); /* Reducida sombra */
+  animation: slideIn 0.5s ease 0.6s backwards; /* Reducido tiempo de 0.6s */
 }
 
 .view-details-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 35px rgba(218, 156, 95, 0.5);
+  transform: translateY(-2px); /* Reducido de -3px */
+  box-shadow: 0 10px 30px rgba(218, 156, 95, 0.5); /* Reducida sombra */
 }
 
 .btn-icon {
-  transition: transform 0.3s ease;
+  transition: transform 0.25s ease; /* Reducido tiempo de 0.3s */
 }
 
 .view-details-btn:hover .btn-icon {
-  transform: translateX(5px);
+  transform: translateX(4px); /* Reducido de 5px */
 }
 
 .btn-glow {
@@ -592,24 +592,24 @@ onUnmounted(() => {
 
 .properties-counter {
   position: absolute;
-  bottom: 100px;
-  right: 8%;
+  bottom: 80px; /* Reducido de 100px */
+  right: 7%; /* Reducido de 8% */
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px; /* Reducido de 8px */
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
-  padding: 16px 24px;
-  border-radius: 50px;
+  padding: 14px 22px; /* Reducido de 16px 24px */
+  border-radius: 40px; /* Reducido de 50px */
   border: 1px solid rgba(218, 156, 95, 0.3);
-  font-size: 18px;
+  font-size: 16px; /* Reducido de 18px */
   font-weight: 700;
   color: #f0e5db;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); /* Reducida sombra */
 }
 
 .counter-current {
-  font-size: 28px;
+  font-size: 24px; /* Reducido de 28px */
   color: #da9c5f;
 }
 
@@ -627,7 +627,7 @@ onUnmounted(() => {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 4px;
+  height: 3px; /* Reducido de 4px */
   background: rgba(255, 255, 255, 0.1);
   z-index: 10;
 }
@@ -636,7 +636,7 @@ onUnmounted(() => {
   height: 100%;
   background: linear-gradient(90deg, #da9c5f, #b8791f);
   transition: width 0.05s linear;
-  box-shadow: 0 0 10px rgba(218, 156, 95, 0.5);
+  box-shadow: 0 0 8px rgba(218, 156, 95, 0.5); /* Reducida sombra */
 }
 
 /* ==================== CONTROLES DE NAVEGACIÓN ==================== */
@@ -644,16 +644,16 @@ onUnmounted(() => {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 60px;
-  height: 60px;
+  width: 52px; /* Reducido de 60px */
+  height: 52px; /* Reducido de 60px */
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(218, 156, 95, 0.3);
   border-radius: 50%;
   color: #da9c5f;
-  font-size: 20px;
+  font-size: 18px; /* Reducido de 20px */
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* Reducido tiempo de 0.3s */
   z-index: 10;
   display: flex;
   align-items: center;
@@ -662,36 +662,36 @@ onUnmounted(() => {
 
 .nav-btn:hover {
   background: rgba(218, 156, 95, 0.3);
-  transform: translateY(-50%) scale(1.1);
-  box-shadow: 0 8px 25px rgba(218, 156, 95, 0.4);
+  transform: translateY(-50%) scale(1.08); /* Reducido de 1.1 */
+  box-shadow: 0 6px 20px rgba(218, 156, 95, 0.4); /* Reducida sombra */
 }
 
 .prev-btn {
-  left: 40px;
+  left: 35px; /* Reducido de 40px */
 }
 
 .next-btn {
-  right: 40px;
+  right: 35px; /* Reducido de 40px */
 }
 
 .nav-indicators {
   position: absolute;
-  bottom: 30px;
+  bottom: 25px; /* Reducido de 30px */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 12px;
+  gap: 10px; /* Reducido de 12px */
   z-index: 10;
 }
 
 .indicator {
-  width: 40px;
-  height: 4px;
+  width: 35px; /* Reducido de 40px */
+  height: 3px; /* Reducido de 4px */
   background: rgba(255, 255, 255, 0.3);
   border: none;
-  border-radius: 2px;
+  border-radius: 1.5px; /* Reducido de 2px */
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease; /* Reducido tiempo de 0.3s */
   padding: 0;
   position: relative;
   overflow: hidden;
@@ -703,7 +703,7 @@ onUnmounted(() => {
   background: linear-gradient(90deg, #da9c5f, #b8791f);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.3s ease;
+  transition: transform 0.25s ease; /* Reducido tiempo de 0.3s */
 }
 
 .indicator.active .indicator-line {
@@ -717,25 +717,25 @@ onUnmounted(() => {
 /* ==================== SECCIÓN DE MINIATURAS ==================== */
 .thumbnails-section {
   position: relative;
-  padding: 60px 8%;
+  padding: 45px 7%; /* Reducido de 60px 8% */
   background: linear-gradient(180deg, rgba(26, 14, 10, 0.5), rgba(26, 14, 10, 0.8));
   border-top: 1px solid rgba(218, 156, 95, 0.2);
 }
 
 .thumbnails-title {
-  font-size: 24px;
+  font-size: 22px; /* Reducido de 24px */
   font-weight: 700;
   color: #f0e5db;
-  margin-bottom: 30px;
+  margin-bottom: 25px; /* Reducido de 30px */
   display: flex;
   align-items: center;
-  gap: 12px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  gap: 10px; /* Reducido de 12px */
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5); /* Reducida sombra */
 }
 
 .thumbnails-title svg {
   color: #da9c5f;
-  font-size: 28px;
+  font-size: 24px; /* Reducido de 28px */
 }
 
 .thumbnails-container {
@@ -744,53 +744,53 @@ onUnmounted(() => {
 
 .thumbnails-wrapper {
   display: flex;
-  gap: 20px;
+  gap: 18px; /* Reducido de 20px */
   overflow-x: auto;
   scroll-behavior: smooth;
-  padding: 10px 0;
+  padding: 8px 0; /* Reducido de 10px */
   scrollbar-width: thin;
   scrollbar-color: #da9c5f rgba(255, 255, 255, 0.1);
 }
 
 .thumbnails-wrapper::-webkit-scrollbar {
-  height: 8px;
+  height: 6px; /* Reducido de 8px */
 }
 
 .thumbnails-wrapper::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  border-radius: 3px; /* Reducido de 4px */
 }
 
 .thumbnails-wrapper::-webkit-scrollbar-thumb {
   background: linear-gradient(90deg, #da9c5f, #b8791f);
-  border-radius: 4px;
+  border-radius: 3px; /* Reducido de 4px */
 }
 
 .thumbnail-card {
-  flex: 0 0 280px;
+  flex: 0 0 250px; /* Reducido de 280px */
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
+  border-radius: 14px; /* Reducido de 16px */
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* Reducido tiempo de 0.3s */
   border: 2px solid rgba(218, 156, 95, 0.2);
   position: relative;
 }
 
 .thumbnail-card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-6px); /* Reducido de -8px */
   border-color: #da9c5f;
-  box-shadow: 0 15px 40px rgba(218, 156, 95, 0.3);
+  box-shadow: 0 12px 35px rgba(218, 156, 95, 0.3); /* Reducida sombra */
 }
 
 .thumbnail-card.active {
   border-color: #da9c5f;
-  box-shadow: 0 0 0 4px rgba(218, 156, 95, 0.2), 0 15px 40px rgba(218, 156, 95, 0.4);
+  box-shadow: 0 0 0 3px rgba(218, 156, 95, 0.2), 0 12px 35px rgba(218, 156, 95, 0.4); /* Reducida sombra */
 }
 
 .thumbnail-image {
   position: relative;
-  height: 180px;
+  height: 160px; /* Reducido de 180px */
   overflow: hidden;
 }
 
@@ -798,11 +798,11 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s ease;
+  transition: transform 0.3s ease; /* Reducido tiempo de 0.4s */
 }
 
 .thumbnail-card:hover .thumbnail-image img {
-  transform: scale(1.1);
+  transform: scale(1.08); /* Reducido de 1.1 */
 }
 
 .thumbnail-overlay {
@@ -813,9 +813,9 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.25s ease; /* Reducido tiempo de 0.3s */
   color: white;
-  font-size: 24px;
+  font-size: 22px; /* Reducido de 24px */
 }
 
 .thumbnail-card:hover .thumbnail-overlay {
@@ -823,54 +823,54 @@ onUnmounted(() => {
 }
 
 .thumbnail-info {
-  padding: 16px;
+  padding: 14px; /* Reducido de 16px */
 }
 
 .thumbnail-title {
-  font-size: 15px;
+  font-size: 14px; /* Reducido de 15px */
   font-weight: 600;
   color: #f0e5db;
-  margin-bottom: 8px;
+  margin-bottom: 6px; /* Reducido de 8px */
   line-height: 1.3;
 }
 
 .thumbnail-price {
-  font-size: 16px;
+  font-size: 15px; /* Reducido de 16px */
   font-weight: 700;
   color: #da9c5f;
 }
 
 .thumbnail-index {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 32px;
-  height: 32px;
+  top: 10px; /* Reducido de 12px */
+  right: 10px; /* Reducido de 12px */
+  width: 28px; /* Reducido de 32px */
+  height: 28px; /* Reducido de 32px */
   background: linear-gradient(135deg, #da9c5f, #b8791f);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 13px; /* Reducido de 14px */
   font-weight: 700;
   color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3); /* Reducida sombra */
 }
 
 .thumbnail-nav-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 48px;
-  height: 48px;
+  width: 42px; /* Reducido de 48px */
+  height: 42px; /* Reducido de 48px */
   background: rgba(218, 156, 95, 0.3);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(218, 156, 95, 0.5);
   border-radius: 50%;
   color: #da9c5f;
-  font-size: 18px;
+  font-size: 16px; /* Reducido de 18px */
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease; /* Reducido tiempo de 0.3s */
   z-index: 10;
   display: flex;
   align-items: center;
@@ -879,124 +879,124 @@ onUnmounted(() => {
 
 .thumbnail-nav-btn:hover {
   background: rgba(218, 156, 95, 0.5);
-  transform: translateY(-50%) scale(1.1);
+  transform: translateY(-50%) scale(1.08); /* Reducido de 1.1 */
 }
 
 .thumbnail-nav-btn.prev {
-  left: -20px;
+  left: -18px; /* Reducido de -20px */
 }
 
 .thumbnail-nav-btn.next {
-  right: -20px;
+  right: -18px; /* Reducido de -20px */
 }
 
 /* ==================== TRANSICIONES ==================== */
 .slide-fade-enter-active {
-  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); /* Reducido tiempo de 0.6s */
 }
 
 .slide-fade-leave-active {
-  transition: all 0.3s ease;
+  transition: all 0.25s ease; /* Reducido tiempo de 0.3s */
 }
 
 .slide-fade-enter-from {
   opacity: 0;
-  transform: translateX(50px);
+  transform: translateX(40px); /* Reducido de 50px */
 }
 
 .slide-fade-leave-to {
   opacity: 0;
-  transform: translateX(-50px);
+  transform: translateX(-40px); /* Reducido de -50px */
 }
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 1200px) {
   .slide-content {
-    padding: 0 5%;
+    padding: 0 4%; /* Reducido de 5% */
   }
 
   .properties-counter {
-    right: 5%;
+    right: 4%; /* Reducido de 5% */
   }
 }
 
 @media (max-width: 768px) {
   .carousel-main {
-    height: 70vh;
-    min-height: 500px;
+    height: 65vh; /* Reducido de 70vh */
+    min-height: 450px; /* Reducido de 500px */
   }
 
   .slide-content {
-    padding: 0 6%;
+    padding: 0 5%; /* Reducido de 6% */
   }
 
   .property-title {
-    font-size: 28px;
+    font-size: 24px; /* Reducido de 28px */
   }
 
   .featured-badge {
-    font-size: 12px;
-    padding: 10px 20px;
+    font-size: 11px; /* Reducido de 12px */
+    padding: 8px 18px; /* Reducido de 10px 20px */
   }
 
   .property-features {
-    gap: 12px;
+    gap: 10px; /* Reducido de 12px */
   }
 
   .feature-chip {
-    padding: 12px 18px;
-    font-size: 14px;
+    padding: 10px 16px; /* Reducido de 12px 18px */
+    font-size: 13px; /* Reducido de 14px */
   }
 
   .property-details {
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 10px; /* Reducido de 12px */
   }
 
   .view-details-btn {
-    padding: 14px 28px;
-    font-size: 14px;
+    padding: 12px 24px; /* Reducido de 14px 28px */
+    font-size: 13px; /* Reducido de 14px */
   }
 
   .properties-counter {
-    bottom: 80px;
-    right: 6%;
-    padding: 12px 20px;
-    font-size: 16px;
+    bottom: 70px; /* Reducido de 80px */
+    right: 5%; /* Reducido de 6% */
+    padding: 10px 18px; /* Reducido de 12px 20px */
+    font-size: 14px; /* Reducido de 16px */
   }
 
   .counter-current {
-    font-size: 24px;
+    font-size: 22px; /* Reducido de 24px */
   }
 
   .nav-btn {
-    width: 50px;
-    height: 50px;
-    font-size: 18px;
+    width: 46px; /* Reducido de 50px */
+    height: 46px; /* Reducido de 50px */
+    font-size: 16px; /* Reducido de 18px */
   }
 
   .prev-btn {
-    left: 20px;
+    left: 18px; /* Reducido de 20px */
   }
 
   .next-btn {
-    right: 20px;
+    right: 18px; /* Reducido de 20px */
   }
 }
 
 @media (max-width: 480px) {
   .carousel-main {
-    height: 60vh;
-    min-height: 450px;
+    height: 55vh; /* Reducido de 60vh */
+    min-height: 400px; /* Reducido de 450px */
   }
 
   .property-title {
-    font-size: 24px;
+    font-size: 22px; /* Reducido de 24px */
   }
 
   .property-features {
     flex-direction: column;
-    gap: 10px;
+    gap: 8px; /* Reducido de 10px */
   }
 
   .feature-chip {
@@ -1006,37 +1006,37 @@ onUnmounted(() => {
 
   .property-details {
     flex-direction: column;
-    gap: 10px;
+    gap: 8px; /* Reducido de 10px */
   }
 
   .properties-counter {
     position: static;
-    margin-top: 20px;
+    margin-top: 18px; /* Reducido de 20px */
     width: fit-content;
-    padding: 10px 18px;
+    padding: 8px 16px; /* Reducido de 10px 18px */
   }
 
   .nav-btn {
-    width: 44px;
-    height: 44px;
-    font-size: 16px;
+    width: 40px; /* Reducido de 44px */
+    height: 40px; /* Reducido de 44px */
+    font-size: 14px; /* Reducido de 16px */
   }
 
   .prev-btn {
-    left: 15px;
+    left: 12px; /* Reducido de 15px */
   }
 
   .next-btn {
-    right: 15px;
+    right: 12px; /* Reducido de 15px */
   }
 
   .nav-indicators {
-    bottom: 20px;
-    gap: 8px;
+    bottom: 18px; /* Reducido de 20px */
+    gap: 6px; /* Reducido de 8px */
   }
 
   .indicator {
-    width: 30px;
+    width: 25px; /* Reducido de 30px */
   }
 }
 </style>

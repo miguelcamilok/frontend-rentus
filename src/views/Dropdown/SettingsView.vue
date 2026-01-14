@@ -3,15 +3,15 @@
     <div class="page-background"></div>
 
     <main class="settings-wrapper">
-      <div class="header-section">
+      <!-- <div class="header-section">
         <h2 class="titulo">Ajustes de Cuenta</h2>
         <p class="subtitle">Personaliza tu experiencia en la plataforma</p>
-      </div>
+      </div> -->
 
       <div class="settings-container">
         <!-- Panel de navegación lateral -->
         <div class="settings-nav">
-          <div 
+          <div  
             v-for="(section, index) in sections" 
             :key="index"
             class="nav-item"
