@@ -1,68 +1,94 @@
 <template>
-  <transition name="fade">
+  <transition name="modal-fade">
     <div v-if="open" class="overlay" @click.self="close">
-      <transition name="modal">
+      <transition name="modal-scale">
         <div class="modal">
+          <!-- Decorative particles -->
+          <div class="particles">
+            <div v-for="i in 6" :key="i" class="particle" :style="{ '--delay': i * 0.4 + 's' }"></div>
+          </div>
+
           <header class="modal-header">
-            <div class="title-box">
-              <h2>Mis Solicitudes de Visita</h2>
-              <p class="subtitle">Seguimiento de tus citas programadas</p>
+            <div class="header-content">
+              <div class="icon-badge">
+                <font-awesome-icon icon="calendar-check" class="header-icon" />
+              </div>
+              <div class="title-box">
+                <h2>Mis Solicitudes de Visita</h2>
+                <p class="subtitle">Seguimiento de tus citas programadas</p>
+              </div>
             </div>
-            <button class="btn-close" @click="close">✕</button>
+            <button class="btn-close" @click="close">
+              <font-awesome-icon icon="times" />
+            </button>
           </header>
 
           <section class="modal-body">
             <!-- Loading -->
             <div v-if="loading" class="loading">
-              <div class="spinner"></div>
+              <div class="spinner-wrapper">
+                <font-awesome-icon icon="spinner" class="spinner" spin />
+              </div>
               <p>Cargando solicitudes...</p>
             </div>
 
             <!-- Solicitudes -->
-            <div v-else-if="solicitudes.length > 0">
-              <div
-                class="request-item"
-                v-for="solicitud in solicitudes"
-                :key="solicitud.id"
-              >
+            <transition-group v-else-if="solicitudes.length > 0" name="request-list" tag="div"
+              class="requests-container">
+              <div class="request-item" v-for="solicitud in solicitudes" :key="solicitud.id">
+                <div class="request-glow"></div>
+
                 <!-- Imagen de la propiedad -->
                 <div class="property-image">
-                  <img 
-                    :src="solicitud.property?.image_url" 
-                    :alt="solicitud.property?.title" 
-                  />
+                  <img :src="solicitud.property?.image_url" :alt="solicitud.property?.title" />
+                  <div class="image-overlay">
+                    <font-awesome-icon icon="home" />
+                  </div>
                 </div>
 
                 <div class="request-details">
                   <!-- Info de la propiedad -->
                   <div class="property-info">
                     <h4>{{ solicitud.property?.title }}</h4>
-                    <p class="address">📍 {{ solicitud.property?.address }}</p>
+                    <p class="address">
+                      <font-awesome-icon icon="map-marker-alt" class="icon-small" />
+                      {{ solicitud.property?.address }}
+                    </p>
                   </div>
 
                   <!-- Fecha solicitada -->
                   <div class="date-info">
-                    <p class="label">Fecha solicitada:</p>
-                    <p class="value">
-                      📅 {{ formatDate(solicitud.requested_date) }} 
-                      🕐 {{ solicitud.requested_time }}
-                    </p>
+                    <div class="date-label">
+                      <font-awesome-icon icon="calendar" class="icon-small" />
+                      <span>Fecha solicitada</span>
+                    </div>
+                    <div class="date-value">
+                      <span class="date">{{ formatDate(solicitud.requested_date) }}</span>
+                      <span class="time">
+                        <font-awesome-icon icon="clock" class="icon-tiny" />
+                        {{ solicitud.requested_time }}
+                      </span>
+                    </div>
                   </div>
 
                   <!-- Contra-propuesta (si existe) -->
-                  <div 
-                    v-if="solicitud.status === 'counter_proposed'" 
-                    class="counter-proposal"
-                  >
-                    <p class="label">🔄 Nueva fecha propuesta por el dueño:</p>
-                    <p class="value highlight">
-                      📅 {{ formatDate(solicitud.counter_date) }} 
-                      🕐 {{ solicitud.counter_time }}
-                    </p>
+                  <div v-if="solicitud.status === 'counter_proposed'" class="counter-proposal">
+                    <div class="counter-header">
+                      <font-awesome-icon icon="calendar-alt" class="counter-icon" />
+                      <span class="counter-title">Nueva fecha propuesta por el dueño</span>
+                    </div>
+                    <div class="counter-value">
+                      <span class="date">{{ formatDate(solicitud.counter_date) }}</span>
+                      <span class="time">
+                        <font-awesome-icon icon="clock" class="icon-tiny" />
+                        {{ solicitud.counter_time }}
+                      </span>
+                    </div>
                   </div>
 
                   <!-- Estado -->
                   <div class="status-badge" :class="solicitud.status">
+                    <span class="status-dot"></span>
                     {{ getStatusText(solicitud.status) }}
                   </div>
 
@@ -70,67 +96,67 @@
                   <div class="actions">
                     <!-- Contra-propuesta pendiente -->
                     <template v-if="solicitud.status === 'counter_proposed'">
-                      <button 
-                        class="btn success" 
-                        @click="acceptCounter(solicitud.id)"
-                      >
-                        ✓ Aceptar nueva fecha
+                      <button class="btn success" @click="acceptCounter(solicitud.id)">
+                        <font-awesome-icon icon="check" />
+                        <span>Aceptar nueva fecha</span>
                       </button>
-                      <button 
-                        class="btn danger" 
-                        @click="rejectCounter(solicitud.id)"
-                      >
-                        ✕ Rechazar
+                      <button class="btn danger" @click="rejectCounter(solicitud.id)">
+                        <font-awesome-icon icon="times" />
+                        <span>Rechazar</span>
                       </button>
                     </template>
 
                     <!-- Aceptada - Esperando visita -->
                     <template v-else-if="solicitud.status === 'accepted'">
-                      <div class="info-message">
-                        ✅ Visita confirmada. El dueño te contactará pronto.
+                      <div class="info-message success">
+                        <font-awesome-icon icon="check-circle" class="info-icon" />
+                        <span>Visita confirmada. El dueño te contactará pronto.</span>
                       </div>
                     </template>
 
                     <!-- Contrato enviado -->
                     <template v-else-if="solicitud.status === 'contract_sent'">
-                      <button 
-                        class="btn primary" 
-                        @click="viewContract(solicitud)"
-                      >
-                        📄 Ver Contrato
+                      <button class="btn primary-full" @click="viewContract(solicitud)">
+                        <font-awesome-icon icon="file-alt" />
+                        <span>Ver Contrato</span>
                       </button>
                     </template>
 
                     <!-- Rechazada -->
                     <template v-else-if="solicitud.status === 'rejected'">
                       <div class="info-message rejected">
-                        ❌ Solicitud rechazada por el dueño
+                        <font-awesome-icon icon="times-circle" class="info-icon" />
+                        <span>Solicitud rechazada por el dueño</span>
                       </div>
                     </template>
 
                     <!-- Pendiente -->
                     <template v-else-if="solicitud.status === 'pending'">
                       <div class="info-message pending">
-                        ⏳ Esperando respuesta del dueño...
+                        <font-awesome-icon icon="clock" class="info-icon" />
+                        <span>Esperando respuesta del dueño...</span>
                       </div>
-                      <button 
-                        class="btn danger-outline" 
-                        @click="cancelRequest(solicitud.id)"
-                      >
-                        Cancelar solicitud
+                      <button class="btn danger-outline" @click="cancelRequest(solicitud.id)">
+                        <font-awesome-icon icon="ban" />
+                        <span>Cancelar solicitud</span>
                       </button>
                     </template>
                   </div>
                 </div>
               </div>
-            </div>
+            </transition-group>
 
             <!-- Vacío -->
             <div v-else class="empty">
-              <i class="fas fa-clipboard-list"></i>
-              <p>No tienes solicitudes de visita</p>
-              <button class="btn primary" @click="goToProperties">
-                Buscar propiedades
+              <div class="empty-icon-wrapper">
+                <font-awesome-icon icon="calendar-check" class="empty-icon" />
+                <div class="empty-circle"></div>
+              </div>
+              <h3>No tienes solicitudes</h3>
+              <p>Aún no has solicitado visitas a propiedades</p>
+              <button class="btn primary-cta" @click="goToProperties">
+                <font-awesome-icon icon="search" />
+                <span>Buscar propiedades</span>
               </button>
             </div>
           </section>
@@ -141,9 +167,10 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { rentalRequestService } from "../../../services/rentalRequestService";
+import { useAlerts } from "../../../composable/useAlerts";
 
 const props = defineProps({
   open: Boolean
@@ -151,25 +178,35 @@ const props = defineProps({
 
 const emit = defineEmits(["close", "view-contract"]);
 const router = useRouter();
+const { success, error, confirm } = useAlerts();
 
 const solicitudes = ref([]);
 const loading = ref(false);
 
 const close = () => emit("close");
 
-// Cargar solicitudes cuando se abre
-watch(() => props.open, async (isOpen) => {
+// Bloquear scroll del body cuando el modal está abierto
+watch(() => props.open, (isOpen) => {
   if (isOpen) {
-    await loadRequests();
+    document.body.style.overflow = 'hidden';
+    loadRequests();
+  } else {
+    document.body.style.overflow = '';
   }
+});
+
+// Cleanup al desmontar
+onUnmounted(() => {
+  document.body.style.overflow = '';
 });
 
 const loadRequests = async () => {
   loading.value = true;
   try {
     solicitudes.value = await rentalRequestService.getMyRequests();
-  } catch (error) {
-    console.error("Error cargando solicitudes:", error);
+  } catch (err) {
+    console.error("Error cargando solicitudes:", err);
+    error("Error al cargar tus solicitudes", "Error");
   } finally {
     loading.value = false;
   }
@@ -179,37 +216,58 @@ const loadRequests = async () => {
 const acceptCounter = async (requestId) => {
   try {
     await rentalRequestService.acceptCounterProposal(requestId);
+    success("Nueva fecha aceptada correctamente", "¡Confirmado!");
     await loadRequests();
-  } catch (error) {
-    console.error("Error aceptando contra-propuesta:", error);
-    alert("Error al aceptar la nueva fecha");
+  } catch (err) {
+    console.error("Error aceptando contra-propuesta:", err);
+    error("Error al aceptar la nueva fecha", "Error");
   }
 };
 
 // Rechazar contra-propuesta
 const rejectCounter = async (requestId) => {
-  if (!confirm("¿Rechazar la fecha propuesta?")) return;
-  
-  try {
-    await rentalRequestService.rejectCounterProposal(requestId);
-    await loadRequests();
-  } catch (error) {
-    console.error("Error rechazando contra-propuesta:", error);
-    alert("Error al rechazar");
-  }
+  confirm(
+    "¿Rechazar la fecha propuesta por el dueño?",
+    async () => {
+      try {
+        await rentalRequestService.rejectCounterProposal(requestId);
+        success("Contra-propuesta rechazada", "Completado");
+        await loadRequests();
+      } catch (err) {
+        console.error("Error rechazando contra-propuesta:", err);
+        error("Error al rechazar la propuesta", "Error");
+      }
+    },
+    undefined,
+    {
+      title: "Confirmar rechazo",
+      confirmText: "Sí, rechazar",
+      cancelText: "Cancelar"
+    }
+  );
 };
 
 // Cancelar solicitud
 const cancelRequest = async (requestId) => {
-  if (!confirm("¿Cancelar esta solicitud de visita?")) return;
-  
-  try {
-    await rentalRequestService.cancelRequest(requestId);
-    await loadRequests();
-  } catch (error) {
-    console.error("Error cancelando solicitud:", error);
-    alert("Error al cancelar");
-  }
+  confirm(
+    "¿Cancelar esta solicitud de visita?",
+    async () => {
+      try {
+        await rentalRequestService.cancelRequest(requestId);
+        success("Solicitud cancelada", "Completado");
+        await loadRequests();
+      } catch (err) {
+        console.error("Error cancelando solicitud:", err);
+        error("Error al cancelar la solicitud", "Error");
+      }
+    },
+    undefined,
+    {
+      title: "Confirmar cancelación",
+      confirmText: "Sí, cancelar",
+      cancelText: "No, mantener"
+    }
+  );
 };
 
 // Ver contrato

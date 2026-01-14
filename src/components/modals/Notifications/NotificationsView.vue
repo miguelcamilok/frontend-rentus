@@ -1,75 +1,115 @@
 <template>
-  <div v-show="open" class="overlay" @click.self="close">
-    <div class="modal">
-
-      <header class="header">
-        <h2>Notificaciones</h2>
-        <div class="header-actions">
-          <button 
-            v-if="unreadCount > 0" 
-            class="mark-all-btn" 
-            @click="markAllAsRead"
-            title="Marcar todas como leídas"
-          >
-            ✓ Marcar todas
-          </button>
-          <button class="close-btn" @click="close">&times;</button>
-        </div>
-      </header>
-
-      <div class="content">
-        <!-- Loading -->
-        <div v-if="loading" class="loading">
-          <div class="spinner"></div>
-          <p>Cargando notificaciones...</p>
+  <Transition name="modal-fade">
+    <div v-show="open" class="overlay" @click.self="close">
+      <div class="modal">
+        
+        <!-- Decorative particles -->
+        <div class="particles">
+          <div v-for="i in 8" :key="i" class="particle" :style="{ '--delay': i * 0.3 + 's' }"></div>
         </div>
 
-        <!-- Notificaciones -->
-        <div v-else-if="formattedNotifications.length > 0">
-          <div 
-            v-for="(group, index) in formattedNotifications" 
-            :key="index"
-            class="date-group"
-          >
-            <div class="date-label">{{ group.date }}</div>
-
-            <div 
-              v-for="notif in group.items" 
-              :key="notif.id"
-              class="notif-item"
-              :class="{ unread: !notif.read }"
-              @click="handleNotificationClick(notif)"
-            >
-              <div class="icon" :class="getNotificationType(notif.type)">
-                <i :class="getNotificationIcon(notif.type)"></i>
+        <header class="header">
+          <div class="header-content">
+            <div class="title-wrapper">
+              <div class="icon-badge">
+                <font-awesome-icon icon="bell" class="bell-icon" />
+                <span v-if="unreadCount > 0" class="badge-count">{{ unreadCount }}</span>
               </div>
-
-              <div class="info">
-                <p class="text" v-html="notif.message"></p>
-                <span class="time">{{ formatTime(notif.created_at) }}</span>
-              </div>
-
+              <h2>Notificaciones</h2>
+            </div>
+            
+            <div class="header-actions">
               <button 
-                class="delete-btn" 
-                @click.stop="deleteNotification(notif.id)"
-                title="Eliminar"
+                v-if="unreadCount > 0" 
+                class="mark-all-btn" 
+                @click="markAllAsRead"
               >
-                ✕
+                <font-awesome-icon icon="check" />
+                <span>Marcar todas</span>
+              </button>
+              <button class="close-btn" @click="close">
+                <font-awesome-icon icon="times" />
               </button>
             </div>
+          </div>
+        </header>
 
+        <div class="content">
+          <!-- Loading -->
+          <div v-if="loading" class="loading">
+            <div class="spinner-wrapper">
+              <font-awesome-icon icon="spinner" class="spinner" spin />
+            </div>
+            <p>Cargando notificaciones...</p>
+          </div>
+
+          <!-- Notificaciones -->
+          <div v-else-if="formattedNotifications.length > 0" class="notifications-list">
+            <TransitionGroup name="notification-list">
+              <div 
+                v-for="(group, index) in formattedNotifications" 
+                :key="index"
+                class="date-group"
+              >
+                <div class="date-label">
+                  <span class="date-line"></span>
+                  <span class="date-text">{{ group.date }}</span>
+                  <span class="date-line"></span>
+                </div>
+
+                <TransitionGroup name="notification-item">
+                  <div 
+                    v-for="notif in group.items" 
+                    :key="notif.id"
+                    class="notif-item"
+                    :class="{ unread: !notif.read }"
+                    @click="handleNotificationClick(notif)"
+                  >
+                    <div class="notif-glow" :class="getNotificationType(notif.type)"></div>
+                    
+                    <div class="icon-wrapper" :class="getNotificationType(notif.type)">
+                      <font-awesome-icon :icon="getNotificationIcon(notif.type)" class="notif-icon" />
+                      <div class="icon-ripple"></div>
+                    </div>
+
+                    <div class="info">
+                      <p class="text" v-html="notif.message"></p>
+                      <div class="meta">
+                        <font-awesome-icon icon="clock" class="time-icon" />
+                        <span class="time">{{ formatTime(notif.created_at) }}</span>
+                      </div>
+                    </div>
+
+                    <div class="actions">
+                      <button 
+                        class="delete-btn" 
+                        @click.stop="deleteNotification(notif.id)"
+                      >
+                        <font-awesome-icon icon="times" />
+                      </button>
+                      <div v-if="!notif.read" class="unread-dot"></div>
+                    </div>
+                  </div>
+                </TransitionGroup>
+
+              </div>
+            </TransitionGroup>
+          </div>
+
+          <!-- Vacío -->
+          <div v-else class="empty">
+            <div class="empty-icon-wrapper">
+              <font-awesome-icon icon="bell" class="empty-icon" />
+              <div class="empty-circle"></div>
+            </div>
+            <h3>Sin notificaciones</h3>
+            <p>Cuando recibas notificaciones aparecerán aquí</p>
           </div>
         </div>
 
-        <!-- Vacío -->
-        <div v-else class="empty">
-          <i class="fas fa-bell-slash"></i>
-          <p>No tienes notificaciones</p>
-        </div>
       </div>
-
     </div>
-  </div>
+  </Transition>
 </template>
 
 <script setup lang="ts">
@@ -92,7 +132,6 @@ const unreadCount = computed(() =>
   notifications.value.filter(n => !n.read).length
 );
 
-// Agrupar por fechas
 const formattedNotifications = computed(() => {
   const groups: Record<string, NotificationItem[]> = {};
   
@@ -108,7 +147,6 @@ const formattedNotifications = computed(() => {
   }));
 });
 
-// Cargar notificaciones cuando se abre el modal
 watch(() => props.open, async (isOpen) => {
   if (isOpen) {
     await loadNotifications();
@@ -127,35 +165,29 @@ const loadNotifications = async () => {
 };
 
 const handleNotificationClick = async (notif: NotificationItem) => {
-  // Marcar como leída si no lo está
   if (!notif.read) {
     await markAsRead(notif.id);
   }
 
-  // Navegar según el tipo de notificación
   const data = notif.data ? JSON.parse(notif.data) : {};
 
   switch (notif.type) {
     case "rental_request":
-      // Abrir modal de solicitudes
       close();
       emit("update", { action: "open_requests" });
       break;
     
     case "counter_proposal":
-      // Abrir modal de mis solicitudes
       close();
       emit("update", { action: "open_my_requests" });
       break;
     
     case "contract_sent":
-      // Ir a la página de contratos
       close();
       router.push("/contratos");
       break;
     
     case "visit_reminder":
-      // Abrir detalles de la propiedad
       if (data.property_id) {
         close();
         router.push(`/propiedades/${data.property_id}`);
@@ -241,15 +273,15 @@ const getNotificationType = (type: string) => {
 
 const getNotificationIcon = (type: string) => {
   const iconMap: Record<string, string> = {
-    rental_request: "fas fa-home",
-    counter_proposal: "fas fa-calendar-alt",
-    contract_sent: "fas fa-file-contract",
-    contract_accepted: "fas fa-check-circle",
-    visit_reminder: "fas fa-clock",
-    payment_reminder: "fas fa-dollar-sign",
-    system: "fas fa-info-circle",
+    rental_request: "home",
+    counter_proposal: "calendar",
+    contract_sent: "file-alt",
+    contract_accepted: "check-circle",
+    visit_reminder: "clock",
+    payment_reminder: "dollar-sign",
+    system: "shield-alt",
   };
-  return iconMap[type] || "fas fa-bell";
+  return iconMap[type] || "bell";
 };
 
 const close = () => {
@@ -258,5 +290,5 @@ const close = () => {
 </script>
 
 <style scoped>
-@import "../../../assets/css/components/NotificationsView.css";
+@import "../../../assets/css/components/NotificationsView.css"
 </style>
