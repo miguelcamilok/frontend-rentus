@@ -5,7 +5,12 @@
         
         <!-- Decorative particles -->
         <div class="particles">
-          <div v-for="i in 8" :key="i" class="particle" :style="{ '--delay': i * 0.3 + 's' }"></div>
+          <div
+            v-for="i in 8"
+            :key="i"
+            class="particle"
+            :style="{ '--delay': i * 0.3 + 's' }"
+          ></div>
         </div>
 
         <header class="header">
@@ -13,19 +18,21 @@
             <div class="title-wrapper">
               <div class="icon-badge">
                 <font-awesome-icon icon="bell" class="bell-icon" />
-                <span v-if="unreadCount > 0" class="badge-count">{{ unreadCount }}</span>
+                <span v-if="unreadCount > 0" class="badge-count">
+                  {{ unreadCount }}
+                </span>
               </div>
-              <h2>Notificaciones</h2>
+              <h2>{{ t("notifications.title") }}</h2>
             </div>
-            
+
             <div class="header-actions">
-              <button 
-                v-if="unreadCount > 0" 
-                class="mark-all-btn" 
+              <button
+                v-if="unreadCount > 0"
+                class="mark-all-btn"
                 @click="markAllAsRead"
               >
                 <font-awesome-icon icon="check" />
-                <span>Marcar todas</span>
+                <span>{{ t("notifications.markAll") }}</span>
               </button>
               <button class="close-btn" @click="close">
                 <font-awesome-icon icon="times" />
@@ -40,14 +47,17 @@
             <div class="spinner-wrapper">
               <font-awesome-icon icon="spinner" class="spinner" spin />
             </div>
-            <p>Cargando notificaciones...</p>
+            <p>{{ t("notifications.loading") }}</p>
           </div>
 
           <!-- Notificaciones -->
-          <div v-else-if="formattedNotifications.length > 0" class="notifications-list">
+          <div
+            v-else-if="formattedNotifications.length > 0"
+            class="notifications-list"
+          >
             <TransitionGroup name="notification-list">
-              <div 
-                v-for="(group, index) in formattedNotifications" 
+              <div
+                v-for="(group, index) in formattedNotifications"
                 :key="index"
                 class="date-group"
               >
@@ -58,17 +68,26 @@
                 </div>
 
                 <TransitionGroup name="notification-item">
-                  <div 
-                    v-for="notif in group.items" 
+                  <div
+                    v-for="notif in group.items"
                     :key="notif.id"
                     class="notif-item"
                     :class="{ unread: !notif.read }"
                     @click="handleNotificationClick(notif)"
                   >
-                    <div class="notif-glow" :class="getNotificationType(notif.type)"></div>
-                    
-                    <div class="icon-wrapper" :class="getNotificationType(notif.type)">
-                      <font-awesome-icon :icon="getNotificationIcon(notif.type)" class="notif-icon" />
+                    <div
+                      class="notif-glow"
+                      :class="getNotificationType(notif.type)"
+                    ></div>
+
+                    <div
+                      class="icon-wrapper"
+                      :class="getNotificationType(notif.type)"
+                    >
+                      <font-awesome-icon
+                        :icon="getNotificationIcon(notif.type)"
+                        class="notif-icon"
+                      />
                       <div class="icon-ripple"></div>
                     </div>
 
@@ -76,13 +95,15 @@
                       <p class="text" v-html="notif.message"></p>
                       <div class="meta">
                         <font-awesome-icon icon="clock" class="time-icon" />
-                        <span class="time">{{ formatTime(notif.created_at) }}</span>
+                        <span class="time">
+                          {{ formatTime(notif.created_at) }}
+                        </span>
                       </div>
                     </div>
 
                     <div class="actions">
-                      <button 
-                        class="delete-btn" 
+                      <button
+                        class="delete-btn"
                         @click.stop="deleteNotification(notif.id)"
                       >
                         <font-awesome-icon icon="times" />
@@ -91,7 +112,6 @@
                     </div>
                   </div>
                 </TransitionGroup>
-
               </div>
             </TransitionGroup>
           </div>
@@ -102,21 +122,24 @@
               <font-awesome-icon icon="bell" class="empty-icon" />
               <div class="empty-circle"></div>
             </div>
-            <h3>Sin notificaciones</h3>
-            <p>Cuando recibas notificaciones aparecerán aquí</p>
+            <h3>{{ t("notifications.empty.title") }}</h3>
+            <p>{{ t("notifications.empty.description") }}</p>
           </div>
         </div>
-
       </div>
     </div>
   </Transition>
 </template>
+
 
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { notificationService } from "../../../services/notificationService";
 import type { NotificationItem } from "../../../services/notificationService";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+
+const { t, locale } = useI18n();
 
 const props = defineProps<{
   open: boolean;
@@ -239,24 +262,26 @@ const getDateLabel = (dateStr: string) => {
   yesterday.setDate(yesterday.getDate() - 1);
 
   if (date.toDateString() === today.toDateString()) {
-    return "Hoy";
+    return t("notifications.dates.today");
   } else if (date.toDateString() === yesterday.toDateString()) {
-    return "Ayer";
+    return t("notifications.dates.yesterday");
   } else {
-    return date.toLocaleDateString("es-ES", { 
-      day: "numeric", 
-      month: "long" 
+    return date.toLocaleDateString(locale.value, {
+      day: "numeric",
+      month: "long",
     });
   }
 };
 
+
 const formatTime = (dateStr: string) => {
   const date = new Date(dateStr);
-  return date.toLocaleTimeString("es-ES", { 
-    hour: "2-digit", 
-    minute: "2-digit" 
+  return date.toLocaleTimeString(locale.value, {
+    hour: "2-digit",
+    minute: "2-digit",
   });
 };
+
 
 const getNotificationType = (type: string) => {
   const typeMap: Record<string, string> = {

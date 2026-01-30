@@ -12,11 +12,11 @@
             <div class="hero-overlay"></div>
             <div class="hero-content">
                 <h1 class="hero-title">
-                    <span class="title-line">Descubre Tu</span>
-                    <span class="title-line gradient-text">Próximo Hogar</span>
+                    <span class="title-line">{{ $t('properties.hero.title.line1') }}</span>
+                    <span class="title-line gradient-text">{{ $t('properties.hero.title.line2') }}</span>
                 </h1>
                 <p class="hero-description">
-                    Explora nuestra colección exclusiva de propiedades diseñadas para tu estilo de vida
+                    {{ $t('properties.hero.description') }}
                 </p>
 
                 <div class="quick-stats">
@@ -26,7 +26,7 @@
                         </div>
                         <div class="stat-content">
                             <div class="stat-value">{{ properties.length }}</div>
-                            <div class="stat-label">Propiedades</div>
+                            <div class="stat-label">{{ $t('properties.hero.stats.properties') }}</div>
                         </div>
                     </div>
                     <div class="stat-box">
@@ -35,7 +35,7 @@
                         </div>
                         <div class="stat-content">
                             <div class="stat-value">{{ availableCount }}</div>
-                            <div class="stat-label">Disponibles</div>
+                            <div class="stat-label">{{ $t('properties.hero.stats.available') }}</div>
                         </div>
                     </div>
                     <div class="stat-box">
@@ -44,7 +44,7 @@
                         </div>
                         <div class="stat-content">
                             <div class="stat-value">{{ citiesCount }}</div>
-                            <div class="stat-label">Ciudades</div>
+                            <div class="stat-label">{{ $t('properties.hero.stats.cities') }}</div>
                         </div>
                     </div>
                 </div>
@@ -54,142 +54,14 @@
                 <div class="scroll-mouse">
                     <div class="scroll-wheel"></div>
                 </div>
-                <span class="scroll-text">Explorar</span>
+                <span class="scroll-text">{{ $t('properties.hero.scroll') }}</span>
             </div>
         </section> -->
         
-
         <PropertyCarousel :properties="properties" :loading-properties="loadingProperties" />
-        
 
-
-        <section class="modern-search-section" data-aos="fade-up">
-            <div class="search-container">
-                <div class="search-header">
-                    <font-awesome-icon :icon="['fas', 'home']" class="search-header-icon" />
-                    <h3>Encuentra tu próximo hogar</h3>
-                </div>
-
-                <div class="search-grid">
-                    <!-- En la sección de búsqueda, cambia: -->
-
-                    <!-- Campo de búsqueda general (reemplaza el campo de título) -->
-                    <div class="search-field">
-                        <label class="search-label">
-                            <font-awesome-icon :icon="['fas', 'search']" />
-                            Buscar
-                        </label>
-                        <input type="text" placeholder="Buscar por título, descripción o ubicación..."
-                            v-model="filters.search" @input="applyFilters" />
-                    </div>
-
-                    <!-- Campo de ubicación -->
-                    <div class="search-field">
-                        <label class="search-label">
-                            <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
-                            Ubicación
-                        </label>
-                        <div class="input-wrapper">
-                            <input type="text" placeholder="¿Dónde quieres vivir?" v-model="filters.city"
-                                @focus="filters.city.length > 2 ? showSuggestions = true : null" @blur="hideSuggestions"
-                                @input="applyFilters" />
-
-                            <!-- Sugerencias de ubicación -->
-                            <div v-if="showSuggestions && locationSuggestions.length > 0" class="suggestions-dropdown">
-                                <div v-for="suggestion in locationSuggestions" :key="suggestion.place_id"
-                                    class="suggestion-item" @mousedown="selectLocationSuggestion(suggestion)">
-                                    <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="suggestion-icon" />
-                                    <span class="suggestion-text">{{ suggestion.description }}</span>
-                                </div>
-                            </div>
-
-                            <div v-if="loadingSuggestions" class="suggestions-loading">
-                                <div class="mini-loader"></div>
-                                Buscando ubicaciones...
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Campo de tipo -->
-                    <div class="search-field">
-                        <label class="search-label">
-                            <font-awesome-icon :icon="['fas', 'home']" />
-                            Tipo de Propiedad
-                        </label>
-                        <select v-model="filters.type" @change="applyFilters">
-                            <option value="">Todos los tipos</option>
-                            <option value="casa">Casa</option>
-                            <option value="apartamento">Apartamento</option>
-                            <option value="local">Local Comercial</option>
-                            <option value="finca">Finca</option>
-                        </select>
-                    </div>
-
-                    <!-- Campo de precio -->
-                    <div class="search-field">
-                        <label class="search-label">
-                            <font-awesome-icon icon="dollar-sign" class="chip-icon" />
-                            Presupuesto Máximo
-                        </label>
-                        <input type="number" placeholder="Ej: 2,000,000" v-model.number="filters.maxPrice"
-                            @input="applyFilters" />
-                    </div>
-
-                    <!-- Botón de búsqueda -->
-                    <div class="search-field">
-                        <button class="search-btn-modern" @click="applyFilters">
-                            <span>Buscar</span>
-                            <font-awesome-icon :icon="['fas', 'arrow-right']" class="btn-arrow" />
-                        </button>
-                    </div>
-                </div>
-                <!-- Active Filters Tags -->
-                <transition name="slide-fade">
-                    <div v-if="hasActiveFilters" class="active-filters-bar">
-                        <span class="filters-label">Filtros Activos:</span>
-                        <div class="filters-chips">
-                            <div v-if="filters.search" class="filter-chip">
-                                <font-awesome-icon icon="search" class="chip-icon" />
-                                <span class="chip-value">{{ filters.search }}</span>
-                                <button @click="filters.search = ''" class="chip-close">
-                                    <font-awesome-icon icon="times" />
-                                </button>
-                            </div>
-
-                            <div v-if="filters.city" class="filter-chip">
-                                <font-awesome-icon icon="map-marker-alt" class="chip-icon" />
-                                <span class="chip-value">{{ filters.city }}</span>
-                                <button @click="filters.city = ''" class="chip-close">
-                                    <font-awesome-icon icon="times" />
-                                </button>
-                            </div>
-
-                            <div v-if="filters.type" class="filter-chip">
-                                <font-awesome-icon icon="home" class="chip-icon" />
-                                <span class="chip-value">{{ filters.type }}</span>
-                                <button @click="filters.type = ''" class="chip-close">
-                                    <font-awesome-icon icon="times" />
-                                </button>
-                            </div>
-
-                            <div v-if="filters.maxPrice" class="filter-chip">
-                                <font-awesome-icon icon="dollar-sign" class="chip-icon" />
-                                <span class="chip-value">{{ formatPrice(filters.maxPrice) }}</span>
-                                <button @click="filters.maxPrice = null" class="chip-close">
-                                    <font-awesome-icon icon="times" />
-                                </button>
-                            </div>
-
-                        </div>
-                        <button @click="clearFilters" class="btn-clear-all-inline">
-                            <span class="icon">↻</span>
-                            <span>Limpiar</span>
-                        </button>
-                    </div>
-                </transition>
-            </div>
-        </section>
-
+        <!-- 🔥 COMPONENTE DE BÚSQUEDA REUTILIZABLE -->
+        <PropertySearch v-model="filters" />
 
         <!-- Main Container -->
         <div class="main-container">
@@ -197,15 +69,18 @@
             <section class="properties-section">
                 <div class="section-header">
                     <div class="header-left">
-                        <h2 class="section-title">Propiedades Disponibles</h2>
+                        <h2 class="section-title">{{ $t('properties.section.title') }}</h2>
                         <p class="section-subtitle">
                             <span class="results-count">{{ filteredProperties.length }}</span>
-                            {{ filteredProperties.length === 1 ? 'propiedad encontrada' : 'propiedades encontradas' }}
+                            {{ filteredProperties.length === 1 
+                                ? $t('properties.section.results.single') 
+                                : $t('properties.section.results.multiple') 
+                            }}
                         </p>
                     </div>
                     <router-link v-if="authUser" to="/properties/create" class="btn-add-property">
                         <span class="btn-plus">+</span>
-                        <span class="btn-text">Publicar Propiedad</span>
+                        <span class="btn-text">{{ $t('properties.section.addProperty') }}</span>
                         <div class="btn-shine"></div>
                     </router-link>
                 </div>
@@ -234,12 +109,12 @@
                             <!-- Action Buttons -->
                             <div v-if="authUser?.id === property.user_id" class="action-buttons">
                                 <router-link :to="{ name: 'PropertyEdit', params: { id: property.id } }"
-                                    class="action-btn edit-btn" title="Editar" @click.stop>
+                                    class="action-btn edit-btn" :title="$t('properties.card.edit')" @click.stop>
                                     <span class="btn-icon">✏️</span>
                                     <div class="btn-bg"></div>
                                 </router-link>
                                 <button @click.stop="deleteProperty(property.id)" class="action-btn delete-btn"
-                                    title="Eliminar">
+                                    :title="$t('properties.card.delete')">
                                     <span class="btn-icon">🗑️</span>
                                     <div class="btn-bg"></div>
                                 </button>
@@ -248,7 +123,7 @@
                             <!-- Type Tag -->
                             <div class="type-tag">
                                 <font-awesome-icon :icon="['fas', getTypeIcon(property.title)]" />
-                                <span class="type-text">{{ detectType(property.title) }}</span>
+                                <span class="type-text">{{ detectTypeTranslated(property.title) }}</span>
                             </div>
                         </div>
 
@@ -264,11 +139,11 @@
                                     </div>
                                 </div>
                                 <div class="card-header-right">
-                                    <span class="price-label-small">Precio Mensual</span>
+                                    <span class="price-label-small">{{ $t('properties.card.priceLabel') }}</span>
                                     <span class="price-value-header">
                                         {{ formatPrice(property.monthly_price) }}
                                     </span>
-                                    <span class="price-period-small">/mes</span>
+                                    <span class="price-period-small">{{ $t('properties.card.perMonth') }}</span>
                                 </div>
                             </div>
 
@@ -279,7 +154,7 @@
                                         <font-awesome-icon :icon="['fas', 'ruler-combined']" />
                                     </div>
                                     <div class="feature-content">
-                                        <span class="feature-label">Área</span>
+                                        <span class="feature-label">{{ $t('properties.card.features.area') }}</span>
                                         <span class="feature-value">{{ property.area_m2 }} m²</span>
                                     </div>
                                 </div>
@@ -288,7 +163,7 @@
                                         <font-awesome-icon :icon="['fas', 'bed']" />
                                     </div>
                                     <div class="feature-content">
-                                        <span class="feature-label">Habitaciones</span>
+                                        <span class="feature-label">{{ $t('properties.card.features.bedrooms') }}</span>
                                         <span class="feature-value">{{ property.num_bedrooms }}</span>
                                     </div>
                                 </div>
@@ -297,7 +172,7 @@
                                         <font-awesome-icon :icon="['fas', 'bath']" />
                                     </div>
                                     <div class="feature-content">
-                                        <span class="feature-label">Baños</span>
+                                        <span class="feature-label">{{ $t('properties.card.features.bathrooms') }}</span>
                                         <span class="feature-value">{{ property.num_bathrooms }}</span>
                                     </div>
                                 </div>
@@ -311,7 +186,7 @@
                             <!-- Card Footer -->
                             <div class="card-footer">
                                 <button class="btn-view-details" @click.stop="goToDetail(property.id)">
-                                    <span class="btn-text">Ver Detalles</span>
+                                    <span class="btn-text">{{ $t('properties.card.viewDetails') }}</span>
                                     <span class="btn-arrow">→</span>
                                     <div class="btn-hover-effect"></div>
                                 </button>
@@ -335,13 +210,13 @@
                             </div>
                         </div>
                     </div>
-                    <h3 class="empty-title">No se encontraron propiedades</h3>
+                    <h3 class="empty-title">{{ $t('properties.empty.title') }}</h3>
                     <p class="empty-message">
-                        Intenta ajustar los filtros de búsqueda para encontrar más resultados
+                        {{ $t('properties.empty.message') }}
                     </p>
-                    <button v-if="hasActiveFilters" @click="clearFilters" class="btn-reset-search">
+                    <button @click="clearFilters" class="btn-reset-search">
                         <span class="btn-icon">↻</span>
-                        <span class="btn-text">Reiniciar Búsqueda</span>
+                        <span class="btn-text">{{ $t('properties.empty.resetButton') }}</span>
                         <div class="btn-ripple"></div>
                     </button>
                 </div>
@@ -353,15 +228,27 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import api from "../../services/api";
 import PropertyCarousel from "./PropertyCarousel.vue";
-
-const router = useRouter();
+import PropertySearch from "../../components/search/PropertySearch.vue";
+import { usePropertyTypes } from "../../composable/usePropertyTypes";
 
 const DEFAULT_PROPERTY_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI2MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2Yzc1N2QiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZW4gbm8gZGlzcG9uaWJsZTwvdGV4dD48L3N2Zz4=";
 
+// ==================== Composables ====================
+const router = useRouter();
+const { t } = useI18n();
+const { 
+  detectTypeNormalized,
+  detectTypeTranslated,
+  getTypeIcon 
+} = usePropertyTypes();
+
+// ==================== State ====================
 const authUser = ref(null);
 const properties = ref([]);
+const loadingProperties = ref(false);
 
 const filters = ref({
     search: "",
@@ -370,10 +257,12 @@ const filters = ref({
     maxPrice: null,
 });
 
-// Computed
+// ==================== Computed ====================
+
 const filteredProperties = computed(() => {
     return properties.value.filter((p) => {
-        const typeFromTitle = detectType(p.title).toLowerCase();
+        // 🔥 Usa detectTypeNormalized del composable
+        const typeFromTitle = detectTypeNormalized(p.title);
 
         const matchSearch =
             !filters.value.search ||
@@ -403,11 +292,8 @@ const citiesCount = computed(() => {
     return new Set(properties.value.map(p => p.city)).size;
 });
 
-const hasActiveFilters = computed(() => {
-    return filters.value.search || filters.value.city || filters.value.type || filters.value.maxPrice;
-});
+// ==================== Methods ====================
 
-// Methods
 const formatPrice = (price) => {
     if (!price && price !== 0) return '$0';
     return new Intl.NumberFormat('es-CO', {
@@ -426,55 +312,42 @@ const loadAuthUser = async () => {
             authUser.value = data;
         }
     } catch (err) {
-        console.error("Error cargando usuario:", err);
+        console.error(t('properties.errors.loadUser'), err);
     }
 };
 
 const loadProperties = async () => {
+    loadingProperties.value = true;
     try {
         const { data } = await api.get("/properties");
         properties.value = data;
     } catch (err) {
-        console.error("Error cargando propiedades", err);
+        console.error(t('properties.errors.loadProperties'), err);
+    } finally {
+        loadingProperties.value = false;
     }
 };
 
-const friendlyStatus = (s) => ({
-    available: "Disponible",
-    rented: "Rentada",
-    maintenance: "Mantenimiento",
-}[s] || s);
-
-const detectType = (title) => {
-    const t = title.toLowerCase();
-    if (t.includes("casa")) return "Casa";
-    if (t.includes("apartamento") || t.includes("apto")) return "Apartamento";
-    if (t.includes("local")) return "Local";
-    if (t.includes("finca")) return "Finca";
-    return "Propiedad";
+const friendlyStatus = (s) => {
+    if (!s) return t('properties.card.status.available');
+    const statusKey = s.toString().trim().toLowerCase();
+    
+    const statusMap = {
+        available: t('properties.card.status.available'),
+        rented: t('properties.card.status.rented'),
+        reserved: t('properties.card.status.reserved'),
+        sold: t('properties.card.status.sold'),
+        maintenance: t('properties.card.status.maintenance'),
+    };
+    
+    return statusMap[statusKey] || t('properties.card.status.available');
 };
-
-const getTypeIcon = (title) => {
-    const t = title.toLowerCase();
-
-    if (t.includes("casa")) return "home";
-    if (t.includes("apartamento") || t.includes("apto")) return "building";
-    if (t.includes("local")) return "store";
-    if (t.includes("finca")) return "tree";
-
-    return "home";
-};
-
 
 const truncateDescription = (description, maxLength = 120) => {
-    if (!description) return "Descripción no disponible";
+    if (!description) return t('properties.empty.message');
     return description.length > maxLength
         ? description.substring(0, maxLength) + "..."
         : description;
-};
-
-const applyFilters = () => {
-    // Filters apply automatically via computed
 };
 
 const clearFilters = () => {
@@ -491,15 +364,15 @@ const goToDetail = (id) => {
 };
 
 const deleteProperty = async (id) => {
-    if (!confirm("¿Eliminar esta propiedad permanentemente?")) return;
+    if (!confirm(t('properties.delete.confirm'))) return;
 
     try {
         await api.delete(`/properties/${id}`);
         properties.value = properties.value.filter((p) => p.id !== id);
-        alert("Propiedad eliminada correctamente");
+        alert(t('properties.delete.success'));
     } catch (error) {
         console.error("Error eliminando propiedad:", error);
-        alert("Error al eliminar la propiedad");
+        alert(t('properties.delete.error'));
     }
 };
 
@@ -507,6 +380,7 @@ const handleImageError = (event) => {
     event.target.src = DEFAULT_PROPERTY_IMAGE;
 };
 
+// ==================== Lifecycle ====================
 onMounted(async () => {
     await loadAuthUser();
     await loadProperties();
@@ -515,4 +389,4 @@ onMounted(async () => {
 
 <style scoped>
 @import "../../assets/css/Properties/PropertyView.css";
-</style>
+</style>    

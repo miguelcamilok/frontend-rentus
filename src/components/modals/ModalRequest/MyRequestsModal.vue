@@ -14,8 +14,8 @@
                 <font-awesome-icon icon="calendar-check" class="header-icon" />
               </div>
               <div class="title-box">
-                <h2>Mis Solicitudes de Visita</h2>
-                <p class="subtitle">Seguimiento de tus citas programadas</p>
+                <h2>{{ $t('myVisits.title') }}</h2>
+                <p class="subtitle">{{ $t('myVisits.subtitle') }}</p>
               </div>
             </div>
             <button class="btn-close" @click="close">
@@ -29,7 +29,7 @@
               <div class="spinner-wrapper">
                 <font-awesome-icon icon="spinner" class="spinner" spin />
               </div>
-              <p>Cargando solicitudes...</p>
+              <p>{{ $t('myVisits.loading') }}</p>
             </div>
 
             <!-- Solicitudes -->
@@ -60,7 +60,7 @@
                   <div class="date-info">
                     <div class="date-label">
                       <font-awesome-icon icon="calendar" class="icon-small" />
-                      <span>Fecha solicitada</span>
+                      <span>{{ $t('myVisits.requestedDate') }}</span>
                     </div>
                     <div class="date-value">
                       <span class="date">{{ formatDate(solicitud.requested_date) }}</span>
@@ -75,7 +75,9 @@
                   <div v-if="solicitud.status === 'counter_proposed'" class="counter-proposal">
                     <div class="counter-header">
                       <font-awesome-icon icon="calendar-alt" class="counter-icon" />
-                      <span class="counter-title">Nueva fecha propuesta por el dueño</span>
+                      <span class="counter-title">
+                        {{ $t('myVisits.counterProposedByOwner') }}
+                      </span>
                     </div>
                     <div class="counter-value">
                       <span class="date">{{ formatDate(solicitud.counter_date) }}</span>
@@ -98,11 +100,11 @@
                     <template v-if="solicitud.status === 'counter_proposed'">
                       <button class="btn success" @click="acceptCounter(solicitud.id)">
                         <font-awesome-icon icon="check" />
-                        <span>Aceptar nueva fecha</span>
+                        <span>{{ $t('myVisits.actions.acceptNewDate') }}</span>
                       </button>
                       <button class="btn danger" @click="rejectCounter(solicitud.id)">
                         <font-awesome-icon icon="times" />
-                        <span>Rechazar</span>
+                        <span>{{ $t('common.reject') }}</span>
                       </button>
                     </template>
 
@@ -110,7 +112,7 @@
                     <template v-else-if="solicitud.status === 'accepted'">
                       <div class="info-message success">
                         <font-awesome-icon icon="check-circle" class="info-icon" />
-                        <span>Visita confirmada. El dueño te contactará pronto.</span>
+                        <span>{{ $t('myVisits.messages.visitConfirmed') }}</span>
                       </div>
                     </template>
 
@@ -118,7 +120,7 @@
                     <template v-else-if="solicitud.status === 'contract_sent'">
                       <button class="btn primary-full" @click="viewContract(solicitud)">
                         <font-awesome-icon icon="file-alt" />
-                        <span>Ver Contrato</span>
+                        <span>{{ $t('myVisits.actions.viewContract') }}</span>
                       </button>
                     </template>
 
@@ -126,7 +128,7 @@
                     <template v-else-if="solicitud.status === 'rejected'">
                       <div class="info-message rejected">
                         <font-awesome-icon icon="times-circle" class="info-icon" />
-                        <span>Solicitud rechazada por el dueño</span>
+                        <span>{{ $t('myVisits.messages.requestRejected') }}</span>
                       </div>
                     </template>
 
@@ -134,11 +136,11 @@
                     <template v-else-if="solicitud.status === 'pending'">
                       <div class="info-message pending">
                         <font-awesome-icon icon="clock" class="info-icon" />
-                        <span>Esperando respuesta del dueño...</span>
+                        <span>{{ $t('myVisits.messages.waitingOwner') }}</span>
                       </div>
                       <button class="btn danger-outline" @click="cancelRequest(solicitud.id)">
                         <font-awesome-icon icon="ban" />
-                        <span>Cancelar solicitud</span>
+                        <span>{{ $t('myVisits.actions.cancelRequest') }}</span>
                       </button>
                     </template>
                   </div>
@@ -152,11 +154,11 @@
                 <font-awesome-icon icon="calendar-check" class="empty-icon" />
                 <div class="empty-circle"></div>
               </div>
-              <h3>No tienes solicitudes</h3>
-              <p>Aún no has solicitado visitas a propiedades</p>
+              <h3>{{ $t('myVisits.empty.title') }}</h3>
+              <p>{{ $t('myVisits.empty.description') }}</p>
               <button class="btn primary-cta" @click="goToProperties">
                 <font-awesome-icon icon="search" />
-                <span>Buscar propiedades</span>
+                <span>{{ $t('myVisits.actions.searchProperties') }}</span>
               </button>
             </div>
           </section>
@@ -166,11 +168,16 @@
   </transition>
 </template>
 
+
 <script setup>
 import { ref, watch, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { rentalRequestService } from "../../../services/rentalRequestService";
 import { useAlerts } from "../../../composable/useAlerts";
+import { useI18n } from 'vue-i18n';
+
+const { t, locale } = useI18n();
+
 
 const props = defineProps({
   open: Boolean
@@ -285,13 +292,15 @@ const goToProperties = () => {
 
 // Utilidades
 const formatDate = (date) => {
-  if (!date) return "N/A";
-  return new Date(date).toLocaleDateString("es-ES", {
+  if (!date) return t('common.na', 'N/A');
+
+  return new Date(date).toLocaleDateString(locale.value, {
     day: "2-digit",
     month: "short",
     year: "numeric"
   });
 };
+
 
 const getStatusText = (status) => {
   const map = {

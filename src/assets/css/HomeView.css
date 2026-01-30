@@ -1429,6 +1429,9 @@
   .modal-details-grid {
     grid-template-columns: 1fr;
   }
+  .hero-image-placeholder{
+    display: none;
+  }
 }
 
 /* Tablets y pantallas medianas */

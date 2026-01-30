@@ -3,12 +3,13 @@ import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
+import { i18n } from './i18n';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 import { faFacebookF, faInstagram, faTwitter, faLinkedinIn } from '@fortawesome/free-brands-svg-icons'
-import { faBell, faClipboardList, faCog, faHeart as faHeartSolid, faLock, faPalette, faPeopleGroup, faSignOutAlt, faUser, faWrench } from '@fortawesome/free-solid-svg-icons'
+import { faBan, faBell, faClipboardList, faCog, faHeart as faHeartSolid, faLock, faPalette, faPeopleGroup, faSignOutAlt, faUser, faWrench } from '@fortawesome/free-solid-svg-icons'
 import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons'
 
 import { 
@@ -31,10 +32,12 @@ library.add(
   faBuilding, faStore, faTree, faSearch, faDollarSign, faChevronLeft, faChevronRight, 
   faSpinner, faImages, faListCheck, faFileAlt, faMap, faCalendarCheck, faShareAlt,
   faClock, faHashtag, faShieldAlt,   faHeartSolid,faHeartRegular, faUser, faBell, faWrench,
-  faSignOutAlt, faClipboardList, faCog, faLock, faPalette, faPeopleGroup
+  faSignOutAlt, faClipboardList, faCog, faLock, faPalette, faPeopleGroup, faBan
 )
 
-const app = createApp(App);
+const app = createApp(App)
+app.use(i18n);
+
 const pinia = createPinia();
 app.use(pinia);
 app.use(router);

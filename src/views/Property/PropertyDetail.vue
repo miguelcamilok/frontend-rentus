@@ -8,7 +8,7 @@
       <div class="loading-spinner">
         <font-awesome-icon :icon="['fas', 'spinner']" spin />
       </div>
-      <p class="loading-text">Cargando detalles de la propiedad...</p>
+      <p class="loading-text">{{ t('property.loadingDetails') }}</p>
     </div>
 
     <!-- Error State -->
@@ -16,11 +16,11 @@
       <div class="error-icon">
         <font-awesome-icon :icon="['fas', 'exclamation-triangle']" />
       </div>
-      <h2>Propiedad no encontrada</h2>
+      <h2>{{ t('property.notFound') }}</h2>
       <p>{{ error }}</p>
       <button @click="router.push('/')" class="btn-back">
         <font-awesome-icon :icon="['fas', 'arrow-left']" />
-        Volver al inicio
+        {{ t('property.backHome') }}
       </button>
     </div>
 
@@ -36,7 +36,7 @@
             <font-awesome-icon :icon="['fas', 'home']" />
           </router-link>
           <font-awesome-icon :icon="['fas', 'chevron-right']" class="breadcrumb-separator" />
-          <router-link to="/propiedades" class="breadcrumb-item">Propiedades</router-link>
+          <router-link to="/propiedades" class="breadcrumb-item">{{ t('property.properties') }}</router-link>
           <font-awesome-icon :icon="['fas', 'chevron-right']" class="breadcrumb-separator" />
           <span class="breadcrumb-current">{{ property.title }}</span>
         </div>
@@ -68,14 +68,14 @@
           <!-- Badge de estado -->
           <div class="status-badge" :class="`status-${property.status}`">
             <font-awesome-icon :icon="getStatusIcon(property.status)" />
-            <span>{{ getStatusText(property.status) }}</span>
+            <span>{{ t(`property.status.${property.status}`) }}</span>
           </div>
 
           <!-- Thumbnails -->
           <div class="thumbnails-bar" v-if="propertyImages.length > 1">
             <div v-for="(image, index) in propertyImages" :key="index" @click="currentImageIndex = index"
               class="thumbnail-item" :class="{ active: currentImageIndex === index }">
-              <img :src="image" :alt="`Vista ${index + 1}`" @error="onImgError" />
+              <img :src="image" :alt="t('property.imageAlt', { index: index + 1 })" @error="onImgError" />
             </div>
           </div>
         </div>
@@ -91,19 +91,19 @@
               <div class="header-tags">
                 <span class="tag tag-type">
                   <font-awesome-icon :icon="['fas', getTypeIcon(property.title)]" />
-                  <span class="type-text">{{ detectType(property.title) }}</span>
+                  <span class="type-text">{{ t(`property.type.${detectType(property.title).toLowerCase()}`) }}</span>
                 </span>
                 <span v-if="property.featured" class="tag tag-featured">
                   <font-awesome-icon :icon="['fas', 'star']" />
-                  Destacada
+                  {{ t('property.featured') }}
                 </span>
                 <span v-if="property.new_construction" class="tag tag-new">
                   <font-awesome-icon :icon="['fas', 'hard-hat']" />
-                  Nueva
+                  {{ t('property.new') }}
                 </span>
                 <span v-if="property.pet_friendly" class="tag tag-pet">
                   <font-awesome-icon :icon="['fas', 'paw']" />
-                  Mascotas
+                  {{ t('property.petFriendly') }}
                 </span>
               </div>
 
@@ -116,11 +116,11 @@
 
               <div class="property-price-banner">
                 <div class="price-main">
-                  <span class="price-label">Precio mensual</span>
+                  <span class="price-label">{{ t('property.monthlyPrice') }}</span>
                   <span class="price-amount">{{ formatPrice(property.monthly_price) }}</span>
                 </div>
                 <div class="price-deposit" v-if="property.deposit_amount">
-                  <span class="deposit-label">Depósito</span>
+                  <span class="deposit-label">{{ t('property.deposit') }}</span>
                   <span class="deposit-amount">{{ formatPrice(property.deposit_amount) }}</span>
                 </div>
               </div>
@@ -130,7 +130,7 @@
             <div class="features-showcase">
               <h2 class="section-title">
                 <font-awesome-icon :icon="['fas', 'list-check']" />
-                Características Principales
+                {{ t('property.mainFeatures') }}
               </h2>
               <div class="features-grid-main">
                 <div class="feature-card" v-if="property.area_m2">
@@ -139,7 +139,7 @@
                   </div>
                   <div class="feature-details">
                     <span class="feature-value">{{ property.area_m2 }}</span>
-                    <span class="feature-label">m² de área</span>
+                    <span class="feature-label">{{ t('property.areaM2') }}</span>
                   </div>
                 </div>
                 <div class="feature-card" v-if="property.num_bedrooms">
@@ -148,7 +148,7 @@
                   </div>
                   <div class="feature-details">
                     <span class="feature-value">{{ property.num_bedrooms }}</span>
-                    <span class="feature-label">Habitaciones</span>
+                    <span class="feature-label">{{ t('property.bedrooms') }}</span>
                   </div>
                 </div>
                 <div class="feature-card" v-if="property.num_bathrooms">
@@ -157,7 +157,7 @@
                   </div>
                   <div class="feature-details">
                     <span class="feature-value">{{ property.num_bathrooms }}</span>
-                    <span class="feature-label">Baños</span>
+                    <span class="feature-label">{{ t('property.bathrooms') }}</span>
                   </div>
                 </div>
                 <div class="feature-card" v-if="property.parking_spaces">
@@ -166,7 +166,7 @@
                   </div>
                   <div class="feature-details">
                     <span class="feature-value">{{ property.parking_spaces }}</span>
-                    <span class="feature-label">Parqueaderos</span>
+                    <span class="feature-label">{{ t('property.parkingSpaces') }}</span>
                   </div>
                 </div>
                 <div class="feature-card" v-if="property.floor_number">
@@ -174,8 +174,8 @@
                     <font-awesome-icon :icon="['fas', 'building']" />
                   </div>
                   <div class="feature-details">
-                    <span class="feature-value">Piso {{ property.floor_number }}</span>
-                    <span class="feature-label">Ubicación</span>
+                    <span class="feature-value">{{ t('property.floor', { number: property.floor_number }) }}</span>
+                    <span class="feature-label">{{ t('property.floorLabel') }}</span>
                   </div>
                 </div>
                 <div class="feature-card" v-if="property.year_built">
@@ -184,7 +184,7 @@
                   </div>
                   <div class="feature-details">
                     <span class="feature-value">{{ property.year_built }}</span>
-                    <span class="feature-label">Año</span>
+                    <span class="feature-label">{{ t('property.yearBuilt') }}</span>
                   </div>
                 </div>
               </div>
@@ -194,10 +194,10 @@
             <div class="description-section">
               <h2 class="section-title">
                 <font-awesome-icon :icon="['fas', 'file-alt']" />
-                Descripción
+                {{ t('property.description') }}
               </h2>
               <div class="description-content">
-                <p>{{ property.description || 'Sin descripción disponible' }}</p>
+                <p>{{ property.description || t('property.noDescription') }}</p>
               </div>
             </div>
 
@@ -205,7 +205,7 @@
             <div class="services-section" v-if="getServicesArray(property.included_services).length > 0">
               <h2 class="section-title">
                 <font-awesome-icon :icon="['fas', 'check-circle']" />
-                Servicios Incluidos
+                {{ t('property.includedServices') }}
               </h2>
               <div class="services-grid">
                 <div v-for="service in getServicesArray(property.included_services)" :key="service"
@@ -220,7 +220,7 @@
             <div class="map-section" v-if="property.lat && property.lng">
               <h2 class="section-title">
                 <font-awesome-icon :icon="['fas', 'map']" />
-                Ubicación en el Mapa
+                {{ t('property.mapLocation') }}
               </h2>
               <div class="map-container">
                 <MapView :id="property.id" :lat="property.lat" :lng="property.lng" :owner-id="property.user_id" />
@@ -237,56 +237,50 @@
             <!-- Card de contacto -->
             <div class="contact-card">
               <div class="contact-header">
-                <h3>¿Te interesa?</h3>
-                <p>Solicita más información</p>
+                <h3>{{ t('property.contact.header') }}</h3>
+                <p>{{ t('property.contact.subHeader') }}</p>
               </div>
 
               <div class="contact-actions">
-                <!-- Si es dueño -->
                 <button v-if="authUser?.id && property?.user_id && authUser.id === property.user_id"
                   class="btn-action btn-owner" disabled>
                   <font-awesome-icon :icon="['fas', 'crown']" />
-                  <span>Esta es tu propiedad</span>
+                  <span>{{ t('property.contact.ownerProperty') }}</span>
                 </button>
 
-                <!-- Si está disponible y autenticado -->
                 <button v-else-if="property?.status === 'available' && isAuthenticated" @click="openRequestVisitModal"
                   class="btn-action btn-primary">
                   <font-awesome-icon :icon="['fas', 'calendar-check']" />
-                  <span>Solicitar Visita</span>
+                  <span>{{ t('property.contact.requestVisit') }}</span>
                 </button>
 
-                <!-- Si está disponible pero no autenticado -->
                 <button v-else-if="property?.status === 'available' && !isAuthenticated" @click="openRequestVisitModal"
                   class="btn-action btn-login">
                   <font-awesome-icon :icon="['fas', 'sign-in-alt']" />
-                  <span>Iniciar Sesión</span>
+                  <span>{{ t('property.contact.login') }}</span>
                 </button>
 
-                <!-- Si no está disponible -->
                 <div v-else class="unavailable-alert">
                   <font-awesome-icon :icon="['fas', 'ban']" />
                   <div>
-                    <strong>No Disponible</strong>
-                    <p>Esta propiedad no está disponible</p>
+                    <strong>{{ t('property.contact.notAvailable') }}</strong>
+                    <p>{{ t('property.contact.notAvailableDesc') }}</p>
                   </div>
                 </div>
 
-                <!-- Botón de contacto -->
                 <button @click="contactAgent" class="btn-action btn-secondary">
                   <font-awesome-icon :icon="['fas', 'phone']" />
-                  <span>Contactar Agente</span>
+                  <span>{{ t('property.contact.contactAgent') }}</span>
                 </button>
 
-                <!-- Acciones secundarias -->
                 <div class="secondary-actions">
                   <button @click="toggleFavorite" class="btn-icon-action" :class="{ active: isFavorite }">
                     <font-awesome-icon :icon="isFavorite ? ['fas', 'heart'] : ['far', 'heart']" />
-                    <span>{{ isFavorite ? 'Guardado' : 'Guardar' }}</span>
+                    <span>{{ isFavorite ? t('property.contact.saved') : t('property.contact.save') }}</span>
                   </button>
                   <button @click="shareProperty" class="btn-icon-action">
                     <font-awesome-icon :icon="['fas', 'share-alt']" />
-                    <span>Compartir</span>
+                    <span>{{ t('property.contact.share') }}</span>
                   </button>
                 </div>
               </div>
@@ -295,15 +289,15 @@
               <div class="property-meta">
                 <div class="meta-row">
                   <font-awesome-icon :icon="['fas', 'clock']" />
-                  <span>Publicado {{ timeAgo(property.publication_date) }}</span>
+                  <span>{{ t('property.meta.published') }} {{ timeAgo(property.publication_date) }}</span>
                 </div>
                 <div class="meta-row">
                   <font-awesome-icon :icon="['fas', 'eye']" />
-                  <span>{{ property.views || 0 }} visitas</span>
+                  <span>{{ property.views || 0 }} {{ t('property.meta.views') }}</span>
                 </div>
                 <div class="meta-row">
                   <font-awesome-icon :icon="['fas', 'hashtag']" />
-                  <span>ID: {{ property.id }}</span>
+                  <span>{{ t('property.meta.id') }}: {{ property.id }}</span>
                 </div>
               </div>
             </div>
@@ -318,12 +312,17 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import RequestVisitModal from '../../components/modals/ModalRequest/RequestVisitModal.vue'
 import MapView from '../../components/modals/Maps/MapView.vue'
 import api from '../../services/api'
+import { useI18n } from 'vue-i18n'
+
+const { t, tm, locale } = useI18n()
+
 
 const router = useRouter()
 const route = useRoute()
@@ -418,12 +417,12 @@ function openRequestVisitModal() {
 }
 
 const detectType = (title) => {
-  const t = title.toLowerCase();
-  if (t.includes("casa")) return "Casa";
-  if (t.includes("apartamento") || t.includes("apto")) return "Apartamento";
-  if (t.includes("local")) return "Local";
-  if (t.includes("finca")) return "Finca";
-  return "Propiedad";
+  const tTitle = title.toLowerCase();
+  if (tTitle.includes("casa")) return 'casa';
+  if (tTitle.includes("apartamento") || tTitle.includes("apto")) return 'apartamento';
+  if (tTitle.includes("local")) return 'local';
+  if (tTitle.includes("finca")) return 'finca';
+  return 'propiedad';
 };
 
 const getTypeIcon = (title) => {
@@ -473,24 +472,32 @@ function getServicesArray(services) {
 }
 
 function formatPrice(price) {
-  if (!price) return 'Consultar precio'
-  return new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    minimumFractionDigits: 0
-  }).format(price)
+  if (!price) return t('property.askPrice')
+
+  const isEN = locale.value.startsWith('en')
+
+  return new Intl.NumberFormat(
+    isEN ? 'en-US' : 'es-CO',
+    {
+      style: 'currency',
+      currency: isEN ? 'USD' : 'COP',
+      minimumFractionDigits: 0
+    }
+  ).format(price)
 }
+
 
 function getStatusText(status) {
   const statusMap = {
-    available: 'Disponible',
-    rented: 'Rentada',
-    reserved: 'Reservada',
-    sold: 'Vendida',
-    maintenance: 'Mantenimiento',
+    available: t('property.status.available'),
+    rented: t('property.status.rented'),
+    reserved: t('property.status.reserved'),
+    sold: t('property.status.sold'),
+    maintenance: t('property.status.maintenance'),
   }
-  return statusMap[status] || 'Disponible'
+  return statusMap[status] || t('property.status.available')
 }
+
 
 function getStatusIcon(status) {
   const iconMap = {
@@ -515,18 +522,17 @@ function getTypeText(type) {
 
 function timeAgo(dateString) {
   if (!dateString) return ''
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffInMs = now - date
-  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
 
-  if (diffInDays === 0) return 'hoy'
-  if (diffInDays === 1) return 'ayer'
-  if (diffInDays < 7) return `hace ${diffInDays} días`
-  if (diffInDays < 30) return `hace ${Math.floor(diffInDays / 7)} semanas`
-  if (diffInDays < 365) return `hace ${Math.floor(diffInDays / 30)} meses`
-  return `hace ${Math.floor(diffInDays / 365)} años`
+  const diff = Math.floor((Date.now() - new Date(dateString)) / 86400000)
+
+  if (diff === 0) return t('time.today')
+  if (diff === 1) return t('time.yesterday')
+  if (diff < 7) return t('time.daysAgo', diff)
+  if (diff < 30) return t('time.weeksAgo', Math.floor(diff / 7))
+  if (diff < 365) return t('time.monthsAgo', Math.floor(diff / 30))
+  return t('time.yearsAgo', Math.floor(diff / 365))
 }
+
 
 // Lifecycle
 onMounted(() => {

@@ -1,51 +1,40 @@
 <template>
     <div class="nosotros-page">
 
-        <!-- Contenido principal -->
         <main class="nosotros-main">
-            <!-- 1. Encabezado con barra translúcida -->
+            <!-- 1. Encabezado -->
             <section class="barra-encabezado">
-                <h1>¿Quiénes somos?</h1>
-                <p class="subti">Rentus, una aplicación de Gestión Inmobiliaria</p>
+                <h1>{{ t('about.title') }}</h1>
+                <p class="subti">{{ t('about.subtitle') }}</p>
             </section>
 
             <!-- 2. Nuestra Historia -->
             <section class="seccion-banner historia">
                 <div class="banner-content">
-                    <h2>Nuestra Historia</h2>
-                    <p>
-                        RentUs nació con la misión de simplificar el proceso de arriendo de
-                        propiedades. Comenzamos como un pequeño equipo apasionado por la
-                        tecnología, con la idea de crear una plataforma eficiente, segura y
-                        accesible.
-                    </p>
+                    <h2>{{ t('about.history.title') }}</h2>
+                    <p>{{ t('about.history.text') }}</p>
                 </div>
             </section>
 
-            <!-- 3. Cards de Equipo y Ventajas -->
+            <!-- 3. Equipo y Ventajas -->
             <section class="seccion-doble-cards">
                 <div class="card">
                     <img src="../assets/img/nosotros.jpg" alt="Nuestro equipo" class="card-img" />
                     <div class="card-content">
-                        <h2 class="subtitulo">Nuestro Equipo</h2>
-                        <p class="parrafo">
-                            Un equipo diverso de desarrolladores, diseñadores y gestores
-                            trabaja día a día para ofrecerte una experiencia digital de
-                            calidad, segura y en constante evolución.
-                        </p>
+                        <h2 class="subtitulo">{{ t('about.team.title') }}</h2>
+                        <p class="parrafo">{{ t('about.team.text') }}</p>
                     </div>
                 </div>
 
                 <div class="card card-lista">
                     <img src="../assets/img/casa3.webp" alt="¿Por qué Rentus?" class="card-img" />
                     <div class="card-content">
-                        <h2 class="subtitulo">¿Por qué elegir Rentus?</h2>
+                        <h2 class="subtitulo">{{ t('about.why.title') }}</h2>
                         <ul class="lista-ventajas">
-                            <li>Interfaz intuitiva y adaptable</li>
-                            <li>Gestión completa de propiedades y contratos</li>
-                            <li>Notificaciones automatizadas</li>
-                            <li>Acceso multiusuario con roles</li>
-                            <li>Totalmente responsive</li>
+                            <li v-for="(item, i) in tm('about.why.list')" :key="i">
+                                {{ item }}
+                            </li>
+
                         </ul>
                     </div>
                 </div>
@@ -54,42 +43,35 @@
             <!-- 4. Misión y Visión -->
             <section class="seccion-banner">
                 <div class="banner-content">
-                    <h2>♚ Nuestra Misión</h2>
-                    <p>
-                        Empoderar a propietarios e inquilinos mediante tecnología fácil,
-                        rápida y segura.
-                    </p>
-                    <h2>✎ Nuestra Visión</h2>
-                    <p>
-                        Convertirnos en la plataforma #1 de arriendo digital en
-                        Latinoamérica para 2030.
-                    </p>
+                    <h2>♚ {{ t('about.mission.title') }}</h2>
+                    <p>{{ t('about.mission.text') }}</p>
+
+                    <h2>✎ {{ t('about.vision.title') }}</h2>
+                    <p>{{ t('about.vision.text') }}</p>
                 </div>
             </section>
 
             <!-- 5. Testimonios -->
             <section class="seccion-testimonios">
-                <h2 class="subtitulo">Lo que dicen nuestros usuarios</h2>
+                <h2 class="subtitulo">{{ t('about.testimonials.title') }}</h2>
+
                 <div class="testimonios-grid">
-                    <div class="testimonio">
-                        <p class="comentario">
-                            "¡Una plataforma increíble! Me ayudó a encontrar mi apartamento en
-                            menos de 2 días."
-                        </p>
-                        <span class="autor">- Laura Gómez</span>
+                    <div v-for="(testimonio, i) in tm('about.testimonials.items')" :key="i" class="testimonio">
+                        <p class="comentario">"{{ testimonio.text }}"</p>
+                        <span class="autor">- {{ testimonio.author }}</span>
                     </div>
-                    <div class="testimonio">
-                        <p class="comentario">
-                            "Como arrendador, ahora gestiono todos mis contratos y pagos en un
-                            solo lugar."
-                        </p>
-                        <span class="autor">- Juan Ríos</span>
-                    </div>
+
                 </div>
             </section>
         </main>
     </div>
 </template>
+
+<script setup>
+import { useI18n } from 'vue-i18n'
+
+const { t, tm } = useI18n()
+</script>
 
 <style scoped>
 @import "../assets/css/AboutUsView.css";

@@ -1396,181 +1396,568 @@
 
 /* === RESPONSIVE DESIGN === */
 
-/* Tablets */
-@media (max-width: 1024px) {
+/* ============================================================
+   RESPONSIVE DESIGN - SOLO TAMAÑOS Y LAYOUTS
+   ============================================================ */
+
+/* Tablets grandes (1024px - 1280px) */
+@media (max-width: 1280px) {
     .properties-grid {
-        grid-template-columns: repeat(auto-fill, minmax(min(100%, 350px), 1fr)); /* Reducido de 380px */
-        gap: 1.5rem; /* Reducido de 1.8rem */
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
+        gap: 1.6rem;
     }
-
-    .property-card {
-        height: auto; /* Removido 680px */
+    
+    .hero-banner {
+        min-height: 350px;
+        padding: 1.8rem 1.2rem;
     }
-
+    
+    .hero-content {
+        max-width: 800px;
+    }
+    
+    .search-container {
+        max-width: 1100px;
+        padding: 28px;
+    }
+    
     .main-container {
-        padding: 0 1.2rem 3.5rem; /* Reducido de 1.5rem 4rem */
+        max-width: 1200px;
+        padding: 0 1.5rem 3.5rem;
     }
 }
 
-/* Mobile Large */
+/* Tablets (768px - 1024px) */
+@media (max-width: 1024px) {
+    .properties-grid {
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+        gap: 1.4rem;
+    }
+    
+    .hero-banner {
+        min-height: 320px;
+        padding: 1.5rem 1rem;
+    }
+    
+    .hero-title {
+        font-size: clamp(1.5rem, 3.5vw, 2.4rem);
+    }
+    
+    .hero-description {
+        font-size: clamp(0.85rem, 1.8vw, 1rem);
+    }
+    
+    .quick-stats {
+        gap: 0.7rem;
+        padding: 0 0.6rem;
+    }
+    
+    .stat-box {
+        min-width: 110px;
+        padding: 0.7rem 1rem;
+    }
+    
+    .modern-search-section {
+        padding: 0 4% 40px;
+        margin-top: -40px;
+    }
+    
+    .search-container {
+        padding: 24px;
+    }
+    
+    .search-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    
+    .search-field:nth-child(1),
+    .search-field:nth-child(2) {
+        grid-column: span 2;
+    }
+    
+    .search-field:nth-child(3),
+    .search-field:nth-child(4) {
+        grid-column: span 1;
+    }
+    
+    .search-btn-modern {
+        grid-column: span 2;
+        width: 100%;
+        justify-content: center;
+        margin-top: 0.5rem;
+    }
+    
+    .property-card {
+        border-radius: 18px;
+    }
+    
+    .card-image-section {
+        height: 240px;
+    }
+    
+    .card-content {
+        padding: 1.2rem;
+    }
+    
+    .features-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.7rem;
+    }
+}
+
+/* Mobile Large (600px - 768px) */
 @media (max-width: 768px) {
     .properties-view {
-        padding-top: 50px; /* Reducido de 60px */
+        padding-top: 50px;
     }
-
+    
     .hero-banner {
-        min-height: 320px; /* Reducido de 400px */
-        padding: 1.5rem 1rem; /* Reducido de 2rem 1rem */
+        min-height: 280px;
+        padding: 1.2rem 1rem;
     }
-
+    
+    .hero-title {
+        font-size: clamp(1.3rem, 2.8vw, 1.8rem);
+    }
+    
+    .title-line {
+        display: inline;
+    }
+    
     .quick-stats {
-        gap: 0.6rem; /* Reducido de 0.8rem */
+        max-width: 500px;
+        margin: 0 auto;
     }
-
+    
     .stat-box {
-        padding: 0.7rem 1rem; /* Reducido de 0.8rem 1.2rem */
-        min-width: 100px; /* Reducido de 120px */
+        min-width: 120px;
+        padding: 0.6rem 0.9rem;
     }
-
-    .stat-value {
-        font-size: 1.3rem; /* Reducido de 1.5rem */
+    
+    .modern-search-section {
+        padding: 0 2% 30px;
+        margin-top: -30px;
     }
-
-    .stat-label {
-        font-size: 0.65rem; /* Reducido de 0.7rem */
+    
+    .search-container {
+        padding: 16px;
+        border-radius: 14px;
     }
-
-    .search-section {
-        padding: 1.5rem 12px; /* Reducido de 2rem 15px */
+    
+    .search-header {
+        gap: 8px;
+        margin-bottom: 16px;
     }
-
-    .search-bar {
+    
+    .search-header h3 {
+        font-size: 1.2rem;
+    }
+    
+    .search-grid {
         grid-template-columns: 1fr;
-        padding: 1rem; /* Reducido de 1.2rem */
-        gap: 0.8rem; /* Reducido de 1rem */
+        gap: 10px;
     }
-
-    .search-btn {
-        width: 100%;
-        justify-content: center;
+    
+    .search-field {
+        grid-column: span 1 !important;
     }
-
-    .section-header {
-        flex-direction: column;
-        align-items: flex-start;
-        margin-bottom: 1.8rem; /* Reducido de 2rem */
-    }
-
-    .btn-add-property {
-        width: 100%;
-        justify-content: center;
-    }
-
+    
     .properties-grid {
         grid-template-columns: 1fr;
-        gap: 1.2rem; /* Reducido de 1.5rem */
+        gap: 1rem;
+        padding: 0 0.5rem;
     }
-
+    
+    .property-card {
+        border-radius: 16px;
+    }
+    
+    .card-image-section {
+        height: 220px;
+    }
+    
     .card-header {
         flex-direction: column;
         align-items: flex-start;
+        gap: 0.8rem;
     }
-
+    
     .card-header-right {
-        align-items: flex-start;
+        align-self: stretch;
+        align-items: center;
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 0.8rem;
     }
-
+    
+    .features-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
     .btn-view-details {
         width: 100%;
         justify-content: center;
     }
-}
-
-/* Mobile Small */
-@media (max-width: 480px) {
-    .hero-banner {
-        min-height: 280px; /* Reducido de 350px */
-    }
-
-    .quick-stats {
+    
+    /* Section Header */
+    .section-header {
         flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+        margin-bottom: 1.8rem;
+    }
+    
+    .header-left {
+        text-align: center;
+    }
+    
+    .btn-add-property {
         width: 100%;
-        max-width: 260px; /* Reducido de 300px */
+        justify-content: center;
     }
-
-    .stat-box {
-        width: 100%;
-        justify-content: flex-start;
-    }
-
-    .search-section {
-        padding: 1.2rem 8px; /* Reducido de 1.5rem 10px */
-    }
-
-    .search-title {
-        font-size: 1.3rem; /* Reducido de 1.5rem */
-        margin-bottom: 1.2rem; /* Reducido de 1.5rem */
-    }
-
-    .search-bar {
-        padding: 0.9rem; /* Reducido de 1rem */
-    }
-
-    .search-input input,
-    .search-input select {
-        padding: 11px 36px 11px 14px; /* Reducido de 12px 40px 12px 15px */
-        font-size: 0.85rem; /* Reducido de 0.9rem */
-    }
-
-    .search-btn {
-        padding: 11px 18px; /* Reducido de 12px 20px */
-    }
-
+    
+    /* Active Filters */
     .active-filters-bar {
         flex-direction: column;
         align-items: flex-start;
-        gap: 0.7rem; /* Reducido de 0.8rem */
+        gap: 0.8rem;
+        padding: 0.9rem;
     }
-
+    
+    .filters-chips {
+        width: 100%;
+    }
+    
     .btn-clear-all-inline {
         width: 100%;
         justify-content: center;
     }
+}
 
+/* Mobile Medium (480px - 600px) */
+@media (max-width: 600px) {
+    .properties-view {
+        padding-top: 45px;
+    }
+    
+    .hero-banner {
+        min-height: 240px;
+        padding: 1rem 0.8rem;
+    }
+    
+    .hero-title {
+        font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+    }
+    
+    .hero-description {
+        font-size: 0.85rem;
+        padding: 0 0.5rem;
+    }
+    
+    .quick-stats {
+        gap: 0.6rem;
+        max-width: 100%;
+    }
+    
+    .stat-box {
+        flex: 1 0 calc(50% - 0.6rem);
+        min-width: 0;
+        max-width: none;
+    }
+    
+    .modern-search-section {
+        padding: 0 1rem 25px;
+        margin-top: -25px;
+    }
+    
+    .search-container {
+        padding: 14px;
+    }
+    
+    .properties-grid {
+        gap: 0.8rem;
+        padding: 0;
+    }
+    
+    .property-card {
+        border-radius: 14px;
+    }
+    
+    .card-image-section {
+        height: 200px;
+    }
+    
+    .status-badge,
+    .type-tag {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.8rem;
+    }
+    
     .features-container {
         grid-template-columns: 1fr;
+        gap: 0.6rem;
     }
+    
+    .section-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+    }
+}
 
+/* Mobile Small (360px - 480px) */
+@media (max-width: 480px) {
+    .properties-view {
+        padding-top: 40px;
+    }
+    
+    .hero-banner {
+        min-height: 220px;
+        padding: 0.8rem 0.6rem;
+    }
+    
+    .hero-title {
+        font-size: 1.1rem;
+        gap: 0.2rem;
+    }
+    
+    .hero-description {
+        font-size: 0.8rem;
+    }
+    
+    .quick-stats {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    
+    .stat-box {
+        flex: none;
+        width: 100%;
+    }
+    
+    .modern-search-section {
+        padding: 0 0.8rem 20px;
+        margin-top: -20px;
+    }
+    
+    .search-container {
+        padding: 12px;
+        border-radius: 10px;
+    }
+    
+    .search-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    
+    .search-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .search-field input,
+    .search-field select {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .properties-grid {
+        gap: 0.6rem;
+    }
+    
+    .property-card {
+        border-radius: 12px;
+    }
+    
     .card-image-section {
-        height: 220px; /* Reducido de 250px */
+        height: 180px;
     }
+    
+    .card-content {
+        padding: 1rem;
+    }
+    
+    .card-title {
+        font-size: 1rem;
+    }
+    
+    .price-value-header {
+        font-size: 1rem;
+    }
+    
+    /* Button improvements for touch */
+    .btn-view-details,
+    .btn-add-property,
+    .btn-reset-search,
+    .search-btn-modern {
+        min-height: 44px;
+    }
+}
 
+/* Very Small Screens (hasta 360px) */
+@media (max-width: 360px) {
+    .hero-banner {
+        min-height: 200px;
+    }
+    
+    .hero-title {
+        font-size: 1rem;
+    }
+    
+    .stat-box {
+        padding: 0.6rem 0.8rem;
+    }
+    
+    .main-container {
+        padding: 0 0.6rem 2rem;
+    }
+    
+    .search-container {
+        padding: 10px;
+    }
+    
+    .search-field input,
+    .search-field select {
+        padding: 8px 10px;
+        font-size: 0.8rem;
+    }
+    
+    .properties-grid {
+        gap: 0.6rem;
+    }
+    
+    .property-card {
+        border-radius: 10px;
+    }
+    
+    .card-image-section {
+        height: 160px;
+    }
+    
+    .features-container {
+        gap: 0.5rem;
+    }
+    
+    .feature-item {
+        padding: 0.5rem;
+    }
+}
+
+/* ============================================================
+   AJUSTES PARA TOUCH DEVICES (sin cambiar colores/animaciones)
+   ============================================================ */
+
+@media (hover: none) and (pointer: coarse) {
+    /* Deshabilitar hover effects en touch devices - solo transform */
+    .property-card:hover {
+        transform: none;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    }
+    
+    .property-img {
+        transform: none !important;
+    }
+    
     .action-buttons {
         opacity: 1;
         transform: translateX(0);
     }
-
-    .price-value-header {
-        font-size: 1.1rem; /* Reducido de 1.2rem */
+    
+    .btn-view-details:hover,
+    .btn-add-property:hover,
+    .search-btn-modern:hover,
+    .btn-reset-search:hover,
+    .action-btn:hover,
+    .filter-chip:hover {
+        transform: none;
+    }
+    
+    /* Mejorar tamaño de targets táctiles */
+    .btn-view-details,
+    .btn-add-property,
+    .search-btn-modern,
+    .btn-reset-search,
+    .action-btn {
+        min-height: 44px;
     }
 }
 
-/* Very Small Screens */
-@media (max-width: 360px) {
-    .main-container {
-        padding: 0 0.6rem 2.5rem; /* Reducido de 0.8rem 3rem */
-    }
+/* ============================================================
+   ORIENTACIÓN LANDSCAPE EN MOBILE
+   ============================================================ */
 
+@media (max-height: 500px) and (orientation: landscape) {
+    .hero-banner {
+        min-height: 200px;
+        padding: 1rem;
+    }
+    
+    .quick-stats {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .stat-box {
+        flex: 1 0 calc(33.333% - 0.5rem);
+        min-width: 0;
+    }
+    
+    .modern-search-section {
+        padding-bottom: 20px;
+    }
+    
     .search-container {
-        padding: 0.8rem; /* Reducido de 1rem */
-        border-radius: 14px; /* Reducido de 16px */
+        padding: 16px;
     }
-
-    .property-card {
-        border-radius: 14px; /* Reducido de 16px */
+    
+    .properties-grid {
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+        gap: 1rem;
     }
+    
+    .card-image-section {
+        height: 160px;
+    }
+}
 
-    .card-content {
-        padding: 1rem; /* Reducido de 1.2rem */
+/* ============================================================
+   ACCESIBILIDAD - REDUCED MOTION (solo desactiva animaciones)
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .property-card,
+    .nav-link,
+    .login-btn,
+    .search-btn-modern,
+    .btn-view-details,
+    .btn-add-property,
+    .btn-reset-search,
+    .stat-box,
+    .filter-chip,
+    .action-btn,
+    .scroll-indicator,
+    .hero-overlay,
+    .status-pulse::before,
+    .empty-icon-container,
+    .particle,
+    .scroll-wheel,
+    .btn-shine,
+    .btn-hover-effect,
+    .card-border-effect,
+    .image-gradient,
+    .card-glow,
+    .property-img,
+    .action-buttons {
+        transition: none !important;
+        animation: none !important;
+        transform: none !important;
+    }
+    
+    .property-card:hover {
+        transform: none;
     }
 }

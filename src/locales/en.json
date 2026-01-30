@@ -1,0 +1,681 @@
+{
+    "home": {
+        "hero": {
+            "badge": "Your ideal home awaits",
+            "title": "Find the",
+            "titleHighlight": "perfect home",
+            "titleEnd": "for your lifestyle",
+            "description": "We accompany you every step of the way to find a house that fits your life and plans. Discover exclusive properties.",
+            "stats": {
+                "properties": "Properties",
+                "clients": "Happy Clients",
+                "experience": "Years of Experience"
+            },
+            "floatingCards": {
+                "verified": "Verified Properties",
+                "rated": "Top Rated"
+            }
+        },
+        "search": {
+            "title": "Find your next home",
+            "fields": {
+                "search": {
+                    "label": "Search",
+                    "placeholder": "Search by title, description or location..."
+                },
+                "location": {
+                    "label": "Location",
+                    "placeholder": "Where do you want to live?"
+                },
+                "type": {
+                    "label": "Property Type",
+                    "all": "All types",
+                    "house": "House",
+                    "apartment": "Apartment",
+                    "commercial": "Commercial Space",
+                    "farm": "Farm"
+                },
+                "budget": {
+                    "label": "Maximum Budget",
+                    "placeholder": "E.g: 2,000,000"
+                }
+            },
+            "button": "Search",
+            "filters": {
+                "active": "Active Filters:",
+                "clear": "Clear"
+            },
+            "suggestions": {
+                "loading": "Searching locations..."
+            }
+        },
+        "properties": {
+            "badge": "Featured Properties",
+            "title": "Discover Our",
+            "titleHighlight": "Best Options",
+            "description": "Properties carefully selected for you",
+            "loading": "Loading amazing properties...",
+            "error": "We couldn't load the data at this time",
+            "retry": "Try again",
+            "card": {
+                "status": {
+                    "available": "Available",
+                    "rented": "Rented",
+                    "reserved": "Reserved",
+                    "sold": "Sold",
+                    "maintenance": "Under Maintenance"
+                },
+                "priceLabel": "Monthly Price",
+                "perMonth": "/month",
+                "features": {
+                    "area": "Area",
+                    "bedrooms": "Bedrooms",
+                    "bathrooms": "Bathrooms"
+                },
+                "viewDetails": "View Details",
+                "favorite": "Favorite",
+                "share": "Share"
+            },
+            "empty": {
+                "title": "No properties found",
+                "description": "Try adjusting your search criteria",
+                "clearFilters": "Clear filters"
+            },
+            "viewMore": {
+                "showing": "Showing",
+                "of": "of",
+                "properties": "properties",
+                "button": "Explore All Properties"
+            }
+        },
+        "cta": {
+            "title": "Ready to find your ideal home?",
+            "description": "Contact us and we'll help you find the perfect property for you",
+            "viewProperties": "View Properties",
+            "contact": "Contact"
+        },
+        "modal": {
+            "close": "Close",
+            "sections": {
+                "location": {
+                    "title": "Location",
+                    "notAvailable": "Not available"
+                },
+                "features": {
+                    "title": "Features",
+                    "area": "Area:",
+                    "bedrooms": "Bedrooms:",
+                    "bathrooms": "Bathrooms:"
+                },
+                "services": {
+                    "title": "Included Services",
+                    "none": "No included services"
+                },
+                "publication": {
+                    "title": "Publication",
+                    "publishedAgo": "Published"
+                },
+                "description": {
+                    "title": "Description",
+                    "notAvailable": "No description available"
+                },
+                "map": {
+                    "title": "Exact Location",
+                    "viewFullMap": "View on Full Map",
+                    "latitude": "Latitude:",
+                    "longitude": "Longitude:",
+                    "notRegistered": "This property doesn't have a registered location yet"
+                },
+                "actions": {
+                    "requestVisit": "Request Visit Appointment",
+                    "unavailable": {
+                        "title": "Property Not Available",
+                        "description": "This property is currently not available for visits"
+                    }
+                }
+            },
+            "gallery": "Gallery"
+        }
+    },
+    "property": {
+        "loadingDetails": "Loading property details...",
+        "notFound": "Property not found",
+        "backHome": "Back to home",
+        "properties": "Properties",
+        "status": {
+            "available": "Available",
+            "rented": "Rented",
+            "reserved": "Reserved",
+            "sold": "Sold",
+            "maintenance": "Maintenance"
+        },
+        "imageAlt": "View {index}",
+        "type": {
+            "casa": "House",
+            "apartamento": "Apartment",
+            "local": "Commercial Space",
+            "finca": "Farm",
+            "propiedad": "Property"
+        },
+        "featured": "Featured",
+        "new": "New",
+        "petFriendly": "Pet Friendly",
+        "monthlyPrice": "Monthly Price",
+        "deposit": "Deposit",
+        "mainFeatures": "Main Features",
+        "areaM2": "m² area",
+        "bedrooms": "Bedrooms",
+        "bathrooms": "Bathrooms",
+        "parkingSpaces": "Parking Spaces",
+        "floor": "Floor {number}",
+        "floorLabel": "Location",
+        "yearBuilt": "Year Built",
+        "description": "Description",
+        "noDescription": "No description available",
+        "includedServices": "Included Services",
+        "mapLocation": "Map Location",
+        "contact": {
+            "header": "Interested?",
+            "subHeader": "Request more information",
+            "ownerProperty": "This is your property",
+            "requestVisit": "Request Visit",
+            "login": "Log In",
+            "notAvailable": "Not Available",
+            "notAvailableDesc": "This property is not available",
+            "contactAgent": "Contact Agent",
+            "save": "Save",
+            "saved": "Saved",
+            "share": "Share"
+        },
+        "meta": {
+            "published": "Published",
+            "views": "views",
+            "id": "ID"
+        },
+        "askPrice": "Ask for price"
+    },
+    "time": {
+        "today": "today",
+        "yesterday": "yesterday",
+        "daysAgo": "{0} days ago",
+        "weeksAgo": "{0} weeks ago",
+        "monthsAgo": "{0} months ago",
+        "yearsAgo": "{0} years ago"
+    },
+    "navbar": {
+        "links": {
+            "home": "Home",
+            "properties": "Properties",
+            "about": "About Us"
+        },
+        "auth": {
+            "login": "Sign In",
+            "logout": "Sign Out",
+            "greeting": "Hello"
+        },
+        "dropdown": {
+            "myProfile": "My Profile",
+            "notifications": "Notifications",
+            "contracts": "Contracts",
+            "payments": "Payments",
+            "sections": {
+                "requests": "Requests",
+                "settings": "Settings"
+            },
+            "maintenance": "Maintenance",
+            "ownerRequests": "Owner Requests",
+            "myRequests": "My Requests",
+            "settings": "Settings"
+        },
+        "alerts": {
+            "logoutSuccess": {
+                "title": "See you soon!",
+                "message": "Session closed successfully"
+            },
+            "logoutError": {
+                "title": "Error",
+                "message": "Could not close session properly"
+            },
+            "maintenanceSuccess": {
+                "title": "Request sent!",
+                "message": "Your maintenance request has been registered"
+            }
+        }
+    },
+    "footer": {
+        "about": {
+            "title": "About Us",
+            "description": "We are a platform dedicated to helping you find the ideal home for your lifestyle."
+        },
+        "quickLinks": {
+            "title": "Quick Links",
+            "whoWeAre": "Who We Are",
+            "properties": "Properties",
+            "contact": "Contact",
+            "faq": "Frequently Asked Questions"
+        },
+        "contact": {
+            "title": "Contact",
+            "email": "support@RentUs.com",
+            "phone": "+57 3218598902",
+            "address": "RentUs Street 123, Popayán"
+        },
+        "social": {
+            "title": "Follow Us"
+        },
+        "bottom": {
+            "rights": "© 2025 RentUs. All rights reserved",
+            "legal": "Legal Notice",
+            "privacy": "Privacy Policy"
+        }
+    },
+    "properties": {
+        "hero": {
+            "title": {
+                "line1": "Discover Your",
+                "line2": "Next Home"
+            },
+            "description": "Explore our exclusive collection of properties designed for your lifestyle",
+            "stats": {
+                "properties": "Properties",
+                "available": "Available",
+                "cities": "Cities"
+            },
+            "scroll": "Explore"
+        },
+        "section": {
+            "title": "Available Properties",
+            "results": {
+                "single": "property found",
+                "multiple": "properties found"
+            },
+            "addProperty": "Publish Property"
+        },
+        "card": {
+            "status": {
+                "available": "Available",
+                "rented": "Rented",
+                "reserved": "Reserved",
+                "sold": "Sold",
+                "maintenance": "Maintenance"
+            },
+            "priceLabel": "Monthly Price",
+            "perMonth": "/month",
+            "features": {
+                "area": "Area",
+                "bedrooms": "Bedrooms",
+                "bathrooms": "Bathrooms"
+            },
+            "viewDetails": "View Details",
+            "edit": "Edit",
+            "delete": "Delete"
+        },
+        "empty": {
+            "title": "No properties found",
+            "message": "Try adjusting your search filters to find more results",
+            "resetButton": "Reset Search"
+        },
+        "delete": {
+            "confirm": "Delete this property permanently?",
+            "success": "Property deleted successfully",
+            "error": "Error deleting property"
+        },
+        "errors": {
+            "loadUser": "Error loading user",
+            "loadProperties": "Error loading properties"
+        }
+    },
+    "carousel": {
+        "featured": "Featured Property",
+        "viewDetails": "View Details",
+        "askPrice": "Ask for price",
+        "squareMeters": "m²",
+        "bedrooms": "Bed|Beds",
+        "bathrooms": "Bath|Baths",
+        "parking": "Parking|Parkings"
+    },
+    "about": {
+        "title": "Who are we?",
+        "subtitle": "Rentus, a Property Management Application",
+        "history": {
+            "title": "Our History",
+            "text": "RentUs was born with the mission of simplifying the property rental process. We started as a small team passionate about technology, aiming to create an efficient, secure, and accessible platform."
+        },
+        "team": {
+            "title": "Our Team",
+            "text": "A diverse team of developers, designers, and managers works every day to offer you a high-quality, secure, and constantly evolving digital experience."
+        },
+        "why": {
+            "title": "Why choose Rentus?",
+            "list": [
+                "Intuitive and adaptable interface",
+                "Complete property and contract management",
+                "Automated notifications",
+                "Multi-user access with roles",
+                "Fully responsive"
+            ]
+        },
+        "mission": {
+            "title": "Our Mission",
+            "text": "Empower property owners and tenants through easy, fast, and secure technology."
+        },
+        "vision": {
+            "title": "Our Vision",
+            "text": "To become the #1 digital rental platform in Latin America by 2030."
+        },
+        "testimonials": {
+            "title": "What our users say",
+            "items": [
+                {
+                    "text": "An amazing platform! It helped me find my apartment in less than 2 days.",
+                    "author": "Laura Gómez"
+                },
+                {
+                    "text": "As a landlord, I now manage all my contracts and payments in one place.",
+                    "author": "Juan Ríos"
+                }
+            ]
+        }
+    },
+    "profile": {
+        "addLocation": "Add location",
+        "bio": "Biography",
+        "addBio": "Add biography",
+        "bioPlaceholder": "Tell us about yourself...",
+        "stats": {
+            "properties": "Properties",
+            "rating": "Rating",
+            "reviews": "Reviews"
+        },
+        "contact": {
+            "email": "Email",
+            "phone": "Phone",
+            "memberSince": "Member since",
+            "notRegistered": "Not registered"
+        },
+        "properties": {
+            "title": "My Properties",
+            "new": "New",
+            "empty": {
+                "title": "You have no properties",
+                "description": "Start by adding your first property",
+                "add": "Add Property"
+            }
+        },
+        "locationModal": {
+            "title": "Location",
+            "department": "Department",
+            "city": "City"
+        }
+    },
+    "contracts": {
+        "title": "My Contracts",
+        "loading": "Loading contracts...",
+        "searchButton": "Search contract",
+        "searchPlaceholder": "Search by ID or address...",
+        "noResults": "No contracts found",
+        "new": "New",
+        "actionRequired": "Action required",
+        "status": "Status",
+        "review": "Review",
+        "preview": "Preview",
+        "page": "Page",
+        "active": "Active",
+        "total": "Total",
+        "pending": "Pending",
+        "empty": "You don’t have any contracts yet",
+        "previewLoading": "Generating contract preview...",
+        "previewUnavailable": "Preview not available",
+        "downloadPdf": "Download PDF",
+        "share": "Share",
+        "details": "Contract Details",
+        "property": "Property",
+        "tenant": "Tenant",
+        "landlord": "Landlord",
+        "monthlyValue": "Monthly Value",
+        "deposit": "Deposit",
+        "duration": "Duration",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "reviewContract": "Review Contract",
+        "loadingContract": "Loading contract...",
+        "summary": "Contract Summary",
+        "importantClauses": "Important clauses:",
+        "acceptTerms": "I have read and accept the contract terms",
+        "accept": "Accept Contract",
+        "accepting": "Accepting...",
+        "reject": "Reject Contract"
+    },
+    "notifications": {
+        "title": "Notifications",
+        "markAll": "Mark all",
+        "loading": "Loading notifications...",
+        "empty": {
+            "title": "No notifications",
+            "description": "When you receive notifications, they will appear here"
+        },
+        "dates": {
+            "today": "Today",
+            "yesterday": "Yesterday"
+        },
+        "newsEmails": "News emails",
+        "newsEmailsDesc": "Receive updates about new features",
+        "propertyAlerts": "Property alerts",
+        "propertyAlertsDesc": "Notifications about properties matching your criteria",
+        "reminders": "Reminders",
+        "remindersDesc": "Reminders about your scheduled appointments and activities",
+        "specialPromotions": "Special promotions",
+        "specialPromotionsDesc": "Exclusive offers and discounts"
+    },
+    "requests": {
+        "title": "Rental Requests",
+        "subtitle": "Review and manage pending requests",
+        "loading": "Loading requests...",
+        "property": {
+            "requestedDate": "Requested date",
+            "proposedDate": "Proposed date (waiting for response)"
+        },
+        "rating": {
+            "none": "No rating",
+            "na": "N/A"
+        },
+        "actions": {
+            "review": "Review",
+            "reject": "Reject",
+            "continue": "Continue process",
+            "finish": "Finish process",
+            "accept": "Accept request",
+            "cancelProposal": "Cancel proposal",
+            "proposeDate": "Propose another date",
+            "sendProposal": "Send proposal",
+            "cancel": "Cancel",
+            "sendContract": "Send contract"
+        },
+        "status": {
+            "pending": "Pending",
+            "accepted": "Accepted",
+            "rejected": "Rejected",
+            "counterProposed": "Counter proposal sent",
+            "visitCompleted": "Visit completed",
+            "contractSent": "Contract sent"
+        },
+        "messages": {
+            "visitScheduled": "Visit scheduled for {date} {time}",
+            "waitingTenant": "Waiting for tenant response...",
+            "requestRejected": "Request rejected",
+            "contractWaiting": "Contract sent - Waiting for acceptance",
+            "visitCompleted": "Visit completed"
+        },
+        "empty": {
+            "title": "No requests",
+            "description": "Rental requests will appear here"
+        },
+        "reviewModal": {
+            "title": "Review Request",
+            "requestedDate": "Requested date"
+        },
+        "counterForm": {
+            "title": "Propose new date and time",
+            "newDate": "New date",
+            "newTime": "New time"
+        },
+        "contractModal": {
+            "title": "Send Contract Terms",
+            "period": "Contract period",
+            "startDate": "Start date",
+            "endDate": "End date",
+            "financial": "Financial information",
+            "monthlyPrice": "Monthly price ($)",
+            "deposit": "Deposit/Guarantee ($)",
+            "paymentDay": "Payment day (1-31)",
+            "lateFee": "Late fee ($)",
+            "terms": "Services and terms",
+            "utilities": "Included services",
+            "utilitiesHint": "Separated by commas",
+            "clauses": "Contract clauses",
+            "clausesHint": "One per line",
+            "specialConditions": "Special conditions (optional)",
+            "specialConditionsPlaceholder": "Additional conditions..."
+        }
+    },
+    "myVisits": {
+        "title": "My Visit Requests",
+        "subtitle": "Track your scheduled appointments",
+        "loading": "Loading requests...",
+        "requestedDate": "Requested date",
+        "counterProposedByOwner": "New date proposed by the owner",
+        "actions": {
+            "acceptNewDate": "Accept new date",
+            "viewContract": "View contract",
+            "cancelRequest": "Cancel request",
+            "searchProperties": "Search properties"
+        },
+        "messages": {
+            "visitConfirmed": "Visit confirmed. The owner will contact you soon.",
+            "requestRejected": "Request rejected by the owner",
+            "waitingOwner": "Waiting for owner response..."
+        },
+        "empty": {
+            "title": "You have no requests",
+            "description": "You haven't requested visits to any properties yet"
+        }
+    },
+    "visitRequest": {
+        "title": "Request a Visit Appointment",
+        "form": {
+            "date": "Visit date",
+            "time": "Visit time"
+        },
+        "info": "The owner will receive your request and may accept it or propose another date/time.",
+        "actions": {
+            "send": "Send Request",
+            "sending": "Sending..."
+        },
+        "success": "Request sent successfully!",
+        "errors": {
+            "generic": "An unexpected error occurred",
+            "sendRequest": "Failed to send the request"
+        }
+    },
+    "alerts": {
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "close": "Close alert"
+    },
+    "languages": {
+        "es": "🇪🇸 Spanish",
+        "en": "🇺🇸 English",
+        "fr": "🇫🇷 French",
+        "de": "🇩🇪 German"
+    },
+    "timezones": {
+        "bogota": "Colombia (GMT-5)",
+        "madrid": "Spain (GMT+1)",
+        "london": "United Kingdom (GMT+0)",
+        "newYork": "U.S. East (GMT-5)",
+        "losAngeles": "U.S. West (GMT-8)"
+    },
+    "settings": {
+        "language": "Language",
+        "timezone": "Time zone",
+        "units": "Units",
+        "unitsMetric": "Metric (km, m²)",
+        "unitsImperial": "Imperial (mi, ft²)",
+        "sections": {
+            "profile": "Profile",
+            "security": "Security",
+            "notifications": "Notifications",
+            "preferences": "Preferences"
+        },
+        "profile": {
+            "title": "Profile",
+            "avatar": "User avatar",
+            "changeAvatar": "Change photo",
+            "avatarHint": "Allowed formats: JPG, PNG, GIF or WEBP. Max 5MB.",
+            "fullName": "Full name",
+            "namePlaceholder": "Enter your name",
+            "email": "Email address",
+            "emailPlaceholder": "Email address",
+            "emailNote": "Email cannot be changed",
+            "phone": "Phone",
+            "phonePlaceholder": "Enter your phone number",
+            "document": "Document",
+            "documentPlaceholder": "Document number",
+            "bio": "Bio",
+            "bioPlaceholder": "Tell us a bit about yourself",
+            "department": "Department",
+            "selectDepartment": "Select a department",
+            "city": "City",
+            "selectCity": "Select a city"
+        },
+        "security": {
+            "title": "Security",
+            "currentPassword": "Current password",
+            "currentPlaceholder": "Enter current password",
+            "newPassword": "New password",
+            "newPlaceholder": "Enter new password",
+            "confirmPassword": "Confirm password",
+            "confirmPlaceholder": "Confirm password",
+            "updatePassword": "Update password",
+            "requirementsTitle": "Password must contain:",
+            "minLength": "At least 8 characters",
+            "upperLower": "Upper and lower case letters",
+            "number": "At least one number",
+            "specialChar": "One special character",
+            "match": "Passwords must match"
+        },
+        "notifications": {
+            "title": "Notifications"
+        },
+        "preferences": {
+            "title": "Preferences",
+            "theme": "Theme",
+            "save": "Save preferences"
+        },
+        "themes": {
+            "light": "Light",
+            "dark": "Dark",
+            "auto": "Automatic"
+        }
+    },
+    "passwordStrength": {
+        "veryWeak": "Very weak",
+        "weak": "Weak",
+        "medium": "Medium",
+        "strong": "Strong"
+    },
+    "common": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "select": "Select",
+        "month": "month",
+        "close": "Close",
+        "reject": "Reject",
+        "saveChanges": "Save changes",
+        "saving": "Saving...",
+        "updating": "Updating...",
+        "reset": "Reset",
+        "savePreferences": "Save preferences",
+        "logout": "Log out"
+    }
+}

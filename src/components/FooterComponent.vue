@@ -2,47 +2,46 @@
   <footer class="footer">
     <div class="footer-top">
       <div class="footer-col">
-        <h4>Sobre Nosotros</h4>
+        <h4>{{ $t('footer.about.title') }}</h4>
         <p>
-          Somos una plataforma dedicada a ayudarle a encontrar la casa ideal
-          según tu estilo de vida.
+          {{ $t('footer.about.description') }}
         </p>
       </div>
 
       <div class="footer-col">
-        <h4>Enlaces Rápidos</h4>
+        <h4>{{ $t('footer.quickLinks.title') }}</h4>
         <ul>
           <li>
-            <router-link to="/sobre-nosotros">Quiénes Somos</router-link>
+            <router-link to="/sobre-nosotros">{{ $t('footer.quickLinks.whoWeAre') }}</router-link>
           </li>
-          <li><router-link to="/propiedades">Propiedades</router-link></li>
-          <li><a href="#">Contacto</a></li>
-          <li><a href="#">Preguntas Frecuentes</a></li>
+          <li><router-link to="/propiedades">{{ $t('footer.quickLinks.properties') }}</router-link></li>
+          <li><a href="#">{{ $t('footer.quickLinks.contact') }}</a></li>
+          <li><a href="#">{{ $t('footer.quickLinks.faq') }}</a></li>
         </ul>
       </div>
 
       <div class="footer-col">
-        <h4>Contacto</h4>
+        <h4>{{ $t('footer.contact.title') }}</h4>
         <ul>
           <li>
             <img
               src="https://img.icons8.com/ios-glyphs/20/ffffff/new-post.png"
             />
-            <a href="mailto:soporte@RentUs.com">soporte@RentUs.com</a>
+            <a :href="`mailto:${$t('footer.contact.email')}`">{{ $t('footer.contact.email') }}</a>
           </li>
           <li>
             <img src="https://img.icons8.com/ios-filled/20/ffffff/phone.png" />
-            <span>+57 3218598902</span>
+            <span>{{ $t('footer.contact.phone') }}</span>
           </li>
           <li>
             <img src="https://img.icons8.com/ios-filled/20/ffffff/marker.png" />
-            <span>Calle RentUs 123, Popayán</span>
+            <span>{{ $t('footer.contact.address') }}</span>
           </li>
         </ul>
       </div>
 
       <div class="footer-col">
-        <h4>Síguenos</h4>
+        <h4>{{ $t('footer.social.title') }}</h4>
         <div class="social-icons">
           <a href="#"
             ><img
@@ -66,11 +65,11 @@
     <hr />
 
     <div class="footer-bottom">
-      <p>&copy; 2025 RentUs. Todos los derechos reservados</p>
+      <p>{{ $t('footer.bottom.rights') }}</p>
       <div class="footer-links">
-        <a href="#">Aviso Legal</a>
+        <a href="#">{{ $t('footer.bottom.legal') }}</a>
         <span>|</span>
-        <a href="#">Política de Privacidad</a>
+        <a href="#">{{ $t('footer.bottom.privacy') }}</a>
       </div>
     </div>
   </footer>

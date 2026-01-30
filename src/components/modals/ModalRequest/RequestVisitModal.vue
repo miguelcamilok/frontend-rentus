@@ -5,7 +5,7 @@
         <div class="modal">
           <header class="modal-header">
             <div class="title-box">
-              <h2>Solicitar Cita de Visita</h2>
+              <h2>{{ t('visitRequest.title') }}</h2>
               <p class="subtitle">{{ property?.title }}</p>
             </div>
             <button class="btn-close" @click="close">✕</button>
@@ -17,45 +17,36 @@
               <img :src="property?.image_url" :alt="property?.title" />
               <div class="property-info">
                 <p class="address">📍 {{ property?.address }}</p>
-                <p class="price">💰 {{ formatPrice(property?.monthly_price) }}/mes</p>
+                <p class="price">
+                  💰 {{ formatPrice(property?.monthly_price) }}/{{ t('common.month') }}
+                </p>
               </div>
             </div>
 
             <!-- Formulario -->
             <form @submit.prevent="submitRequest" class="request-form">
               <div class="form-group">
-                <label>📅 Fecha de la visita</label>
-                <input 
-                  v-model="form.requested_date" 
-                  type="date" 
-                  :min="minDate"
-                  class="input" 
-                  required 
-                />
+                <label>📅 {{ t('visitRequest.form.date') }}</label>
+                <input v-model="form.requested_date" type="date" :min="minDate" class="input" required />
               </div>
 
               <div class="form-group">
-                <label>🕐 Hora de la visita</label>
-                <input 
-                  v-model="form.requested_time" 
-                  type="time" 
-                  class="input" 
-                  required 
-                />
+                <label>🕐 {{ t('visitRequest.form.time') }}</label>
+                <input v-model="form.requested_time" type="time" class="input" required />
               </div>
 
               <div class="info-box">
                 <i class="fas fa-info-circle"></i>
-                <p>El dueño recibirá tu solicitud y podrá aceptarla o proponer otra fecha/hora.</p>
+                <p>{{ t('visitRequest.info') }}</p>
               </div>
 
               <div class="actions">
                 <button type="button" class="btn secondary" @click="close">
-                  Cancelar
+                  {{ t('common.cancel') }}
                 </button>
                 <button type="submit" class="btn primary" :disabled="loading">
-                  <span v-if="!loading">Enviar Solicitud</span>
-                  <span v-else>Enviando...</span>
+                  <span v-if="!loading">{{ t('visitRequest.actions.send') }}</span>
+                  <span v-else>{{ t('visitRequest.actions.sending') }}</span>
                 </button>
               </div>
             </form>
@@ -63,7 +54,7 @@
             <!-- Mensaje de éxito -->
             <div v-if="success" class="success-message">
               <i class="fas fa-check-circle"></i>
-              <p>¡Solicitud enviada exitosamente!</p>
+              <p>{{ t('visitRequest.success') }}</p>
             </div>
 
             <!-- Mensaje de error -->
@@ -78,9 +69,14 @@
   </transition>
 </template>
 
+
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { rentalRequestService } from "../../../services/rentalRequestService";
+import { useI18n } from 'vue-i18n';
+
+const { t, locale } = useI18n();
+
 
 interface Property {
   id: number;
@@ -130,13 +126,20 @@ watch(() => props.open, (isOpen) => {
 });
 
 const formatPrice = (price?: number) => {
-  if (!price) return "N/A";
-  return new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
+  if (!price) return t('common.na', 'N/A');
+
+  const currencyMap: Record<string, string> = {
+    es: 'COP',
+    en: 'USD'
+  };
+
+  return new Intl.NumberFormat(locale.value, {
+    style: 'currency',
+    currency: currencyMap[locale.value] || 'USD',
+    minimumFractionDigits: 0
   }).format(price);
 };
+
 
 const submitRequest = async () => {
   if (!props.property) return;
@@ -152,17 +155,22 @@ const submitRequest = async () => {
     });
 
     success.value = true;
-    
+
     setTimeout(() => {
       emit("success");
       close();
     }, 2000);
   } catch (err: any) {
-    error.value = err.response?.data?.message || "Error al enviar la solicitud";
+    const backendCode = err.response?.data?.code;
+
+    error.value = backendCode
+      ? t(`visitRequest.errors.${backendCode}`)
+      : t('visitRequest.errors.sendRequest');
   } finally {
     loading.value = false;
   }
 };
+
 
 const close = () => {
   emit("close");
@@ -403,6 +411,7 @@ const close = () => {
     transform: scale(0.95);
     opacity: 0;
   }
+
   to {
     transform: scale(1);
     opacity: 1;

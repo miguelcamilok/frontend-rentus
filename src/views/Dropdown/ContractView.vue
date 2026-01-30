@@ -3,12 +3,12 @@
     <div class="page-background"></div>
 
     <main class="carousel-container">
-      <h2 class="titulo">Mis Contratos</h2>
+      <h2 class="titulo">{{ t('contracts.title') }}</h2>
 
       <!-- Loading State -->
       <div v-if="loading" class="loading-container">
         <div class="loading-spinner"></div>
-        <p>Cargando contratos...</p>
+        <p>{{ t('contracts.loading') }}</p>
       </div>
 
       <!-- Carrusel de Contratos Paginado -->
@@ -17,60 +17,83 @@
         <div class="quick-nav">
           <button class="quick-nav-btn" @click="showQuickNav = !showQuickNav">
             <i class="fas fa-search"></i>
-            Buscar contrato
+            {{ t('contracts.searchButton') }}
           </button>
           <div v-if="showQuickNav" class="quick-nav-dropdown">
-            <input type="text" v-model="searchQuery" placeholder="Buscar por ID o dirección..."
-              class="quick-nav-search" />
+            <input
+              type="text"
+              v-model="searchQuery"
+              :placeholder="t('contracts.searchPlaceholder')"
+              class="quick-nav-search"
+            />
             <div class="quick-nav-list">
-              <div v-for="contract in filteredContracts" :key="contract.id" class="quick-nav-item"
-                @click="goToContractById(contract.id)">
+              <div
+                v-for="contract in filteredContracts"
+                :key="contract.id"
+                class="quick-nav-item"
+                @click="goToContractById(contract.id)"
+              >
                 <span class="contract-id">#{{ contract.id }}</span>
                 <span class="contract-info">{{ contract.propertyAddress }}</span>
               </div>
               <div v-if="filteredContracts.length === 0" class="no-results">
-                No se encontraron contratos
+                {{ t('contracts.noResults') }}
               </div>
             </div>
           </div>
         </div>
 
         <div class="carousel">
-          <div v-for="(contract, index) in paginatedContracts" :key="contract.id" class="card" :class="{
-            active: activeIndex === index,
-            'highlight-new': contract.isNew,
-            'highlight-pending': contract.status === 'pending' && isUserTenant(contract),
-          }" @click="setActiveContract(index)">
-            <div class="card-badge" v-if="contract.isNew">Nuevo</div>
-            <div class="card-badge pending-badge" v-if="contract.status === 'pending' && isUserTenant(contract)">
-              Acción requerida
+          <div
+            v-for="(contract, index) in paginatedContracts"
+            :key="contract.id"
+            class="card"
+            :class="{
+              active: activeIndex === index,
+              'highlight-new': contract.isNew,
+              'highlight-pending': contract.status === 'pending' && isUserTenant(contract),
+            }"
+            @click="setActiveContract(index)"
+          >
+            <div class="card-badge" v-if="contract.isNew">
+              {{ t('contracts.new') }}
+            </div>
+            <div
+              class="card-badge pending-badge"
+              v-if="contract.status === 'pending' && isUserTenant(contract)"
+            >
+              {{ t('contracts.actionRequired') }}
             </div>
 
-            <img :src="getPropertyImage(contract.propertyImage)" :alt="contract.title" @error="handleImageError" />
+            <img
+              :src="getPropertyImage(contract.propertyImage)"
+              :alt="contract.title"
+              @error="handleImageError"
+            />
             <h4>{{ contract.title }}</h4>
             <p class="property-address">{{ contract.propertyAddress }}</p>
             <p>
-              Estado:
+              {{ t('contracts.status') }}:
               <span :style="{ color: getStatusInfo(contract.status).color }">
                 {{ getStatusInfo(contract.status).text }}
               </span>
             </p>
             <div class="contract-price">
-              {{ formatPrice(contract.monthlyPrice) }}/mes
+              {{ formatPrice(contract.monthlyPrice) }}/{{ t('common.month') }}
             </div>
 
             <div class="card-actions">
               <template v-if="contract.status === 'pending' && isUserTenant(contract)">
                 <button class="btn-accept" @click.stop="openAcceptModal(contract)">
                   <i class="fas fa-check"></i>
-                  Revisar
+                  {{ t('contracts.review') }}
                 </button>
               </template>
 
               <template v-else>
                 <button class="vista-previa" @click.stop="openContractModal(contract)">
                   <font-awesome-icon :icon="['fas', 'eye']" />
-                  Vista previa
+                  {{ t('contracts.preview') }}
                 </button>
                 <button class="download-btn-sm" @click.stop="downloadContract(contract)">
                   <font-awesome-icon :icon="['fas', 'download']" />
@@ -86,7 +109,9 @@
           <button @click="prevContract" :disabled="activeIndex === 0">⟨</button>
           <span class="carousel-counter">
             {{ activeIndex + 1 }} / {{ paginatedContracts.length }}
-            <span class="page-indicator">(Página {{ currentPage + 1 }} / {{ totalPages }})</span>
+            <span class="page-indicator">
+              ({{ t('contracts.page') }} {{ currentPage + 1 }} / {{ totalPages }})
+            </span>
           </span>
           <button @click="nextContract" :disabled="activeIndex === paginatedContracts.length - 1">⟩</button>
           <button @click="nextPage" :disabled="currentPage === totalPages - 1">⟩⟩</button>
@@ -96,15 +121,15 @@
         <div class="contracts-stats">
           <div class="stat-item">
             <span class="stat-number">{{ contractStats.active }}</span>
-            <span class="stat-label">Activos</span>
+            <span class="stat-label">{{ t('contracts.active') }}</span>
           </div>
           <div class="stat-item">
             <span class="stat-number">{{ contractStats.total }}</span>
-            <span class="stat-label">Total</span>
+            <span class="stat-label">{{ t('contracts.total') }}</span>
           </div>
           <div class="stat-item">
             <span class="stat-number">{{ contractStats.pending }}</span>
-            <span class="stat-label">Pendientes</span>
+            <span class="stat-label">{{ t('contracts.pending') }}</span>
           </div>
         </div>
       </div>
@@ -112,7 +137,7 @@
       <!-- Mensaje si no hay contratos -->
       <div v-else class="empty-state">
         <i class="fas fa-file-contract"></i>
-        <p>No tienes contratos aún</p>
+        <p>{{ t('contracts.empty') }}</p>
       </div>
     </main>
 
@@ -126,57 +151,57 @@
 
         <div v-if="previewLoading" class="preview-loading">
           <div class="loading-spinner"></div>
-          <p>Generando vista previa del contrato...</p>
+          <p>{{ t('contracts.previewLoading') }}</p>
         </div>
 
         <div v-else class="contract-preview">
           <iframe v-if="contractPdfUrl" :src="contractPdfUrl" class="pdf-preview" frameborder="0"></iframe>
           <div v-else class="preview-fallback">
             <i class="fas fa-file-contract"></i>
-            <p>Vista previa no disponible</p>
+            <p>{{ t('contracts.previewUnavailable') }}</p>
           </div>
         </div>
 
         <div class="modal-actions">
           <button class="close-btn" @click="closeModal">
             <i class="fas fa-times"></i>
-            Cerrar
+            {{ t('common.close') }}
           </button>
           <button class="download-btn" @click="downloadContract(selectedContract!)" :disabled="!contractPdfUrl">
             <i class="fas fa-download"></i>
-            Descargar PDF
+            {{ t('contracts.downloadPdf') }}
           </button>
           <button class="share-btn" @click="shareContract(selectedContract!)">
             <i class="fas fa-share"></i>
-            Compartir
+            {{ t('contracts.share') }}
           </button>
         </div>
 
         <div class="contract-details">
-          <h4>Detalles del Contrato</h4>
+          <h4>{{ t('contracts.details') }}</h4>
           <div class="details-grid">
             <div class="detail-item">
-              <label>Propiedad:</label>
+              <label>{{ t('contracts.property') }}:</label>
               <span>{{ selectedContract?.propertyAddress }}</span>
             </div>
             <div class="detail-item">
-              <label>Inquilino:</label>
+              <label>{{ t('contracts.tenant') }}:</label>
               <span>{{ selectedContract?.tenantName }}</span>
             </div>
             <div class="detail-item">
-              <label>Valor Mensual:</label>
+              <label>{{ t('contracts.monthlyValue') }}:</label>
               <span>{{ formatPrice(selectedContract?.monthlyPrice) }}</span>
             </div>
             <div class="detail-item">
-              <label>Duración:</label>
+              <label>{{ t('contracts.duration') }}:</label>
               <span>{{ getContractDuration(selectedContract!) }}</span>
             </div>
             <div class="detail-item">
-              <label>Fecha Inicio:</label>
+              <label>{{ t('contracts.startDate') }}:</label>
               <span>{{ formatDate(selectedContract?.startDate) }}</span>
             </div>
             <div class="detail-item">
-              <label>Fecha Fin:</label>
+              <label>{{ t('contracts.endDate') }}:</label>
               <span>{{ formatDate(selectedContract?.endDate) }}</span>
             </div>
           </div>
@@ -188,55 +213,55 @@
     <div v-if="showAcceptModal" class="modal-overlay" @click="closeAcceptModal">
       <div class="accept-modal-content" @click.stop>
         <div class="modal-header">
-          <h3>📄 Revisar Contrato</h3>
+          <h3>📄 {{ t('contracts.reviewContract') }}</h3>
           <span class="close" @click="closeAcceptModal">&times;</span>
         </div>
 
         <div class="accept-modal-body">
           <div v-if="previewLoading" class="preview-loading">
             <div class="loading-spinner"></div>
-            <p>Cargando contrato...</p>
+            <p>{{ t('contracts.loadingContract') }}</p>
           </div>
 
           <div v-else class="contract-preview">
             <iframe v-if="contractPdfUrl" :src="contractPdfUrl" class="pdf-preview" frameborder="0"></iframe>
             <div v-else class="preview-fallback">
               <i class="fas fa-file-contract"></i>
-              <p>Vista previa no disponible</p>
+              <p>{{ t('contracts.previewUnavailable') }}</p>
             </div>
           </div>
 
           <div class="contract-summary">
-            <h4>Resumen del Contrato</h4>
+            <h4>{{ t('contracts.summary') }}</h4>
             <div class="summary-grid">
               <div class="summary-item">
-                <span class="summary-label">Propiedad:</span>
+                <span class="summary-label">{{ t('contracts.property') }}:</span>
                 <span class="summary-value">{{ selectedContract?.propertyAddress }}</span>
               </div>
               <div class="summary-item">
-                <span class="summary-label">Arrendador:</span>
+                <span class="summary-label">{{ t('contracts.landlord') }}:</span>
                 <span class="summary-value">{{ selectedContract?.landlordName }}</span>
               </div>
               <div class="summary-item">
-                <span class="summary-label">Valor mensual:</span>
+                <span class="summary-label">{{ t('contracts.monthlyValue') }}:</span>
                 <span class="summary-value highlight">{{ formatPrice(selectedContract?.monthlyPrice) }}</span>
               </div>
               <div class="summary-item">
-                <span class="summary-label">Depósito:</span>
+                <span class="summary-label">{{ t('contracts.deposit') }}:</span>
                 <span class="summary-value">{{ formatPrice(selectedContract?.deposit) }}</span>
               </div>
               <div class="summary-item">
-                <span class="summary-label">Duración:</span>
+                <span class="summary-label">{{ t('contracts.duration') }}:</span>
                 <span class="summary-value">{{ getContractDuration(selectedContract!) }}</span>
               </div>
               <div class="summary-item">
-                <span class="summary-label">Inicio:</span>
+                <span class="summary-label">{{ t('contracts.startDate') }}:</span>
                 <span class="summary-value">{{ formatDate(selectedContract?.startDate) }}</span>
               </div>
             </div>
 
             <div v-if="selectedContract?.clauses && selectedContract.clauses.length > 0" class="clauses-section">
-              <h5>Cláusulas importantes:</h5>
+              <h5>{{ t('contracts.importantClauses') }}</h5>
               <ul class="clauses-list">
                 <li v-for="(clause, idx) in selectedContract.clauses" :key="idx">
                   {{ clause }}
@@ -248,18 +273,18 @@
           <div class="confirmation-box">
             <label class="checkbox-label">
               <input type="checkbox" v-model="contractAccepted" />
-              <span>He leído y acepto los términos del contrato</span>
+              <span>{{ t('contracts.acceptTerms') }}</span>
             </label>
           </div>
 
           <div class="accept-modal-actions">
             <button class="btn-accept-full" @click="acceptContract" :disabled="!contractAccepted || acceptLoading">
               <i class="fas fa-check-circle"></i>
-              {{ acceptLoading ? 'Aceptando...' : 'Aceptar Contrato' }}
+              {{ acceptLoading ? t('contracts.accepting') : t('contracts.accept') }}
             </button>
             <button class="btn-reject-full" @click="rejectContract" :disabled="acceptLoading">
               <i class="fas fa-times-circle"></i>
-              Rechazar Contrato
+              {{ t('contracts.reject') }}
             </button>
           </div>
         </div>
@@ -268,10 +293,15 @@
   </div>
 </template>
 
+
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
 import { contractService } from "../../services/contractService";
 import { pdfService } from "../../services/pdfService";
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
 
 // Constante para imagen por defecto
 const DEFAULT_PROPERTY_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI2MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2Yzc1N2QiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZW4gbm8gZGlzcG9uaWJsZTwvdGV4dD48L3N2Zz4=";
