@@ -125,53 +125,64 @@ class AuthService {
   /**
    * Registrar nuevo usuario
    */
-  async register(userData: RegisterData): Promise<AuthResponse> {
-    try {
-      console.log('📤 Enviando registro:', userData);
-      
-      const response = await api.post<AuthResponse>("/auth/register", {
-        ...userData,
-        email: userData.email.trim().toLowerCase(),
-        status: userData.status || 'active'
-      });
+async register(userData: RegisterData): Promise<AuthResponse> {
+  try {
+    console.log('📤 Enviando registro:', userData);
+    
+    const response = await api.post<AuthResponse>("/auth/register", {
+      ...userData,
+      email: userData.email.trim().toLowerCase(),
+      status: userData.status || 'active'
+    });
 
-      if (response.data.success && response.data.token && response.data.user) {
-        this.saveToken(response.data.token, false); // Por defecto no recordar en registro
-        this.saveUser(response.data.user, false);
-        console.log('✅ Registro exitoso:', response.data.user);
-        return response.data;
-      }
-
-      throw new Error(response.data.message || "Error en el registro");
-      
-    } catch (error: unknown) {
-      console.error('❌ Error en registro:', error);
-      
-      if (error instanceof AxiosError) {
-        const responseData = error.response?.data as ErrorResponse;
-        
-        // Manejar errores de validación 422
-        if (error.response?.status === 422 && responseData?.errors) {
-          const validationErrors = responseData.errors;
-          const errorMessages = Object.entries(validationErrors)
-            .map(([field, messages]) => {
-              const fieldName = this.translateFieldName(field);
-              return `${fieldName}: ${messages.join(', ')}`;
-            })
-            .join('\n');
-          
-          throw new Error(`Errores de validación:\n${errorMessages}`);
-        }
-        
-        // Manejar otros errores
-        throw new Error(
-          responseData?.message || "Error en el registro"
-        );
-      }
-      
-      throw new Error("Error desconocido en el registro");
+    // Caso 1: registro exitoso con token (login automático)
+    if (response.data.success && response.data.token && response.data.user) {
+      this.saveToken(response.data.token, false);
+      this.saveUser(response.data.user, false);
+      console.log('✅ Registro y login exitoso:', response.data.user);
+      return response.data;
     }
+
+    // Caso 2: registro exitoso pero solo envío de correo
+    if (response.data.success && !response.data.token) {
+      console.log('✅ Registro exitoso, por favor verifica tu correo:', response.data.message);
+      // Guardar email pendiente para verificación
+      localStorage.setItem("pending_email", userData.email.trim().toLowerCase());
+      return response.data;
+    }
+
+    // Caso 3: error real
+    throw new Error(response.data.message || "Error en el registro");
+    
+  } catch (error: unknown) {
+    console.error('❌ Error en registro:', error);
+    
+    if (error instanceof AxiosError) {
+      const responseData = error.response?.data as ErrorResponse;
+      
+      // Manejar errores de validación 422
+      if (error.response?.status === 422 && responseData?.errors) {
+        const validationErrors = responseData.errors;
+        const errorMessages = Object.entries(validationErrors)
+          .map(([field, messages]) => {
+            const fieldName = this.translateFieldName(field);
+            return `${fieldName}: ${messages.join(', ')}`;
+          })
+          .join('\n');
+        
+        throw new Error(`Errores de validación:\n${errorMessages}`);
+      }
+      
+      // Otros errores del backend
+      throw new Error(
+        responseData?.message || "Error en el registro"
+      );
+    }
+    
+    throw new Error("Error desconocido en el registro");
   }
+}
+
 
   /**
    * Iniciar sesión

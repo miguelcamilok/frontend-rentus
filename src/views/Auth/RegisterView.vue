@@ -357,11 +357,11 @@ const validatePassword = (password: string): string | null => {
     return null;
 };
 
-const validatePasswordConfirmation = (confirmation: string): string | null => {
-    if (!confirmation) return "Debes confirmar tu contraseña";
-    if (confirmation !== formData.value.password) return "Las contraseñas no coinciden";
-    return null;
-};
+// const validatePasswordConfirmation = (confirmation: string): string | null => {
+//     if (!confirmation) return "Debes confirmar tu contraseña";
+//     if (confirmation !== formData.value.password) return "Las contraseñas no coinciden";
+//     return null;
+// };
 
 const validateField = (field: keyof RegisterData) => {
     let error: string | null = null;
@@ -400,22 +400,22 @@ const clearFieldError = (field: string) => {
 };
 
 // Fortaleza de contraseña
-const passwordStrength = computed(() => {
-    const pwd = formData.value.password;
-    if (!pwd) return { level: 'weak', percentage: 0, text: '' };
+// const passwordStrength = computed(() => {
+//     const pwd = formData.value.password;
+//     if (!pwd) return { level: 'weak', percentage: 0, text: '' };
 
-    let strength = 0;
-    if (pwd.length >= 8) strength += 20;
-    if (pwd.length >= 12) strength += 10;
-    if (/[a-z]/.test(pwd)) strength += 20;
-    if (/[A-Z]/.test(pwd)) strength += 20;
-    if (/[0-9]/.test(pwd)) strength += 15;
-    if (/[!@#$%^&*]/.test(pwd)) strength += 15;
+//     let strength = 0;
+//     if (pwd.length >= 8) strength += 20;
+//     if (pwd.length >= 12) strength += 10;
+//     if (/[a-z]/.test(pwd)) strength += 20;
+//     if (/[A-Z]/.test(pwd)) strength += 20;
+//     if (/[0-9]/.test(pwd)) strength += 15;
+//     if (/[!@#$%^&*]/.test(pwd)) strength += 15;
 
-    if (strength < 40) return { level: 'weak', percentage: strength, text: 'Débil' };
-    if (strength < 70) return { level: 'medium', percentage: strength, text: 'Media' };
-    return { level: 'strong', percentage: strength, text: 'Fuerte' };
-});
+//     if (strength < 40) return { level: 'weak', percentage: strength, text: 'Débil' };
+//     if (strength < 70) return { level: 'medium', percentage: strength, text: 'Media' };
+//     return { level: 'strong', percentage: strength, text: 'Fuerte' };
+// });
 
 // Validar formulario completo
 const isFormValid = computed(() => {
@@ -614,91 +614,4 @@ onMounted(() => {
 
 <style scoped>
 @import '../../assets/css/auth/auth.css';
-
-.input-error {
-    border-color: #ef4444 !important;
-    background-color: #fef2f2;
-}
-
-.error-text {
-    display: block;
-    color: #ef4444;
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
-}
-
-.btn-submit:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-/* Password Strength Indicator */
-.password-strength {
-    margin-top: 0.5rem;
-}
-
-.strength-bar {
-    width: 100%;
-    height: 4px;
-    background: #e5e7eb;
-    border-radius: 2px;
-    overflow: hidden;
-    margin-bottom: 0.25rem;
-}
-
-.strength-fill {
-    height: 100%;
-    transition: all 0.3s ease;
-    border-radius: 2px;
-}
-
-.strength-weak {
-    background: linear-gradient(90deg, #ef4444, #dc2626);
-}
-
-.strength-medium {
-    background: linear-gradient(90deg, #f59e0b, #d97706);
-}
-
-.strength-strong {
-    background: linear-gradient(90deg, #10b981, #059669);
-}
-
-.strength-text {
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.text-weak {
-    color: #ef4444;
-}
-
-.text-medium {
-    color: #f59e0b;
-}
-
-.text-strong {
-    color: #10b981;
-}
-
-.link-terms {
-    color: #3a2219a9;
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s ease;
-}
-
-.link-terms:hover {
-    color: #3a2219;
-    text-decoration: underline;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .form-group {
-        margin-bottom: 1.25rem;
-    }
-}
 </style>

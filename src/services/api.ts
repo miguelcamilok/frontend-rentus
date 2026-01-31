@@ -1,41 +1,31 @@
+
 // services/api.ts
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 
+// ==================== CONFIGURACIÓN BASE ====================
 const api = axios.create({
-  baseURL: "http://api.rentus/api",
-  timeout: 30000,
+  baseURL: import.meta.env.VITE_API_URL || "http://api.rentus/api",
   headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  }
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+  timeout: 10000, // 10 segundos
 });
 
-// Variable para evitar loops infinitos en refresh
-let isRefreshing = false;
-let failedQueue: Array<{
-  resolve: (token: string) => void;
-  reject: (error: any) => void;
-}> = [];
+// ==================== HELPERS ====================
 
-const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach(prom => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token!);
-    }
-  });
-  failedQueue = [];
-};
-
-// Función para obtener el token del storage correcto
+/**
+ * Obtener token del storage
+ */
 const getToken = (): string | null => {
   return localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token");
 };
 
-// Función para guardar el token en el storage correcto
+/**
+ * Guardar token en storage
+ */
 const saveToken = (token: string, remember: boolean = false) => {
-  if (remember || localStorage.getItem("auth_token")) {
+  if (remember) {
     localStorage.setItem("auth_token", token);
     sessionStorage.removeItem("auth_token");
   } else {
@@ -44,7 +34,9 @@ const saveToken = (token: string, remember: boolean = false) => {
   }
 };
 
-// Función para limpiar el storage
+/**
+ * Limpiar storage
+ */
 const clearStorage = () => {
   localStorage.removeItem("auth_token");
   localStorage.removeItem("user");
@@ -52,49 +44,85 @@ const clearStorage = () => {
   sessionStorage.removeItem("user");
 };
 
-// Interceptor de REQUEST: agrega el token automáticamente
+// ==================== INTERCEPTOR DE REQUEST ====================
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = getToken();
+
+    // Agregar token a los headers si existe
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
   },
-  (error) => {
+  (error: AxiosError) => {
+    console.error("❌ Error en request:", error);
     return Promise.reject(error);
   }
 );
 
-// Interceptor de RESPONSE: maneja tokens expirados y refresh automático
+// ==================== INTERCEPTOR DE RESPONSE ====================
+
+// Variable para evitar múltiples intentos de refresh simultáneos
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value?: unknown) => void;
+  reject: (reason?: any) => void;
+}> = [];
+
+/**
+ * Procesar cola de peticiones fallidas después del refresh
+ */
+const processQueue = (error: Error | null, token: string | null = null) => {
+  failedQueue.forEach((promise) => {
+    if (error) {
+      promise.reject(error);
+    } else {
+      promise.resolve(token);
+    }
+  });
+
+  failedQueue = [];
+};
+
 api.interceptors.response.use(
   (response) => {
+    // Response exitoso, retornarlo directamente
     return response;
   },
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
 
-    // Si es error 401 y no hemos intentado refrescar
+    // Si no hay config, rechazar directamente
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
+
+    // ==================== MANEJO DE 401 (TOKEN EXPIRADO) ====================
     if (error.response?.status === 401 && !originalRequest._retry) {
-      
-      // Si la petición es al endpoint de login o refresh, no intentar refrescar
-      if (originalRequest.url?.includes('/auth/login') || 
-          originalRequest.url?.includes('/auth/register')) {
+      // Evitar loop infinito
+      if (originalRequest.url?.includes("/auth/refresh")) {
+        console.error("❌ Refresh token expirado, cerrando sesión");
+        clearStorage();
+        window.location.href = "/login";
         return Promise.reject(error);
       }
 
-      // Si ya estamos refrescando, agregar a la cola
       if (isRefreshing) {
+        // Ya hay un refresh en proceso, agregar a la cola
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
-          .then(token => {
+          .then((token) => {
             if (originalRequest.headers) {
               originalRequest.headers.Authorization = `Bearer ${token}`;
             }
             return api(originalRequest);
           })
-          .catch(err => {
+          .catch((err) => {
             return Promise.reject(err);
           });
       }
@@ -103,51 +131,85 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // Intentar refrescar el token
-        const response = await api.post('/auth/refresh');
-        const newToken = response.data.token;
+        console.log("🔄 Token expirado, intentando refresh...");
 
-        if (newToken) {
-          // Determinar si está en localStorage o sessionStorage
+        // Intentar refrescar el token
+        const response = await api.post("/auth/refresh");
+
+        if (response.data.success && response.data.token) {
+          const newToken = response.data.token;
           const isRemembered = !!localStorage.getItem("auth_token");
+
+          // Guardar nuevo token
           saveToken(newToken, isRemembered);
 
-          // Procesar la cola de peticiones fallidas
-          processQueue(null, newToken);
-
-          // Actualizar el header de la petición original
+          // Actualizar header de la petición original
           if (originalRequest.headers) {
             originalRequest.headers.Authorization = `Bearer ${newToken}`;
           }
 
-          // Reintentar la petición original
+          // Procesar cola de peticiones fallidas
+          processQueue(null, newToken);
+
+          console.log("✅ Token refrescado exitosamente");
+
+          // Reintentar petición original
           return api(originalRequest);
+        } else {
+          throw new Error("No se pudo refrescar el token");
         }
       } catch (refreshError) {
-        // Si falla el refresh, limpiar todo y redirigir
-        processQueue(refreshError, null);
+        console.error("❌ Error al refrescar token:", refreshError);
+
+        // Procesar cola con error
+        processQueue(refreshError as Error, null);
+
+        // Limpiar storage y redirigir
         clearStorage();
-        
-        // Solo redirigir si no estamos ya en login
-        if (window.location.pathname !== '/login') {
-          localStorage.setItem('redirectAfterLogin', window.location.pathname);
-          window.location.href = '/login';
-        }
-        
+        window.location.href = "/login";
+
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
     }
 
-    // Manejar error 403 (Forbidden)
+    // ==================== OTROS ERRORES ====================
+
+    // 403: Forbidden (cuenta inactiva, no verificada, etc.)
     if (error.response?.status === 403) {
-      console.error('Acceso denegado: No tienes permisos para esta acción');
+      console.warn("⚠️ Acceso denegado (403)");
+    }
+
+    // 422: Validation Error
+    if (error.response?.status === 422) {
+      console.warn("⚠️ Error de validación (422)");
+    }
+
+    // 429: Too Many Requests
+    if (error.response?.status === 429) {
+      console.warn("⚠️ Demasiadas peticiones (429)");
+    }
+
+    // 500: Server Error
+    if (error.response?.status === 500) {
+      console.error("❌ Error del servidor (500)");
+    }
+
+    // Timeout
+    if (error.code === "ECONNABORTED") {
+      console.error("❌ Timeout: La petición tardó demasiado");
+    }
+
+    // Network Error
+    if (!error.response) {
+      console.error("❌ Error de red: No se pudo conectar al servidor");
     }
 
     return Promise.reject(error);
   }
 );
+
 
 // API de Google Maps (sin cambios)
 const googleApi = axios.create({
