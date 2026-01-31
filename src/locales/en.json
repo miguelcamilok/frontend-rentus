@@ -405,7 +405,9 @@
         "locationModal": {
             "title": "Location",
             "department": "Department",
-            "city": "City"
+            "city": "City",
+            "selectDepartment": "Select Department",
+            "selectCity": "Select City"
         }
     },
     "contracts": {
@@ -444,7 +446,13 @@
         "acceptTerms": "I have read and accept the contract terms",
         "accept": "Accept Contract",
         "accepting": "Accepting...",
-        "reject": "Reject Contract"
+        "reject": "Reject Contract",
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "statusExpired": "Expired",
+        "statusPending": "Pending",
+        "statusRejected": "Rejected",
+        "statusUnknown": "Unknown Status"
     },
     "notifications": {
         "title": "Notifications",

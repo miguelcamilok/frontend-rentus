@@ -34,13 +34,7 @@
               <div class="avatar-overlay">
                 <font-awesome-icon :icon="['fas', 'camera']" />
               </div>
-              <input
-                ref="fileInput"
-                type="file"
-                accept="image/*"
-                @change="handlePhotoUpload"
-                style="display: none"
-              />
+              <input ref="fileInput" type="file" accept="image/*" @change="handlePhotoUpload" style="display: none" />
             </div>
           </div>
 
@@ -72,11 +66,7 @@
                   <font-awesome-icon :icon="['fas', 'user']" />
                   {{ t('profile.bio') }}
                 </h4>
-                <button
-                  v-if="profileData.bio && !editingBio"
-                  @click="startEditBio"
-                  class="icon-btn-small"
-                >
+                <button v-if="profileData.bio && !editingBio" @click="startEditBio" class="icon-btn-small">
                   <font-awesome-icon :icon="['fas', 'edit']" />
                 </button>
               </div>
@@ -87,18 +77,13 @@
                 </p>
                 <button v-else @click="startEditBio" class="add-content-btn">
                   <font-awesome-icon :icon="['fas', 'plus']" />
-                  <span>{{ t('profile.bio.add') }}</span>
+                  <span>{{ t('profile.addBio') }}</span>
                 </button>
               </div>
 
               <div v-else class="bio-edit">
-                <textarea
-                  v-model="bioText"
-                  ref="bioTextarea"
-                  class="bio-input"
-                  :placeholder="t('profile.bio.placeholder')"
-                  maxlength="200"
-                ></textarea>
+                <textarea v-model="bioText" ref="bioTextarea" class="bio-input"
+                  :placeholder="t('profile.bioPlaceholder')" maxlength="200"></textarea>
 
                 <div class="bio-footer">
                   <span class="char-count">{{ bioText.length }}/200</span>
@@ -116,11 +101,7 @@
 
             <!-- Stats -->
             <div class="stats-cards-compact">
-              <div
-                v-for="stat in stats"
-                :key="stat.key"
-                class="stat-card-compact"
-              >
+              <div v-for="stat in stats" :key="stat.key" class="stat-card-compact">
                 <font-awesome-icon :icon="stat.icon" class="stat-icon-compact" />
                 <span class="stat-value-compact">{{ stat.value }}</span>
                 <span class="stat-label-compact">
@@ -134,11 +115,7 @@
 
       <!-- Contact Info -->
       <div class="info-grid">
-        <div
-          v-for="info in contactInfo"
-          :key="info.key"
-          class="info-card"
-        >
+        <div v-for="info in contactInfo" :key="info.key" class="info-card">
           <div class="info-card-icon">
             <font-awesome-icon :icon="info.icon" />
           </div>
@@ -167,18 +144,11 @@
         </div>
 
         <div v-if="userProperties.length > 0" class="properties-grid">
-          <div
-            v-for="property in userProperties"
-            :key="property.id"
-            class="property-card"
-            @click="viewPropertyDetails(property.id)"
-          >
+          <div v-for="property in userProperties" :key="property.id" class="property-card"
+            @click="viewPropertyDetails(property.id)">
             <div class="property-image">
-              <img
-                :src="property.image_url || defaultPropertyImage"
-                :alt="property.title"
-                @error="handlePropertyImageError"
-              />
+              <img :src="property.image_url || defaultPropertyImage" :alt="property.title"
+                @error="handlePropertyImageError" />
               <div class="property-status" :class="`status-${property.status}`">
                 {{ friendlyStatus(property.status) }}
               </div>
@@ -188,10 +158,7 @@
                   <button @click="editProperty(property.id)" class="action-btn">
                     <font-awesome-icon :icon="['fas', 'edit']" />
                   </button>
-                  <button
-                    @click="deleteProperty(property.id)"
-                    class="action-btn delete"
-                  >
+                  <button @click="deleteProperty(property.id)" class="action-btn delete">
                     <font-awesome-icon :icon="['fas', 'trash']" />
                   </button>
                 </div>
@@ -244,7 +211,69 @@
           </button>
         </div>
       </div>
+
+      <!-- Social Links -->
+      <div class="social-links">
+        <a href="#" class="social-btn facebook">
+          <font-awesome-icon :icon="['fab', 'facebook-f']" />
+        </a>
+        <a href="#" class="social-btn instagram">
+          <font-awesome-icon :icon="['fab', 'instagram']" />
+        </a>
+        <a href="#" class="social-btn twitter">
+          <font-awesome-icon :icon="['fab', 'twitter']" />
+        </a>
+        <a href="#" class="social-btn linkedin">
+          <font-awesome-icon :icon="['fab', 'linkedin-in']" />
+        </a>
+      </div>
     </main>
+
+    <!-- Location Modal -->
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="showLocationModal" class="modal-backdrop" @click="showLocationModal = false">
+          <div class="modal" @click.stop>
+            <div class="modal-header">
+              <h3>{{ t('profile.locationModal.title') }}</h3>
+              <button @click="showLocationModal = false" class="modal-close">
+                <font-awesome-icon :icon="['fas', 'times']" />
+              </button>
+            </div>
+
+            <div class="modal-body">
+              <div class="form-group">
+                <label>{{ t('profile.locationModal.department') }}</label>
+                <select v-model="selectedDepartment" @change="updateCities">
+                  <option value="">{{ t('profile.locationModal.selectDepartment') }}</option>
+                  <option v-for="dept in departments" :key="dept.name" :value="dept.name">
+                    {{ dept.name }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group" v-if="selectedDepartment">
+                <label>{{ t('profile.locationModal.city') }}</label>
+                <select v-model="selectedCity">
+                  <option value="">{{ t('profile.locationModal.selectCity') }}</option>
+                  <option v-for="city in availableCities" :key="city" :value="city">
+                    {{ city }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button @click="cancelLocationModal" class="btn-secondary">{{ t('common.cancel') }}</button>
+              <button @click="saveLocation" :disabled="!selectedCity" class="btn-primary">
+                {{ t('common.save') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
   </div>
 </template>
 
@@ -500,7 +529,7 @@ const deleteProperty = (id: number) => {
 onMounted(async () => {
   try {
     const userResponse = await api.get('/auth/me')
-    
+
     if (!userResponse.data.success || !userResponse.data.user) {
       throw new Error('No se pudo obtener el usuario')
     }
@@ -537,7 +566,7 @@ onMounted(async () => {
       err.response?.data?.message || 'No se pudo cargar tu perfil. Intenta nuevamente.',
       'Error al cargar perfil'
     )
-    
+
     if (err.response?.status === 401) {
       router.push('/login')
     }

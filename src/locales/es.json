@@ -444,7 +444,13 @@
         "acceptTerms": "He leído y acepto los términos del contrato",
         "accept": "Aceptar Contrato",
         "accepting": "Aceptando...",
-        "reject": "Rechazar Contrato"
+        "reject": "Rechazar Contrato",
+        "statusActive": "Activo",
+        "statusInactive": "Inactivo",
+        "statusExpired": "Expirado",
+        "statusPending": "Pendiente",
+        "statusRejected": "Rechazado",
+        "statusUnknown": "Desconocido"
     },
     "notifications": {
         "title": "Notificaciones",

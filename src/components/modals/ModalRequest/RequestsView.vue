@@ -192,6 +192,269 @@
           </section>
         </div>
       </transition>
+  <!-- MODAL DE REVISIÓN -->
+      <transition name="modal-fade">
+        <div v-if="showReviewModal" class="overlay overlay-nested" @click.self="closeReviewModal">
+          <transition name="modal-scale">
+            <div class="review-modal">
+              <div class="modal-particles">
+                <div v-for="i in 4" :key="i" class="particle" :style="{ '--delay': i * 0.5 + 's' }"></div>
+              </div>
+
+              <header class="modal-header secondary">
+                <div class="header-content">
+                  <div class="icon-badge secondary">
+                    <font-awesome-icon icon="search" />
+                  </div>
+                  <div class="title-box">
+                    <h3>Revisar Solicitud</h3>
+                  </div>
+                </div>
+                <button class="btn-close" @click="closeReviewModal">
+                  <font-awesome-icon icon="times" />
+                </button>
+              </header>
+
+              <div class="review-content" v-if="selectedRequest">
+                <div class="review-property">
+                  <div class="property-img-wrapper">
+                    <img :src="selectedRequest.property?.image_url" />
+                    <div class="img-overlay"></div>
+                  </div>
+                  <div class="property-text">
+                    <h4>{{ selectedRequest.property?.title }}</h4>
+                    <p>
+                      <font-awesome-icon icon="map-marker-alt" class="icon-small" />
+                      {{ selectedRequest.property?.address }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="review-tenant">
+                  <div class="tenant-img-wrapper">
+                    <img :src="selectedRequest.user?.photo || '/img/default.webp'" />
+                    <div class="tenant-ring"></div>
+                  </div>
+                  <div class="tenant-text">
+                    <p class="name">{{ selectedRequest.user?.name }}</p>
+                    <p class="rating">
+                      <font-awesome-icon icon="star" />
+                      {{ selectedRequest.user?.rating || 'N/A' }}
+                    </p>
+                    <p class="contact">
+                      <font-awesome-icon icon="envelope" class="icon-tiny" />
+                      {{ selectedRequest.user?.email }}
+                    </p>
+                    <p class="contact">
+                      <font-awesome-icon icon="phone" class="icon-tiny" />
+                      {{ selectedRequest.user?.phone }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="review-date">
+                  <div class="date-header">
+                    <font-awesome-icon icon="calendar-check" />
+                    <strong>Fecha solicitada</strong>
+                  </div>
+                  <p class="date-detail">
+                    <font-awesome-icon icon="calendar" class="icon-small" />
+                    {{ formatDate(selectedRequest.requested_date) }}
+                  </p>
+                  <p class="date-detail">
+                    <font-awesome-icon icon="clock" class="icon-small" />
+                    {{ selectedRequest.requested_time }}
+                  </p>
+                </div>
+
+                <div class="review-actions">
+                  <button class="btn success-full" @click="aceptarSolicitud">
+                    <font-awesome-icon icon="check" />
+                    <span>Aceptar solicitud</span>
+                  </button>
+                  <button class="btn warning-full" @click="toggleCounterForm">
+                    <font-awesome-icon icon="calendar-alt" />
+                    <span>{{ showCounterForm ? 'Cancelar propuesta' : 'Proponer otra fecha' }}</span>
+                  </button>
+                  <button class="btn danger-full" @click="rechazarSolicitud">
+                    <font-awesome-icon icon="times" />
+                    <span>Rechazar solicitud</span>
+                  </button>
+                </div>
+
+                <!-- FORMULARIO CONTRA-PROPUESTA -->
+                <transition name="fade">
+                  <div v-if="showCounterForm" class="counter-form">
+                    <div class="form-header">
+                      <font-awesome-icon icon="calendar-alt" class="form-icon" />
+                      <h4>Proponer nueva fecha y hora</h4>
+                    </div>
+                    <div class="form-group">
+                      <label>
+                        <font-awesome-icon icon="calendar" class="label-icon" />
+                        Nueva fecha
+                      </label>
+                      <input type="date" v-model="counterDate" :min="getTodayDate()" />
+                    </div>
+                    <div class="form-group">
+                      <label>
+                        <font-awesome-icon icon="clock" class="label-icon" />
+                        Nueva hora
+                      </label>
+                      <input type="time" v-model="counterTime" />
+                    </div>
+                    <div class="form-actions">
+                      <button class="btn primary" @click="enviarContraPropuesta">
+                        <font-awesome-icon icon="paper-plane" />
+                        <span>Enviar propuesta</span>
+                      </button>
+                      <button class="btn secondary" @click="showCounterForm = false">
+                        <font-awesome-icon icon="times" />
+                        <span>Cancelar</span>
+                      </button>
+                    </div>
+                  </div>
+                </transition>
+              </div>
+            </div>
+          </transition>
+        </div>
+      </transition>
+
+      <!-- MODAL DE CONTRATO -->
+      <transition name="modal-fade">
+        <div v-if="showContractModal" class="overlay overlay-nested" @click.self="closeContractModal">
+          <transition name="modal-scale">
+            <div class="contract-modal">
+              <div class="modal-particles">
+                <div v-for="i in 4" :key="i" class="particle" :style="{ '--delay': i * 0.5 + 's' }"></div>
+              </div>
+
+              <header class="modal-header tertiary">
+                <div class="header-content">
+                  <div class="icon-badge tertiary">
+                    <font-awesome-icon icon="file-alt" />
+                  </div>
+                  <div class="title-box">
+                    <h3>Enviar Términos del Contrato</h3>
+                  </div>
+                </div>
+                <button class="btn-close" @click="closeContractModal">
+                  <font-awesome-icon icon="times" />
+                </button>
+              </header>
+
+              <div class="contract-content" v-if="selectedRequest">
+                <div class="contract-section">
+                  <div class="section-title">
+                    <font-awesome-icon icon="calendar-check" />
+                    <span>Período del contrato</span>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>
+                        <font-awesome-icon icon="calendar" class="label-icon" />
+                        Fecha de inicio
+                      </label>
+                      <input type="date" v-model="contractData.start_date" :min="getTodayDate()" />
+                    </div>
+                    <div class="form-group">
+                      <label>
+                        <font-awesome-icon icon="calendar" class="label-icon" />
+                        Fecha de finalización
+                      </label>
+                      <input type="date" v-model="contractData.end_date" :min="contractData.start_date" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="contract-section">
+                  <div class="section-title">
+                    <font-awesome-icon icon="dollar-sign" />
+                    <span>Información financiera</span>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>
+                        <font-awesome-icon icon="dollar-sign" class="label-icon" />
+                        Precio mensual ($)
+                      </label>
+                      <input type="number" v-model.number="contractData.monthly_price"
+                        :placeholder="selectedRequest.property?.monthly_price" />
+                    </div>
+                    <div class="form-group">
+                      <label>
+                        <font-awesome-icon icon="shield-alt" class="label-icon" />
+                        Depósito/Garantía ($)
+                      </label>
+                      <input type="number" v-model.number="contractData.deposit" />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>
+                        <font-awesome-icon icon="calendar-check" class="label-icon" />
+                        Día de pago (1-31)
+                      </label>
+                      <input type="number" v-model.number="contractData.payment_day" min="1" max="31" />
+                    </div>
+                    <div class="form-group">
+                      <label>
+                        <font-awesome-icon icon="exclamation-triangle" class="label-icon" />
+                        Multa por retraso ($)
+                      </label>
+                      <input type="number" v-model.number="contractData.late_fee" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="contract-section">
+                  <div class="section-title">
+                    <font-awesome-icon icon="list-check" />
+                    <span>Servicios y términos</span>
+                  </div>
+                  <div class="form-group">
+                    <label>
+                      <font-awesome-icon icon="lightbulb" class="label-icon" />
+                      Servicios incluidos
+                    </label>
+                    <input type="text" v-model="utilitiesInput" placeholder="Agua, Luz, Internet, Gas" />
+                    <span class="input-hint">Separados por coma</span>
+                  </div>
+                  <div class="form-group">
+                    <label>
+                      <font-awesome-icon icon="file-alt" class="label-icon" />
+                      Cláusulas del contrato
+                    </label>
+                    <textarea v-model="clausesInput" rows="5"
+                      placeholder="Ejemplo: No se permiten mascotas, No fumar dentro del inmueble, etc."></textarea>
+                    <span class="input-hint">Una por línea</span>
+                  </div>
+                  <div class="form-group">
+                    <label>
+                      <font-awesome-icon icon="info-circle" class="label-icon" />
+                      Condiciones especiales (opcional)
+                    </label>
+                    <textarea v-model="contractData.special_conditions" rows="3"
+                      placeholder="Condiciones adicionales..."></textarea>
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button class="btn success-full" @click="enviarContrato">
+                    <font-awesome-icon icon="paper-plane" />
+                    <span>Enviar contrato</span>
+                  </button>
+                  <button class="btn secondary" @click="closeContractModal">
+                    <font-awesome-icon icon="times" />
+                    <span>Cancelar</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </transition>
+        </div>
+      </transition>
     </div>
   </transition>
 </template>

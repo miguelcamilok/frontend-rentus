@@ -82,6 +82,7 @@
               {{ formatPrice(contract.monthlyPrice) }}/{{ t('common.month') }}
             </div>
 
+            <!-- ✅ ARREGLADO: Condición mejorada -->
             <div class="card-actions">
               <template v-if="contract.status === 'pending' && isUserTenant(contract)">
                 <button class="btn-accept" @click.stop="openAcceptModal(contract)">
@@ -99,6 +100,11 @@
                   <font-awesome-icon :icon="['fas', 'download']" />
                 </button>
               </template>
+            </div>
+
+            <!-- ✅ DEBUG: Remover después de confirmar que funciona -->
+            <div v-if="false" style="font-size: 10px; color: red; margin-top: 5px;">
+              DEBUG: Status={{ contract.status }}, TenantId={{ contract.tenantId }}, CurrentUserId={{ currentUserId }}, IsTenant={{ isUserTenant(contract) }}
             </div>
           </div>
         </div>
@@ -302,7 +308,6 @@ import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
-
 // Constante para imagen por defecto
 const DEFAULT_PROPERTY_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI2MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2Yzc1N2QiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZW4gbm8gZGlzcG9uaWJsZTwvdGV4dD48L3N2Zz4=";
 
@@ -388,14 +393,48 @@ watch(currentPage, () => {
   activeIndex.value = 0;
 });
 
-// Cargar usuario actual
+// ✅ ARREGLADO: Cargar usuario actual con mejor logging
 const loadCurrentUser = () => {
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  currentUserId.value = user.id || null;
+  try {
+    const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
+    
+    if (!userStr) {
+      console.warn('⚠️ No se encontró usuario en storage');
+      currentUserId.value = null;
+      return;
+    }
+
+    const user = JSON.parse(userStr);
+    currentUserId.value = user.id || null;
+    
+    console.log('✅ Usuario cargado:', {
+      id: currentUserId.value,
+      name: user.name,
+      email: user.email
+    });
+  } catch (error) {
+    console.error('❌ Error al cargar usuario:', error);
+    currentUserId.value = null;
+  }
 };
 
-const isUserTenant = (contract: ContractCardUI) => {
-  return contract.tenantId === currentUserId.value;
+// ✅ ARREGLADO: Función mejorada con validación estricta
+const isUserTenant = (contract: ContractCardUI): boolean => {
+  const isTenant = contract.tenantId != null && 
+                   currentUserId.value != null && 
+                   contract.tenantId === currentUserId.value;
+  
+  // Debug log (remover en producción)
+  if (contract.status === 'pending') {
+    console.log(`🔍 Verificando contrato #${contract.id}:`, {
+      tenantId: contract.tenantId,
+      currentUserId: currentUserId.value,
+      isTenant,
+      status: contract.status
+    });
+  }
+  
+  return isTenant;
 };
 
 // Navegación de página
@@ -450,7 +489,7 @@ const goToContractById = (contractId: number) => {
   }
 };
 
-// NUEVA: Manejar error de imagen
+// Manejar error de imagen
 const handleImageError = (event: Event) => {
   const target = event.target as HTMLImageElement;
   target.src = DEFAULT_PROPERTY_IMAGE;
@@ -617,15 +656,21 @@ const getPropertyImage = (img?: string) => {
 };
 
 const getStatusInfo = (status: string) => {
-  const map: Record<string, { text: string; color: string }> = {
-    active: { text: "Activo", color: "green" },
-    inactive: { text: "Inactivo", color: "gray" },
-    expired: { text: "Expirado", color: "red" },
-    pending: { text: "Pendiente", color: "orange" },
-    rejected: { text: "Rechazado", color: "red" },
+  const map: Record<string, { key: string; color: string }> = {
+    active:   { key: "contracts.statusActive", color: "green" },
+    inactive:{ key: "contracts.statusInactive", color: "gray" },
+    expired: { key: "contracts.statusExpired", color: "red" },
+    pending: { key: "contracts.statusPending", color: "orange" },
+    rejected:{ key: "contracts.statusRejected", color: "red" },
   };
-  return map[status] ?? { text: "Desconocido", color: "black" };
+
+  const item = map[status];
+
+  return item
+    ? { text: t(item.key), color: item.color }
+    : { text: t("contracts.statusUnknown"), color: "black" };
 };
+
 
 const formatDate = (date?: string) =>
   date ? new Date(date).toLocaleDateString("es-ES") : "N/A";
@@ -659,11 +704,13 @@ const loadContractStats = async () => {
   }
 };
 
-// Cargar contratos optimizado
+// ✅ ARREGLADO: Cargar contratos con mejor parsing y validación
 const loadContracts = async () => {
   try {
     loading.value = true;
     const response = await contractService.getContracts();
+
+    console.log('📦 Contratos recibidos del backend:', response);
 
     contracts.value = response.map((c: any) => {
       let parsedTerms: any = {};
@@ -677,7 +724,8 @@ const loadContracts = async () => {
         }
       }
 
-      return {
+      // ✅ Asegurar que tenant_id se mapee correctamente
+      const contractData = {
         id: c.id,
         title: `Contrato ${c.id}`,
         status: c.status,
@@ -690,7 +738,7 @@ const loadContracts = async () => {
         tenantName: c.tenant?.name ?? "N/A",
         tenantCC: c.tenant?.id_documento ?? "N/A",
         tenantEmail: c.tenant?.email ?? "N/A",
-        tenantId: c.tenant_id,
+        tenantId: c.tenant_id, // ✅ CRÍTICO: Asegurarse de que esto venga del backend
         landlordName: c.landlord?.name ?? "N/A",
         landlordCC: c.landlord?.id_documento ?? "N/A",
         landlordEmail: c.landlord?.email ?? "N/A",
@@ -702,7 +750,20 @@ const loadContracts = async () => {
         clauses: parsedTerms.clauses ?? [],
         isNew: c.status === 'pending',
       };
+
+      // Debug para contratos pendientes
+      if (c.status === 'pending') {
+        console.log(`🔍 Contrato pendiente #${c.id}:`, {
+          tenant_id: c.tenant_id,
+          landlord_id: c.landlord_id,
+          status: c.status
+        });
+      }
+
+      return contractData;
     });
+
+    console.log(`✅ ${contracts.value.length} contratos procesados`);
   } catch (error) {
     console.error("Error cargando contratos:", error);
   } finally {
