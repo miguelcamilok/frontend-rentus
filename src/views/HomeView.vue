@@ -621,11 +621,33 @@ async function fetchAllData() {
       api.get("/properties"),
       api.get("/users")
     ]);
-    properties.value = propRes.data;
+    
+    // Manejar diferentes formatos de respuesta
+    // Formato 1: Respuesta directa (array)
+    // Formato 2: Respuesta con data y meta
+    
+    // Para propiedades
+    if (propRes.data && Array.isArray(propRes.data)) {
+      properties.value = propRes.data;
+    } else if (propRes.data && propRes.data.data && Array.isArray(propRes.data.data)) {
+      properties.value = propRes.data.data;
+    } else {
+      properties.value = [];
+    }
+    
     propertyCount.value = properties.value.length;
-    activeClientsCount.value = usersRes.data.length;
+    
+    // Para usuarios
+    if (usersRes.data && Array.isArray(usersRes.data)) {
+      activeClientsCount.value = usersRes.data.length;
+    } else if (usersRes.data && usersRes.data.data && Array.isArray(usersRes.data.data)) {
+      activeClientsCount.value = usersRes.data.data.length;
+    } else {
+      activeClientsCount.value = 0;
+    }
+    
   } catch (error) {
-    console.error(error);
+    console.error("Error cargando datos:", error);
     errorProperties.value = t('home.properties.error');
     propertyCount.value = 0;
     activeClientsCount.value = 0;

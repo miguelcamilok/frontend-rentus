@@ -433,49 +433,104 @@ const isFormValid = computed(() => {
 
 // ==================== Manejo de registro ====================
 
+// En RegisterView.vue
 const handleRegister = async () => {
-    errorMessage.value = "";
-    validationErrors.value = {};
+  errorMessage.value = "";
+  validationErrors.value = {};
 
-    // Validar todos los campos
-    validateField('name');
-    validateField('email');
-    validateField('phone');
-    validateField('id_documento');
-    validateField('address');
-    validateField('password');
+  // Validar todos los campos
+  validateField('name');
+  validateField('email');
+  validateField('phone');
+  validateField('id_documento');
+  validateField('address');
+  validateField('password');
 
-    if (Object.keys(validationErrors.value).length > 0) {
-        errorMessage.value = "Por favor corrige los errores en el formulario";
-        return;
-    }
+  if (Object.keys(validationErrors.value).length > 0) {
+    errorMessage.value = "Por favor corrige los errores en el formulario";
+    return;
+  }
 
-    if (!acceptTerms.value) {
-        errorMessage.value = "Debes aceptar los términos y condiciones";
-        return;
-    }
+  if (!acceptTerms.value) {
+    errorMessage.value = "Debes aceptar los términos y condiciones";
+    return;
+  }
 
-    isLoading.value = true;
+  isLoading.value = true;
 
-    try {
-        const response = await authService.register(formData.value);
+  try {
+    const response = await authService.register(formData.value);
+    console.log('🔍 Respuesta completa del registro:', response);
 
-        if (response.success && response.token) {
-            console.log('✅ Registro exitoso, redirigiendo...');
-
-            // Pequeño delay para mostrar éxito
-            setTimeout(() => {
-                router.push("/");
-            }, 500);
+    if (response.success) {
+      // CASO A: Si el backend NO devolvió token (necesita verificación)
+      if (!response.token) {
+        console.log('📧 Verificación de correo requerida');
+        
+        // Obtener el token de verificación de la respuesta
+        const verificationToken = response.data?.verification_token;
+        const userEmail = formData.value.email.trim().toLowerCase();
+        
+        if (verificationToken) {
+          console.log('🔑 Token de verificación recibido:', verificationToken);
+          
+          // Redirigir a la página de confirmación con el token
+          router.push({
+            path: '/confirm-email',
+            query: { 
+              token: verificationToken,
+              email: userEmail
+            }
+          });
         } else {
-            errorMessage.value = response.message || "Error al crear la cuenta";
+          console.log('⚠️ No hay token de verificación en la respuesta');
+          console.log('📋 Datos de la respuesta:', response.data);
+          
+          // Intentar obtener el token de otra forma o mostrar mensaje
+          router.push({
+            path: '/confirm-email',
+            query: { 
+              email: userEmail,
+              error: 'no_token'
+            }
+          });
         }
-    } catch (err: any) {
-        console.error('❌ Error en registro:', err);
-        errorMessage.value = err.message || "Error al registrar usuario. Intenta nuevamente";
-    } finally {
-        isLoading.value = false;
+      }
+      // CASO B: Si el backend SÍ devolvió token (login automático - inusual)
+      else if (response.token && response.user) {
+        console.warn('⚠️ Login automático después de registro (inusual)');
+        
+        // Guardar token y usuario
+        authService.saveToken(response.token, false);
+        authService.saveUser(response.user, false);
+        
+        // Redirigir según rol
+        setTimeout(() => {
+          if (response.user?.role === 'admin' || response.user?.role === 'support') {
+            console.log('🔐 Admin/support detectado, redirigiendo al dashboard');
+            router.push('/admin/dashboard');
+          } else {
+            console.log('👤 Usuario normal, redirigiendo al home');
+            router.push('/');
+          }
+        }, 500);
+      }
+      // CASO C: Respuesta inesperada
+      else {
+        console.warn('⚠️ Respuesta inesperada del registro:', response);
+        // Por defecto, ir al home
+        router.push('/');
+      }
+      
+    } else {
+      errorMessage.value = response.message || "Error al crear la cuenta";
     }
+  } catch (err: any) {
+    console.error('❌ Error en registro:', err);
+    errorMessage.value = err.message || "Error al registrar usuario. Intenta nuevamente";
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 // ==================== Funciones de navegación ====================

@@ -2,6 +2,8 @@
 import api from "./api";
 import { AxiosError } from "axios";
 
+export type UserRole = 'user' | 'admin' | 'support';
+
 export interface User {
   id: number;
   name: string;
@@ -10,6 +12,8 @@ export interface User {
   address: string;
   id_documento: string;
   status: string;
+  role: UserRole;
+  verification_status?: string;
   photo?: string;
   bio?: string;
   department?: string;
@@ -35,11 +39,18 @@ export interface LoginData {
 export interface AuthResponse {
   success: boolean;
   user?: User;
-  token: string;
+  token?: string;
   message?: string;
   expires_in?: number;
   token_type?: string;
   remember?: boolean;
+  data?: {
+    user?: User;
+    verification_required?: boolean;
+    verification_token?: string;
+    email?: string;
+    [key: string]: any;
+  };
 }
 
 // Interfaz para errores de validación de Laravel
@@ -82,7 +93,7 @@ class AuthService {
   /**
    * Guardar token según preferencia de "Recordarme"
    */
-  private saveToken(token: string, remember: boolean = false) {
+  public saveToken(token: string, remember: boolean = false) {
     this.token = token;
     if (remember) {
       localStorage.setItem("auth_token", token);
@@ -97,7 +108,7 @@ class AuthService {
   /**
    * Guardar usuario en storage
    */
-  private saveUser(user: User, remember: boolean = false) {
+  public saveUser(user: User, remember: boolean = false) {
     const storage = remember ? localStorage : sessionStorage;
     storage.setItem("user", JSON.stringify(user));
   }
@@ -116,6 +127,7 @@ class AuthService {
   private clearStorage() {
     localStorage.removeItem("auth_token");
     localStorage.removeItem("user");
+    localStorage.removeItem("pending_email");
     sessionStorage.removeItem("auth_token");
     sessionStorage.removeItem("user");
     this.token = null;
@@ -125,64 +137,75 @@ class AuthService {
   /**
    * Registrar nuevo usuario
    */
-async register(userData: RegisterData): Promise<AuthResponse> {
-  try {
-    console.log('📤 Enviando registro:', userData);
-    
-    const response = await api.post<AuthResponse>("/auth/register", {
-      ...userData,
-      email: userData.email.trim().toLowerCase(),
-      status: userData.status || 'active'
-    });
-
-    // Caso 1: registro exitoso con token (login automático)
-    if (response.data.success && response.data.token && response.data.user) {
-      this.saveToken(response.data.token, false);
-      this.saveUser(response.data.user, false);
-      console.log('✅ Registro y login exitoso:', response.data.user);
-      return response.data;
-    }
-
-    // Caso 2: registro exitoso pero solo envío de correo
-    if (response.data.success && !response.data.token) {
-      console.log('✅ Registro exitoso, por favor verifica tu correo:', response.data.message);
-      // Guardar email pendiente para verificación
-      localStorage.setItem("pending_email", userData.email.trim().toLowerCase());
-      return response.data;
-    }
-
-    // Caso 3: error real
-    throw new Error(response.data.message || "Error en el registro");
-    
-  } catch (error: unknown) {
-    console.error('❌ Error en registro:', error);
-    
-    if (error instanceof AxiosError) {
-      const responseData = error.response?.data as ErrorResponse;
+  async register(userData: RegisterData): Promise<AuthResponse> {
+    try {
+      console.log('📤 Enviando registro:', userData);
       
-      // Manejar errores de validación 422
-      if (error.response?.status === 422 && responseData?.errors) {
-        const validationErrors = responseData.errors;
-        const errorMessages = Object.entries(validationErrors)
-          .map(([field, messages]) => {
-            const fieldName = this.translateFieldName(field);
-            return `${fieldName}: ${messages.join(', ')}`;
-          })
-          .join('\n');
+      const response = await api.post<AuthResponse>("/auth/register", {
+        ...userData,
+        email: userData.email.trim().toLowerCase(),
+        status: userData.status || 'active'
+      });
+
+      console.log('📥 Respuesta del registro:', response.data);
+
+      // CASO 1: Registro exitoso PERO requiere verificación (el backend NO devuelve token)
+      if (response.data.success && !response.data.token) {
+        console.log('✅ Registro exitoso, verificación de correo requerida');
         
-        throw new Error(`Errores de validación:\n${errorMessages}`);
+        // Guardar email pendiente para verificación
+        localStorage.setItem("pending_email", userData.email.trim().toLowerCase());
+        
+        // Devolver la respuesta completa incluyendo data
+        return {
+          ...response.data,
+          data: response.data.data || {
+            verification_required: true,
+            email: userData.email.trim().toLowerCase()
+          }
+        };
+      }
+
+      // CASO 2: registro exitoso CON token (login automático) - NO debería pasar con verificación
+      if (response.data.success && response.data.token && response.data.user) {
+        console.warn('⚠️ El backend devolvió token en el registro (inusual con verificación)');
+        this.saveToken(response.data.token, false);
+        this.saveUser(response.data.user, false);
+        console.log('✅ Registro y login automático:', response.data.user);
+        return response.data;
+      }
+
+      // CASO 3: error real
+      throw new Error(response.data.message || "Error en el registro");
+      
+    } catch (error: unknown) {
+      console.error('❌ Error en registro:', error);
+      
+      if (error instanceof AxiosError) {
+        const responseData = error.response?.data as ErrorResponse;
+        
+        // Manejar errores de validación 422
+        if (error.response?.status === 422 && responseData?.errors) {
+          const validationErrors = responseData.errors;
+          const errorMessages = Object.entries(validationErrors)
+            .map(([field, messages]) => {
+              const fieldName = this.translateFieldName(field);
+              return `${fieldName}: ${messages.join(', ')}`;
+            })
+            .join('\n');
+          
+          throw new Error(`Errores de validación:\n${errorMessages}`);
+        }
+        
+        // Otros errores del backend
+        throw new Error(
+          responseData?.message || "Error en el registro"
+        );
       }
       
-      // Otros errores del backend
-      throw new Error(
-        responseData?.message || "Error en el registro"
-      );
+      throw new Error("Error desconocido en el registro");
     }
-    
-    throw new Error("Error desconocido en el registro");
   }
-}
-
 
   /**
    * Iniciar sesión
@@ -205,6 +228,7 @@ async register(userData: RegisterData): Promise<AuthResponse> {
         if (response.data.user) {
           this.saveUser(response.data.user, remember);
           console.log('✅ Login exitoso:', response.data.user);
+          console.log('👤 Rol del usuario:', response.data.user.role);
           return response.data;
         }
         
@@ -213,6 +237,7 @@ async register(userData: RegisterData): Promise<AuthResponse> {
         this.saveUser(user, remember);
         
         console.log('✅ Login exitoso:', user);
+        console.log('👤 Rol del usuario:', user.role);
         return { ...response.data, user };
       }
 
@@ -249,6 +274,7 @@ async register(userData: RegisterData): Promise<AuthResponse> {
       const response = await api.get<{ success: boolean; user: User }>("/auth/me");
       
       if (response.data.success && response.data.user) {
+        console.log('👤 Usuario obtenido con rol:', response.data.user.role);
         return response.data.user;
       }
       
@@ -313,6 +339,36 @@ async register(userData: RegisterData): Promise<AuthResponse> {
    */
   isAuthenticated(): boolean {
     return !!this.getToken();
+  }
+
+  /**
+   * Verificar si el usuario tiene un rol específico
+   */
+  hasRole(role: UserRole): boolean {
+    const user = this.getUser();
+    return user?.role === role;
+  }
+
+  /**
+   * Verificar si el usuario tiene alguno de los roles especificados
+   */
+  hasAnyRole(roles: UserRole[]): boolean {
+    const user = this.getUser();
+    return user ? roles.includes(user.role) : false;
+  }
+
+  /**
+   * Verificar si el usuario es admin
+   */
+  isAdmin(): boolean {
+    return this.hasRole('admin');
+  }
+
+  /**
+   * Verificar si el usuario es admin o support
+   */
+  hasAdminAccess(): boolean {
+    return this.hasAnyRole(['admin', 'support']);
   }
 
   /**

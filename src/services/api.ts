@@ -1,4 +1,3 @@
-
 // services/api.ts
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 
@@ -105,9 +104,18 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       // Evitar loop infinito
       if (originalRequest.url?.includes("/auth/refresh")) {
-        console.error("❌ Refresh token expirado, cerrando sesión");
+        console.log("❌ Refresh token expirado, limpiando sesión");
         clearStorage();
-        window.location.href = "/login";
+        
+        // IMPORTANTE: NO redirigir aquí, dejar que el router maneje esto
+        // Solo eliminar el token inválido
+        return Promise.reject(error);
+      }
+
+      // Si estamos en el home y no hay token, simplemente rechazar sin redirigir
+      const token = getToken();
+      if (!token) {
+        console.log("🔓 No hay token, rechazando petición (ruta pública)");
         return Promise.reject(error);
       }
 
@@ -164,9 +172,9 @@ api.interceptors.response.use(
         // Procesar cola con error
         processQueue(refreshError as Error, null);
 
-        // Limpiar storage y redirigir
+        // Limpiar storage pero NO redirigir automáticamente
         clearStorage();
-        window.location.href = "/login";
+        console.log("🧹 Sesión limpiada, el router manejará la redirección si es necesario");
 
         return Promise.reject(refreshError);
       } finally {
@@ -209,7 +217,6 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
 
 // API de Google Maps (sin cambios)
 const googleApi = axios.create({

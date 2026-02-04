@@ -16,6 +16,9 @@ import ContractView from "../views/Dropdown/ContractView.vue";
 import SettingsView from "../views/Dropdown/SettingsView.vue";
 import { authService } from "../services/auth";
 
+// ==================== IMPORTAR RUTAS DEL ADMIN PANEL ====================
+import { adminRoutes } from "../admin/router/admin.routes";
+
 const routes: RouteRecordRaw[] = [
   // ==================== RUTAS CON LAYOUT ====================
   {
@@ -66,6 +69,9 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+
+  // ==================== RUTAS DEL ADMIN PANEL ====================
+  ...adminRoutes,
 
   // ==================== MAPA (SIN LAYOUT) ====================
   {
@@ -150,6 +156,8 @@ router.beforeEach(async (to, from, next) => {
   const isAuthenticated = authService.isAuthenticated();
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
   const hideForAuth = to.matched.some((record) => record.meta.hideForAuth);
+  const requiresAdmin = to.matched.some((record) => record.meta.requiresAdmin);
+  const requiresRole = to.meta.requiresRole as string | undefined;
 
   // ==================== CASO 1: Ruta requiere autenticación ====================
   if (requiresAuth && !isAuthenticated) {
@@ -167,8 +175,23 @@ router.beforeEach(async (to, from, next) => {
 
   // ==================== CASO 2: Usuario autenticado intenta acceder a login/register ====================
   if (hideForAuth && isAuthenticated) {
-    console.log("👤 Usuario autenticado, redirigiendo a inicio");
-    next({ name: "home" });
+    console.log("👤 Usuario autenticado, redirigiendo");
+    
+    try {
+      // Obtener información del usuario para decidir redirección
+      const user = await authService.getMe();
+      
+      // Si es admin o support, redirigir al dashboard admin
+      if (user.role === 'admin' || user.role === 'support') {
+        console.log("🔐 Usuario admin/support detectado, redirigiendo al dashboard");
+        next({ name: "admin-dashboard" });
+      } else {
+        next({ name: "home" });
+      }
+    } catch (error) {
+      console.error("Error al obtener usuario:", error);
+      next({ name: "home" });
+    }
     return;
   }
 
@@ -176,8 +199,38 @@ router.beforeEach(async (to, from, next) => {
   if (isAuthenticated && requiresAuth) {
     try {
       // Intentar obtener el usuario para validar el token
-      await authService.getMe();
+      const user = await authService.getMe();
       console.log("✅ Token válido, permitiendo acceso");
+
+      // ==================== CASO 3.1: Verificar acceso al admin panel ====================
+      if (requiresAdmin) {
+        const userRole = user.role;
+        
+        console.log(`🔐 Verificando acceso admin. Rol del usuario: ${userRole}`);
+        
+        // Solo admin y support pueden acceder
+        if (userRole !== 'admin' && userRole !== 'support') {
+          console.warn("🚫 Acceso denegado: Se requiere rol de administrador");
+          next({ 
+            name: "home",
+            query: { error: 'unauthorized' }
+          });
+          return;
+        }
+
+        // ==================== CASO 3.2: Verificar rol específico ====================
+        if (requiresRole && userRole !== requiresRole) {
+          console.warn(`🚫 Acceso denegado: Se requiere rol ${requiresRole}, tienes ${userRole}`);
+          next({ 
+            name: "admin-dashboard",
+            query: { error: 'insufficient_permissions' }
+          });
+          return;
+        }
+
+        console.log("✅ Acceso admin permitido");
+      }
+
       next();
     } catch (error) {
       console.error("❌ Token inválido:", error);
@@ -194,7 +247,19 @@ router.beforeEach(async (to, from, next) => {
     return;
   }
 
-  // ==================== CASO 4: Permitir navegación ====================
+  // ==================== CASO 4: Rutas admin sin autenticación ====================
+  if (requiresAdmin && !isAuthenticated) {
+    console.log("🔒 Admin panel requiere autenticación, redirigiendo a login");
+    localStorage.setItem("redirectAfterLogin", to.fullPath);
+    
+    next({
+      name: "Login",
+      query: { redirect: to.fullPath },
+    });
+    return;
+  }
+
+  // ==================== CASO 5: Permitir navegación ====================
   console.log("✅ Navegación permitida");
   next();
 });

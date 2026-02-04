@@ -33,10 +33,25 @@ class EventBus {
 export const eventBus = new EventBus();
 
 export const EVENTS = {
+  // Eventos de perfil
   PROFILE_PHOTO_UPDATED: 'profile:photo:updated',
+  
+  // Eventos de idioma
   LANGUAGE_CHANGED: 'language:changed',
+  
+  // Eventos de autenticación
   USER_LOGGED_IN: 'user:logged:in',
   USER_LOGGED_OUT: 'user:logged:out',
+  
+  // Eventos de notificaciones
   NOTIFICATION_RECEIVED: 'notification:received',
   NOTIFICATION_READ: 'notification:read',
+  
+  // Eventos de gestión de usuarios (nuevos)
+  USER_CREATED: 'user:created',
+  USER_UPDATED: 'user:updated',
+  USER_DELETED: 'user:deleted',
+  USER_ROLE_UPDATED: 'user:role:updated',
+  USER_STATUS_UPDATED: 'user:status:updated',
+  USER_PHOTO_UPDATED: 'user:photo:updated',
 } as const;

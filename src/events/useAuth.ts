@@ -3,6 +3,7 @@ import { ref, computed } from "vue";
 import {
   authService,
   type User,
+  type UserRole,
   type LoginData,
   type RegisterData,
 } from "../services/auth";
@@ -19,6 +20,45 @@ export function useAuth() {
   const isAuthenticated = computed(
     () => !!user.value && authService.isAuthenticated()
   );
+
+  // ==================== HELPERS DE ROLES ====================
+  
+  /**
+   * Verificar si el usuario tiene un rol específico
+   */
+  const hasRole = computed(() => (role: UserRole) => {
+    return user.value?.role === role;
+  });
+
+  /**
+   * Verificar si el usuario tiene alguno de los roles especificados
+   */
+  const hasAnyRole = computed(() => (roles: UserRole[]) => {
+    if (!user.value) return false;
+    return roles.includes(user.value.role);
+  });
+
+  /**
+   * Verificar si es admin
+   */
+  const isAdmin = computed(() => user.value?.role === 'admin');
+
+  /**
+   * Verificar si es support
+   */
+  const isSupport = computed(() => user.value?.role === 'support');
+
+  /**
+   * Verificar si tiene acceso al admin panel (admin o support)
+   */
+  const hasAdminAccess = computed(() => {
+    return user.value?.role === 'admin' || user.value?.role === 'support';
+  });
+
+  /**
+   * Verificar si es usuario normal
+   */
+  const isUser = computed(() => user.value?.role === 'user');
 
   // ==================== MÉTODOS ====================
 
@@ -41,7 +81,8 @@ export function useAuth() {
       
       if (response.success && response.user) {
         user.value = response.user;
-        console.log('✅ Usuario guardado en estado global:', user.value);
+        console.log('✅ Usuario guardado en estado global:', user.value.name);
+        console.log('👤 Rol del usuario:', user.value.role);
         return response;
       }
 
@@ -72,7 +113,8 @@ export function useAuth() {
       
       if (response.success && response.user) {
         user.value = response.user;
-        console.log('✅ Usuario registrado y guardado:', user.value);
+        console.log('✅ Usuario registrado y guardado:', user.value.name);
+        console.log('👤 Rol asignado:', user.value.role);
         return response;
       }
 
@@ -127,7 +169,8 @@ export function useAuth() {
     try {
       const userData = await authService.getMe();
       user.value = userData;
-      console.log('✅ Usuario obtenido:', user.value);
+      console.log('✅ Usuario obtenido:', userData.name);
+      console.log('👤 Rol:', userData.role);
     } catch (err: unknown) {
       console.error('❌ Error al obtener usuario:', err);
       
@@ -196,6 +239,14 @@ export function useAuth() {
     isAuthenticated,
     isLoading: computed(() => isLoading.value),
     error: computed(() => error.value),
+    
+    // Helpers de roles
+    hasRole,
+    hasAnyRole,
+    isAdmin,
+    isSupport,
+    hasAdminAccess,
+    isUser,
     
     // Métodos
     login,

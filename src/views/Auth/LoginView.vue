@@ -24,14 +24,8 @@
         </transition>
 
         <div class="message-indicators">
-          <button
-            v-for="(_, index) in messages"
-            :key="index"
-            @click="currentMessageIndex = index"
-            class="indicator-dot"
-            :class="{ active: currentMessageIndex === index }"
-            :aria-label="`Ver mensaje ${index + 1}`"
-          ></button>
+          <button v-for="(_, index) in messages" :key="index" @click="currentMessageIndex = index" class="indicator-dot"
+            :class="{ active: currentMessageIndex === index }" :aria-label="`Ver mensaje ${index + 1}`"></button>
         </div>
       </div>
 
@@ -43,20 +37,11 @@
           </button>
 
           <div class="tabs-container">
-            <button
-              class="tab-btn"
-              :class="{ active: activeTab === 'login' }"
-              @click="setTab('login')"
-              type="button"
-            >
+            <button class="tab-btn" :class="{ active: activeTab === 'login' }" @click="setTab('login')" type="button">
               Iniciar Sesión
             </button>
-            <button
-              class="tab-btn"
-              :class="{ active: activeTab === 'register' }"
-              @click="setTab('register')"
-              type="button"
-            >
+            <button class="tab-btn" :class="{ active: activeTab === 'register' }" @click="setTab('register')"
+              type="button">
               Registrarse
             </button>
           </div>
@@ -68,18 +53,8 @@
 
           <transition name="fade">
             <div v-if="errorMessage" class="alert-error" role="alert">
-              <svg
-                class="alert-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
+              <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -92,33 +67,14 @@
             <div class="form-group">
               <label for="email" class="form-label">Correo electrónico</label>
               <div class="input-wrapper">
-                <svg
-                  class="input-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
+                <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="2" y="4" width="20" height="16" rx="2" />
                   <path d="m2 7 10 7 10-7" />
                 </svg>
-                <input
-                  id="email"
-                  v-model.trim="email"
-                  type="email"
-                  class="form-input"
-                  :class="{ 'input-error': validationErrors.email }"
-                  placeholder="rentus@gmail.com"
-                  autocomplete="email"
-                  @blur="validateField('email')"
-                  @input="clearFieldError('email')"
-                  required
-                />
+                <input id="email" v-model.trim="email" type="email" class="form-input"
+                  :class="{ 'input-error': validationErrors.email }" placeholder="rentus@gmail.com" autocomplete="email"
+                  @blur="validateField('email')" @input="clearFieldError('email')" required />
               </div>
               <span v-if="validationErrors.email" class="error-text">
                 {{ validationErrors.email }}
@@ -128,69 +84,27 @@
             <div class="form-group">
               <label for="password" class="form-label">Contraseña</label>
               <div class="input-wrapper">
-                <svg
-                  class="input-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
+                <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                   <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                 </svg>
-                <input
-                  id="password"
-                  v-model="password"
-                  :type="showPassword ? 'text' : 'password'"
-                  class="form-input"
-                  :class="{ 'input-error': validationErrors.password }"
-                  placeholder="••••••••"
-                  autocomplete="current-password"
-                  @blur="validateField('password')"
-                  @input="clearFieldError('password')"
-                  required
-                />
-                <button
-                  type="button"
-                  class="toggle-password"
-                  @click="showPassword = !showPassword"
-                  :aria-label="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-                >
-                  <svg
-                    v-if="!showPassword"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
+                <input id="password" v-model="password" :type="showPassword ? 'text' : 'password'" class="form-input"
+                  :class="{ 'input-error': validationErrors.password }" placeholder="••••••••"
+                  autocomplete="current-password" @blur="validateField('password')" @input="clearFieldError('password')"
+                  required />
+                <button type="button" class="toggle-password" @click="showPassword = !showPassword"
+                  :aria-label="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+                  <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                     <circle cx="12" cy="12" r="3" />
                   </svg>
-                  <svg
-                    v-else
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path
-                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
-                    />
+                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                     <line x1="1" y1="1" x2="23" y2="23" />
                   </svg>
                 </button>
@@ -213,18 +127,8 @@
             <button type="submit" class="btn-submit" :disabled="isLoading || !isFormValid">
               <span v-if="!isLoading" class="btn-content">
                 <span class="btn-text">Iniciar Sesión</span>
-                <svg
-                  class="btn-arrow"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
+                <svg class="btn-arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <line x1="5" y1="12" x2="19" y2="12" />
                   <polyline points="12 5 19 12 12 19" />
                 </svg>
@@ -290,9 +194,9 @@ const currentMessage = computed(() => messages[currentMessageIndex.value]);
 
 // Validación en tiempo real
 const isFormValid = computed(() => {
-  return email.value.trim() !== "" && 
-         password.value.length >= 6 && 
-         Object.keys(validationErrors.value).length === 0;
+  return email.value.trim() !== "" &&
+    password.value.length >= 6 &&
+    Object.keys(validationErrors.value).length === 0;
 });
 
 // Validar email
@@ -336,6 +240,7 @@ const clearFieldError = (field: string) => {
 };
 
 // Manejar login
+// En LoginView.vue, modifica la función handleLogin
 const handleLogin = async () => {
   errorMessage.value = "";
   validationErrors.value = {};
@@ -363,14 +268,30 @@ const handleLogin = async () => {
 
     if (response.success && response.token) {
       console.log('✅ Login exitoso, redirigiendo...');
-      
+
+      // Obtener información del usuario para decidir redirección
+      const user = await authService.getMe();
+      console.log('👤 Usuario logueado con rol:', user.role);
+
       // Verificar si hay una URL de redirección guardada
-      const redirectUrl = localStorage.getItem('redirectAfterLogin') || 
-                         (route.query.redirect as string) || 
-                         '/';
-      
+      let redirectUrl = localStorage.getItem('redirectAfterLogin') ||
+        (route.query.redirect as string);
+
       localStorage.removeItem('redirectAfterLogin');
-      
+
+      // Si no hay redirección específica, decidir según el rol
+      if (!redirectUrl) {
+        // Si es admin o support, ir al dashboard admin
+        if (user.role === 'admin' || user.role === 'support') {
+          redirectUrl = '/admin/dashboard';
+          console.log('🔐 Redirigiendo admin/support al dashboard');
+        } else {
+          // Usuario normal va al home
+          redirectUrl = '/';
+          console.log('👤 Redirigiendo usuario normal al home');
+        }
+      }
+
       // Pequeño delay para asegurar que el token se guardó
       setTimeout(() => {
         router.push(redirectUrl);
@@ -494,7 +415,7 @@ onMounted(() => {
   let { w, h, dpr } = resize(canvas);
 
   particles = Array.from({ length: PARTICLE_COUNT }, () => new Particle(w, h, dpr));
-  
+
   const onResize = () => {
     const r = resize(canvas);
     w = r.w; h = r.h; dpr = r.dpr;
