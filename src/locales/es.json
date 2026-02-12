@@ -1,4 +1,79 @@
 {
+  "editProperty": {
+    "loading": "Cargando propiedad...",
+    "errorTitle": "Error al cargar",
+    "backToProperties": "Volver a Propiedades",
+    "breadcrumb": {
+      "properties": "Propiedades",
+      "edit": "Editar"
+    },
+    "title": "Editar Propiedad",
+    "subtitle": "Actualiza la información de tu propiedad",
+    "sections": {
+      "basicInfo": "Información Básica",
+      "location": "Ubicación",
+      "features": "Características",
+      "image": "Imagen",
+      "services": "Servicios Incluidos"
+    },
+    "fields": {
+      "title": "Título",
+      "description": "Descripción",
+      "status": "Estado",
+      "monthlyPrice": "Precio Mensual",
+      "address": "Dirección",
+      "city": "Ciudad",
+      "latitude": "Latitud",
+      "longitude": "Longitud",
+      "area": "Área (m²)",
+      "bedrooms": "Habitaciones",
+      "bathrooms": "Baños",
+      "parking": "Parqueaderos",
+      "imageUrl": "URL de la Imagen"
+    },
+    "placeholders": {
+      "title": "Ej: Apartamento moderno en el centro",
+      "description": "Describe las características principales de la propiedad...",
+      "address": "Ej: Calle 10 #15-20",
+      "city": "Ej: Popayán",
+      "imageUrl": "https://ejemplo.com/imagen.jpg"
+    },
+    "status": {
+      "available": "Disponible",
+      "rented": "Arrendada",
+      "maintenance": "En Mantenimiento"
+    },
+    "services": {
+      "water": "Agua",
+      "electricity": "Electricidad",
+      "gas": "Gas",
+      "internet": "Internet",
+      "cableTv": "TV por Cable",
+      "security": "Seguridad",
+      "parking": "Parqueadero",
+      "gym": "Gimnasio",
+      "pool": "Piscina",
+      "bbqArea": "Zona BBQ",
+      "laundry": "Lavandería",
+      "elevator": "Ascensor"
+    },
+    "buttons": {
+      "cancel": "Cancelar",
+      "save": "Guardar Cambios",
+      "saving": "Guardando..."
+    },
+    "messages": {
+      "updateSuccess": "¡Propiedad actualizada exitosamente!",
+      "updateError": "Error al actualizar la propiedad",
+      "noPermission": "No tienes permisos para editar esta propiedad",
+      "cancelConfirm": "¿Estás seguro de que deseas cancelar? Los cambios no guardados se perderán."
+    },
+    "errors": {
+      "loadError": "No se pudo cargar la propiedad",
+      "noPermission": "No tienes permisos para editar esta propiedad",
+      "mustLogin": "Debes iniciar sesión para editar propiedades"
+    }
+  },
   "home": {
     "hero": {
       "badge": "Tu hogar ideal te espera",
@@ -218,14 +293,26 @@
       "header": "¿Te interesa?",
       "subHeader": "Solicita más información",
       "ownerProperty": "Esta es tu propiedad",
+      "editProperty": "Editar Propiedad",
+      "deleteProperty": "Eliminar Propiedad",
       "requestVisit": "Solicitar Visita",
       "login": "Iniciar Sesión",
+      "loginRequired": "Debes iniciar sesión para solicitar una visita. ¿Deseas ir a iniciar sesión?",
       "notAvailable": "No Disponible",
       "notAvailableDesc": "Esta propiedad no está disponible",
       "contactAgent": "Contactar Agente",
+      "agentContact": "Función de contacto - Implementar con WhatsApp, Email, etc.",
       "save": "Guardar",
       "saved": "Guardado",
-      "share": "Compartir"
+      "share": "Compartir",
+      "shareText": "Mira esta propiedad: {title}",
+      "linkCopied": "¡Enlace copiado al portapapeles!",
+      "deleteConfirm": "¿Estás seguro que deseas eliminar esta propiedad? Esta acción no se puede deshacer.",
+      "deleteFinalConfirm": "Esta es tu última oportunidad. ¿Realmente deseas eliminar esta propiedad permanentemente?",
+      "deleteSuccess": "¡Propiedad eliminada exitosamente!",
+      "deleteError": "Error al eliminar la propiedad.",
+      "deleteNoPermission": "No tienes permisos para eliminar esta propiedad.",
+      "deleteNotFound": "La propiedad no fue encontrada."
     },
     "meta": {
       "published": "Publicado",
@@ -282,11 +369,6 @@
       "bathrooms": "0",
       "services": "WiFi, Gas, Agua, Luz, Parqueadero",
       "imageUrl": "https://ejemplo.com/imagen.jpg"
-    },
-    "status": {
-      "available": "Disponible",
-      "rented": "Arrendada",
-      "maintenance": "En Mantenimiento"
     }
   },
   "time": {
@@ -392,14 +474,12 @@
   "about": {
     "title": "Sobre Nosotros",
     "subtitle": "Más de 10 años conectando personas con sus hogares ideales",
-    
     "stats": {
       "years": "Años de Experiencia",
       "properties": "Propiedades Gestionadas",
       "clients": "Clientes Satisfechos",
       "satisfaction": "Satisfacción"
     },
-
     "history": {
       "title": "Nuestra Historia",
       "timeline": [
@@ -435,7 +515,6 @@
         }
       ]
     },
-
     "team": {
       "title": "Nuestro Equipo",
       "text": "Somos un grupo de profesionales apasionados por el sector inmobiliario, comprometidos con brindar la mejor experiencia a nuestros clientes. Cada miembro aporta su expertise única para crear soluciones innovadoras.",
@@ -462,7 +541,6 @@
         }
       ]
     },
-
     "values": {
       "title": "Nuestros Valores",
       "list": [
@@ -488,7 +566,6 @@
         }
       ]
     },
-
     "why": {
       "title": "¿Por Qué Elegir Rentus?",
       "features": [
@@ -530,7 +607,6 @@
         }
       ]
     },
-
     "mission": {
       "title": "Nuestra Misión",
       "text": "Facilitar el encuentro perfecto entre propiedades y personas, utilizando tecnología de vanguardia para crear experiencias excepcionales en el mercado inmobiliario.",
@@ -541,7 +617,6 @@
         "Crear comunidades sostenibles y prósperas"
       ]
     },
-
     "vision": {
       "title": "Nuestra Visión",
       "text": "Ser la plataforma líder en Latinoamérica que transforme completamente la forma en que las personas encuentran, alquilan y gestionan propiedades.",
@@ -552,7 +627,6 @@
         "Lograr carbono neutral en todas nuestras operaciones"
       ]
     },
-
     "process": {
       "title": "Nuestro Proceso",
       "description": "Un camino simple y transparente desde la búsqueda hasta mudarte a tu nuevo hogar",
@@ -584,7 +658,6 @@
         }
       ]
     },
-
     "testimonials": {
       "title": "Lo Que Dicen Nuestros Clientes",
       "description": "Historias reales de personas que encontraron su hogar ideal con Rentus",
@@ -633,7 +706,6 @@
         }
       ]
     },
-
     "cta": {
       "title": "¿Listo para Encontrar tu Hogar Ideal?",
       "description": "Únete a miles de personas que ya confían en Rentus para sus necesidades inmobiliarias",

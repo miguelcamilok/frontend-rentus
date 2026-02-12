@@ -1134,6 +1134,7 @@
   gap: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 1px;
+  text-decoration: none; /* ← AGREGADO: Quita el subrayado */
 }
 
 .btn-primary {
@@ -1145,6 +1146,7 @@
 .btn-primary:hover {
   transform: translateY(-5px);
   box-shadow: 0 15px 40px rgba(218, 156, 95, 0.7);
+  text-decoration: none; /* ← AGREGADO: Asegura que no aparezca al hacer hover */
 }
 
 .btn-secondary {

@@ -11,6 +11,8 @@ import ConfirmEmailView from "../views/Auth/ConfirmEmailView.vue";
 import ResetPasswordView from "../views/Auth/ResetPasswordView.vue";
 import ProfileView from "../views/Dropdown/ProfileView.vue";
 import PropertyView from "../views/Property/PropertyView.vue";
+import PropertyCreate from "../views/Property/PropertyCreate.vue";
+import PropertyEdit from "../views/Property/PropertyEdit.vue";
 import AboutUsView from "../views/AboutUsView.vue";
 import ContractView from "../views/Dropdown/ContractView.vue";
 import SettingsView from "../views/Dropdown/SettingsView.vue";
@@ -48,6 +50,18 @@ const routes: RouteRecordRaw[] = [
         name: "PropertyView",
         component: PropertyView,
         meta: { title: "Propiedades" },
+      },
+      {
+        path: "/properties/create",
+        name: "PropertyCreate",
+        component: PropertyCreate,
+        meta: { title: "Crear Propiedad", requiresAuth: true },
+      },
+      {
+        path: "/propiedades/:id/editar",
+        name: "PropertyEdit",
+        component: PropertyEdit,
+        meta: { title: "Editar Propiedad", requiresAuth: true },
       },
       {
         path: "/sobre-nosotros",
@@ -176,11 +190,11 @@ router.beforeEach(async (to, from, next) => {
   // ==================== CASO 2: Usuario autenticado intenta acceder a login/register ====================
   if (hideForAuth && isAuthenticated) {
     console.log("👤 Usuario autenticado, redirigiendo");
-    
+
     try {
       // Obtener información del usuario para decidir redirección
       const user = await authService.getMe();
-      
+
       // Si es admin o support, redirigir al dashboard admin
       if (user.role === 'admin' || user.role === 'support') {
         console.log("🔐 Usuario admin/support detectado, redirigiendo al dashboard");
@@ -205,13 +219,13 @@ router.beforeEach(async (to, from, next) => {
       // ==================== CASO 3.1: Verificar acceso al admin panel ====================
       if (requiresAdmin) {
         const userRole = user.role;
-        
+
         console.log(`🔐 Verificando acceso admin. Rol del usuario: ${userRole}`);
-        
+
         // Solo admin y support pueden acceder
         if (userRole !== 'admin' && userRole !== 'support') {
           console.warn("🚫 Acceso denegado: Se requiere rol de administrador");
-          next({ 
+          next({
             name: "home",
             query: { error: 'unauthorized' }
           });
@@ -221,7 +235,7 @@ router.beforeEach(async (to, from, next) => {
         // ==================== CASO 3.2: Verificar rol específico ====================
         if (requiresRole && userRole !== requiresRole) {
           console.warn(`🚫 Acceso denegado: Se requiere rol ${requiresRole}, tienes ${userRole}`);
-          next({ 
+          next({
             name: "admin-dashboard",
             query: { error: 'insufficient_permissions' }
           });
@@ -251,7 +265,7 @@ router.beforeEach(async (to, from, next) => {
   if (requiresAdmin && !isAuthenticated) {
     console.log("🔒 Admin panel requiere autenticación, redirigiendo a login");
     localStorage.setItem("redirectAfterLogin", to.fullPath);
-    
+
     next({
       name: "Login",
       query: { redirect: to.fullPath },
