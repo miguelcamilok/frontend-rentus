@@ -9,7 +9,7 @@
 
 body {
     font-family: 'Inter Tight', sans-serif;
-    background-color: #f8f9fa;
+    background-color: #2e1d17;  /* ← Color café que funciona como transición */
     color: #333;
     line-height: 1.6;
 }
