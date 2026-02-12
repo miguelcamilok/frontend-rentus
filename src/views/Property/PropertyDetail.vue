@@ -90,8 +90,8 @@
             <div class="property-header">
               <div class="header-tags">
                 <span class="tag tag-type">
-                  <font-awesome-icon :icon="['fas', getTypeIcon(property.title)]" />
-                  <span class="type-text">{{ t(`property.type.${detectType(property.title).toLowerCase()}`) }}</span>
+                  <font-awesome-icon :icon="['fas', getTypeIcon(property)]" />
+                  <span class="type-text">{{ getTypeTranslated(property) }}</span>
                 </span>
                 <span v-if="property.featured" class="tag tag-featured">
                   <font-awesome-icon :icon="['fas', 'star']" />
@@ -378,7 +378,18 @@ async function fetchProperty() {
 
   try {
     const response = await api.get(`/properties/${propertyId}`)
-    property.value = response.data
+    
+    // 🔥 CORRECCIÓN: Manejar estructura de respuesta del backend
+    if (response.data.success && response.data.data) {
+      property.value = response.data.data
+    } else if (response.data.data) {
+      property.value = response.data.data
+    } else {
+      property.value = response.data
+    }
+    
+    console.log('✅ Propiedad cargada:', property.value)
+    
     await api.post(`/properties/${propertyId}/view`)
   } catch (err) {
     console.error('Error al cargar la propiedad:', err)
@@ -416,16 +427,55 @@ function openRequestVisitModal() {
   showRequestModal.value = true
 }
 
-const detectType = (title) => {
+// 🔥 CORRECCIÓN: Detectar tipo de propiedad de forma segura
+const detectType = (propertyData) => {
+  if (!propertyData) return 'otro';
+  
+  // Si tiene el campo type explícito, usarlo
+  if (propertyData.type) {
+    return propertyData.type;
+  }
+  
+  // Fallback: detectar del título (protegido contra undefined)
+  const title = propertyData.title || '';
   const tTitle = title.toLowerCase();
+  
   if (tTitle.includes("casa")) return 'casa';
   if (tTitle.includes("apartamento") || tTitle.includes("apto")) return 'apartamento';
   if (tTitle.includes("local")) return 'local';
   if (tTitle.includes("finca")) return 'finca';
-  return 'propiedad';
+  return 'otro';
 };
 
-const getTypeIcon = (title) => {
+// 🔥 CORRECCIÓN: Obtener traducción del tipo de forma segura
+const getTypeTranslated = (propertyData) => {
+  const type = detectType(propertyData);
+  
+  const typeMap = {
+    casa: t('property.type.casa'),
+    apartamento: t('property.type.apartamento'),
+    local: t('property.type.local'),
+    finca: t('property.type.finca'),
+    otro: t('property.type.otro'),
+  };
+  
+  return typeMap[type] || t('property.type.otro');
+};
+
+// 🔥 CORRECCIÓN: Obtener icono de forma segura
+const getTypeIcon = (propertyData) => {
+  if (!propertyData) return "home";
+  
+  // Primero intentar con el campo type
+  const type = propertyData.type || '';
+  
+  if (type === 'casa') return "home";
+  if (type === 'apartamento') return "building";
+  if (type === 'local') return "store";
+  if (type === 'finca') return "tree";
+  
+  // Fallback: detectar del título (protegido contra undefined)
+  const title = propertyData.title || '';
   const t = title.toLowerCase();
 
   if (t.includes("casa")) return "home";

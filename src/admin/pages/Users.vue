@@ -509,7 +509,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { userManagementService, type User, type UserStats } from '../../services/userManagementService';
 import { eventBus } from '../../events/eventBus';
-import { useAlerts } from '../../composable/useAlerts';
+import { useAlerts } from '../../composables/useAlerts';
 
 const { success, error: showError } = useAlerts();
 

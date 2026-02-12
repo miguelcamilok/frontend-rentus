@@ -177,7 +177,7 @@ import StatCard from '../components/StatCard.vue';
 import { useAdminAuth } from '../composables/useAdminAuth';
 import { adminService, type AdminStats } from '../../services/adminService';
 import { eventBus, EVENTS } from '../../events/eventBus';
-import { useAlerts } from '../../composable/useAlerts';
+import { useAlerts } from '../../composables/useAlerts';
 import api from '../../services/api';
 
 const router = useRouter();

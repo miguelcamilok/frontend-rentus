@@ -101,7 +101,7 @@ import { ref, computed, onMounted, onUnmounted} from 'vue';
 import { useRouter } from 'vue-router';
 import { notificationService, type NotificationItem } from '../../services/notificationService';
 import { eventBus, EVENTS } from '../../events/eventBus';
-import { useAlerts } from '../../composable/useAlerts';
+import { useAlerts } from '../../composables/useAlerts';
 
 const router = useRouter();
 const { success, error: showError } = useAlerts();

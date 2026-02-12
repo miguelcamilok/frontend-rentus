@@ -463,7 +463,7 @@
 <script setup>
 import { ref, watch } from "vue";
 import { rentalRequestService } from "../../../services/rentalRequestService";
-import { useAlerts } from "../../../composable/useAlerts";
+import { useAlerts } from "../../../composables/useAlerts";
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();

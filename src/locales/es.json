@@ -148,6 +148,7 @@
             "logout": "Cerrar Sesión",
             "greeting": "Hola"
         },
+        
         "dropdown": {
             "myProfile": "Mi Perfil",
             "notifications": "Notificaciones",
@@ -160,7 +161,8 @@
             "maintenance": "Mantenimiento",
             "ownerRequests": "Solicitudes (Dueño)",
             "myRequests": "Mis Solicitudes",
-            "settings": "Ajustes"
+            "settings": "Ajustes",
+            "adminPanel": "Panel de Administración"
         },
         "alerts": {
             "logoutSuccess": {

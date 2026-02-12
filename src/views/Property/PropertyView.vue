@@ -1,63 +1,5 @@
 <template>
     <div class="properties-view">
-        <!-- Hero Banner con Parallax Effect -->
-        <!-- <section class="hero-banner">
-            <div class="hero-particles">
-                <div class="particle" v-for="i in 20" :key="i" :style="{
-                    left: Math.random() * 100 + '%',
-                    animationDelay: Math.random() * 5 + 's',
-                    animationDuration: (3 + Math.random() * 4) + 's'
-                }"></div>
-            </div>
-            <div class="hero-overlay"></div>
-            <div class="hero-content">
-                <h1 class="hero-title">
-                    <span class="title-line">{{ $t('properties.hero.title.line1') }}</span>
-                    <span class="title-line gradient-text">{{ $t('properties.hero.title.line2') }}</span>
-                </h1>
-                <p class="hero-description">
-                    {{ $t('properties.hero.description') }}
-                </p>
-
-                <div class="quick-stats">
-                    <div class="stat-box">
-                        <div class="stat-inline-icon">
-                            <font-awesome-icon :icon="['fas', 'home']" />
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-value">{{ properties.length }}</div>
-                            <div class="stat-label">{{ $t('properties.hero.stats.properties') }}</div>
-                        </div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-inline-icon">
-                            <font-awesome-icon :icon="['fas', 'check-circle']" />
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-value">{{ availableCount }}</div>
-                            <div class="stat-label">{{ $t('properties.hero.stats.available') }}</div>
-                        </div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-inline-icon">
-                            <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-value">{{ citiesCount }}</div>
-                            <div class="stat-label">{{ $t('properties.hero.stats.cities') }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="scroll-indicator">
-                <div class="scroll-mouse">
-                    <div class="scroll-wheel"></div>
-                </div>
-                <span class="scroll-text">{{ $t('properties.hero.scroll') }}</span>
-            </div>
-        </section> -->
-        
         <PropertyCarousel :properties="properties" :loading-properties="loadingProperties" />
 
         <!-- 🔥 COMPONENTE DE BÚSQUEDA REUTILIZABLE -->
@@ -232,7 +174,7 @@ import { useI18n } from "vue-i18n";
 import api from "../../services/api";
 import PropertyCarousel from "./PropertyCarousel.vue";
 import PropertySearch from "../../components/search/PropertySearch.vue";
-import { usePropertyTypes } from "../../composable/usePropertyTypes";
+import { usePropertyTypes } from "../../types/usePropertyTypes";
 
 const DEFAULT_PROPERTY_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI2MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2Yzc1N2QiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZW4gbm8gZGlzcG9uaWJsZTwvdGV4dD48L3N2Zz4=";
 
@@ -309,10 +251,18 @@ const loadAuthUser = async () => {
         const token = localStorage.getItem("token");
         if (token) {
             const { data } = await api.get("/auth/me");
-            authUser.value = data;
+            // 🔥 CORRECCIÓN: El backend devuelve { success: true, user: {...} }
+            if (data.success && data.user) {
+                authUser.value = data.user;
+            } else if (data.id) {
+                // Por si acaso el formato fuera directo
+                authUser.value = data;
+            }
+            console.log('✅ Usuario autenticado:', authUser.value);
         }
     } catch (err) {
         console.error(t('properties.errors.loadUser'), err);
+        authUser.value = null;
     }
 };
 
@@ -320,9 +270,22 @@ const loadProperties = async () => {
     loadingProperties.value = true;
     try {
         const { data } = await api.get("/properties");
-        properties.value = data;
+        
+        // 🔥 CORRECCIÓN: El backend devuelve { data: [...], meta: {...} }
+        if (Array.isArray(data.data)) {
+            properties.value = data.data;
+            console.log('✅ Propiedades cargadas:', properties.value.length);
+        } else if (Array.isArray(data)) {
+            // Por si el backend devuelve array directo
+            properties.value = data;
+            console.log('✅ Propiedades cargadas (formato alternativo):', properties.value.length);
+        } else {
+            console.warn('⚠️ Formato de respuesta inesperado:', data);
+            properties.value = [];
+        }
     } catch (err) {
         console.error(t('properties.errors.loadProperties'), err);
+        properties.value = [];
     } finally {
         loadingProperties.value = false;
     }
@@ -382,11 +345,13 @@ const handleImageError = (event) => {
 
 // ==================== Lifecycle ====================
 onMounted(async () => {
+    console.log('🚀 Iniciando carga de datos...');
     await loadAuthUser();
     await loadProperties();
+    console.log('✅ Datos cargados completamente');
 });
 </script>
 
 <style scoped>
 @import "../../assets/css/Properties/PropertyView.css";
-</style>    
+</style>
