@@ -121,8 +121,6 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
 const { t, locale } = useI18n()
-
-
 const router = useRouter()
 
 const props = defineProps({
@@ -144,9 +142,40 @@ let progressInterval = null
 
 const defaultImage = ref(DEFAULT_IMAGE)
 
+// 🔥 FUNCIÓN HELPER: Obtener imagen principal de una propiedad
+const getMainImage = (property) => {
+  if (!property) return DEFAULT_IMAGE
+  
+  // 🔥 PRIORIDAD 1: Buscar en property.images (relación hasMany)
+  if (property.images && Array.isArray(property.images) && property.images.length > 0) {
+    // Buscar la imagen marcada como principal (is_main: true)
+    const mainImage = property.images.find(img => img.is_main)
+    if (mainImage && mainImage.image_url) {
+      return mainImage.image_url
+    }
+    
+    // Si no hay imagen principal, usar la primera (order: 0)
+    const sortedImages = [...property.images].sort((a, b) => a.order - b.order)
+    if (sortedImages[0] && sortedImages[0].image_url) {
+      return sortedImages[0].image_url
+    }
+  }
+  
+  // 🔥 FALLBACK: Usar image_url principal si existe
+  if (property.image_url && property.image_url.trim() !== '') {
+    return property.image_url
+  }
+  
+  return DEFAULT_IMAGE
+}
+
 // Computed
 const carouselProperties = computed(() => {
-  return props.properties.filter(p => p.image_url && p.image_url.trim() !== '')
+  // Filtrar propiedades que tengan al menos una imagen válida
+  return props.properties.filter(p => {
+    const mainImg = getMainImage(p)
+    return mainImg && mainImg !== DEFAULT_IMAGE
+  })
 })
 
 const currentProperty = computed(() => {
@@ -154,8 +183,9 @@ const currentProperty = computed(() => {
   return carouselProperties.value[currentIndex.value] || {}
 })
 
+// 🔥 CORRECCIÓN: Usar solo la imagen principal
 const currentImage = computed(() => {
-  return currentProperty.value?.image_url || DEFAULT_IMAGE
+  return getMainImage(currentProperty.value)
 })
 
 const hasRoomDetails = computed(() => {
@@ -167,6 +197,7 @@ const hasRoomDetails = computed(() => {
 const onImgError = (event) => {
   const img = event.target
   if (img && img.src !== DEFAULT_IMAGE) {
+    console.warn('❌ Error cargando imagen en carrusel:', img.src)
     img.src = DEFAULT_IMAGE
     img.onerror = null
   }
@@ -186,7 +217,6 @@ const formatPrice = (price) => {
     }
   ).format(price)
 }
-
 
 const truncateText = (text, maxLength) => {
   if (!text) return ''
@@ -280,6 +310,8 @@ watch(() => props.properties, () => {
 
   currentIndex.value = 0
 
+  console.log('🔄 Propiedades actualizadas en carrusel:', carouselProperties.value.length)
+
   if (carouselProperties.value.length > 1) {
     startAutoplay()
     startProgress()
@@ -288,6 +320,8 @@ watch(() => props.properties, () => {
 
 // Lifecycle
 onMounted(() => {
+  console.log('🎠 Carrusel montado con', carouselProperties.value.length, 'propiedades')
+  
   if (carouselProperties.value.length > 1) {
     startAutoplay()
     startProgress()

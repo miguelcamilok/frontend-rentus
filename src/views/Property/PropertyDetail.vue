@@ -363,13 +363,24 @@ const isAuthenticated = computed(() => {
   return !!localStorage.getItem("auth_token") || !!sessionStorage.getItem("auth_token")
 })
 
+// 🔥 CORRECCIÓN: Construir array de imágenes desde property.images
 const propertyImages = computed(() => {
   if (!property.value) return [DEFAULT_IMAGE]
+  
   const images = []
-  if (property.value.image_url) images.push(property.value.image_url)
-  if (property.value.additional_images && Array.isArray(property.value.additional_images)) {
-    images.push(...property.value.additional_images)
+  
+  // 🔥 NUEVA LÓGICA: Priorizar property.images (relación hasMany)
+  if (property.value.images && Array.isArray(property.value.images) && property.value.images.length > 0) {
+    // Ordenar por 'order' y extraer image_url
+    const sortedImages = [...property.value.images].sort((a, b) => a.order - b.order)
+    images.push(...sortedImages.map(img => img.image_url))
+  } 
+  // Fallback: usar image_url principal si existe
+  else if (property.value.image_url && property.value.image_url.trim() !== '') {
+    images.push(property.value.image_url)
   }
+  
+  // Si no hay imágenes, retornar default
   return images.length > 0 ? images : [DEFAULT_IMAGE]
 })
 
@@ -397,7 +408,7 @@ async function fetchProperty() {
   try {
     const response = await api.get(`/properties/${propertyId}`)
     
-    // 🔥 CORRECCIÓN: Manejar estructura de respuesta del backend
+    // Manejar estructura de respuesta del backend
     if (response.data.success && response.data.data) {
       property.value = response.data.data
     } else if (response.data.data) {
@@ -407,7 +418,9 @@ async function fetchProperty() {
     }
     
     console.log('✅ Propiedad cargada:', property.value)
+    console.log('📸 Imágenes disponibles:', property.value.images)
     
+    // Incrementar vistas
     await api.post(`/properties/${propertyId}/view`)
   } catch (err) {
     console.error('Error al cargar la propiedad:', err)
@@ -418,6 +431,7 @@ async function fetchProperty() {
 }
 
 function onImgError(event) {
+  console.warn('❌ Error cargando imagen:', event.target.src)
   event.target.src = DEFAULT_IMAGE
 }
 
@@ -445,16 +459,10 @@ function openRequestVisitModal() {
   showRequestModal.value = true
 }
 
-// 🔥 CORRECCIÓN: Detectar tipo de propiedad de forma segura
 const detectType = (propertyData) => {
   if (!propertyData) return 'otro';
+  if (propertyData.type) return propertyData.type;
   
-  // Si tiene el campo type explícito, usarlo
-  if (propertyData.type) {
-    return propertyData.type;
-  }
-  
-  // Fallback: detectar del título (protegido contra undefined)
   const title = propertyData.title || '';
   const tTitle = title.toLowerCase();
   
@@ -465,7 +473,6 @@ const detectType = (propertyData) => {
   return 'otro';
 };
 
-// 🔥 CORRECCIÓN: Obtener traducción del tipo de forma segura
 const getTypeTranslated = (propertyData) => {
   const type = detectType(propertyData);
   
@@ -480,11 +487,9 @@ const getTypeTranslated = (propertyData) => {
   return typeMap[type] || t('property.type.otro');
 };
 
-// 🔥 CORRECCIÓN: Obtener icono de forma segura
 const getTypeIcon = (propertyData) => {
   if (!propertyData) return "home";
   
-  // Primero intentar con el campo type
   const type = propertyData.type || '';
   
   if (type === 'casa') return "home";
@@ -492,7 +497,6 @@ const getTypeIcon = (propertyData) => {
   if (type === 'local') return "store";
   if (type === 'finca') return "tree";
   
-  // Fallback: detectar del título (protegido contra undefined)
   const title = propertyData.title || '';
   const t = title.toLowerCase();
   if (t.includes("casa")) return "home";
@@ -528,8 +532,6 @@ function shareProperty() {
   }
 }
 
-// ==================== NUEVAS FUNCIONES: EDITAR Y ELIMINAR ====================
-
 function editProperty() {
   router.push({
     name: 'PropertyEdit',
@@ -564,8 +566,6 @@ async function deleteProperty() {
     loading.value = false
   }
 }
-
-// ==================== FIN NUEVAS FUNCIONES ====================
 
 function getServicesArray(services) {
   if (!services) return []
