@@ -701,49 +701,11 @@
 }
 
 .btn-owner {
-  background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
-  border: none;
-  color: white;
-  font-weight: 600;
-  cursor: default;
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: not-allowed;
+  opacity: 0.7;
 }
-
-/* ==================== NUEVOS ESTILOS: BOTONES DE PROPIETARIO ==================== */
-
-.owner-actions {
-  display: flex;
-  gap: 12px;
-  width: 100%;
-  margin-top: 0;
-}
-
-.btn-edit {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  color: white;
-  transition: all 0.3s ease;
-  flex: 1;
-}
-
-.btn-edit:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-}
-
-.btn-delete {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  border: none;
-  color: white;
-  transition: all 0.3s ease;
-  flex: 1;
-}
-
-.btn-delete:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
-}
-
-/* ==================== FIN NUEVOS ESTILOS ==================== */
 
 .unavailable-alert {
   display: flex;
@@ -996,10 +958,5 @@
   
   .map-container {
     height: 250px;
-  }
-
-  .owner-actions {
-    flex-direction: column;
-    gap: 10px;
   }
 }

@@ -148,6 +148,7 @@
             "logout": "Cerrar Sesión",
             "greeting": "Hola"
         },
+        
         "dropdown": {
             "myProfile": "Mi Perfil",
             "notifications": "Notificaciones",
@@ -160,7 +161,8 @@
             "maintenance": "Mantenimiento",
             "ownerRequests": "Solicitudes (Dueño)",
             "myRequests": "Mis Solicitudes",
-            "settings": "Ajustes"
+            "settings": "Ajustes",
+            "adminPanel": "Panel de Administración"
         },
         "alerts": {
             "logoutSuccess": {
@@ -345,492 +347,343 @@
             "title": "Nuestro Equipo",
             "text": "Un equipo diverso de desarrolladores, diseñadores y gestores trabaja día a día para ofrecerte una experiencia digital de calidad, segura y en constante evolución."
         },
-        {
-          "name": "Jefferson Martinez",
-          "role": "Developer",
-          "initials": "JM"
+        "why": {
+            "title": "¿Por qué elegir Rentus?",
+            "list": [
+                "Interfaz intuitiva y adaptable",
+                "Gestión completa de propiedades y contratos",
+                "Notificaciones automatizadas",
+                "Acceso multiusuario con roles",
+                "Totalmente responsive"
+            ]
+        },
+        "mission": {
+            "title": "Nuestra Misión",
+            "text": "Empoderar a propietarios e inquilinos mediante tecnología fácil, rápida y segura."
+        },
+        "vision": {
+            "title": "Nuestra Visión",
+            "text": "Convertirnos en la plataforma #1 de arriendo digital en Latinoamérica para 2030."
+        },
+        "testimonials": {
+            "title": "Lo que dicen nuestros usuarios",
+            "items": [
+                {
+                    "text": "¡Una plataforma increíble! Me ayudó a encontrar mi apartamento en menos de 2 días.",
+                    "author": "Laura Gómez"
+                },
+                {
+                    "text": "Como arrendador, ahora gestiono todos mis contratos y pagos en un solo lugar.",
+                    "author": "Juan Ríos"
+                }
+            ]
         }
-      ]
-    },
-    "values": {
-      "title": "Nuestros Valores",
-      "list": [
-        {
-          "icon": "🤝",
-          "title": "Confianza",
-          "description": "Transparencia total en cada proceso y transacción"
-        },
-        {
-          "icon": "💡",
-          "title": "Innovación",
-          "description": "Tecnología de punta para mejorar la experiencia"
-        },
-        {
-          "icon": "❤️",
-          "title": "Compromiso",
-          "description": "Dedicación absoluta con nuestros clientes"
-        },
-        {
-          "icon": "🎯",
-          "title": "Excelencia",
-          "description": "Calidad superior en cada servicio que ofrecemos"
-        }
-      ]
-    },
-    "why": {
-      "title": "¿Por Qué Elegir Rentus?",
-      "features": [
-        {
-          "icon": "🔍",
-          "title": "Búsqueda Inteligente",
-          "description": "Nuestro algoritmo de IA encuentra la propiedad perfecta según tus necesidades específicas y preferencias personales.",
-          "highlight": "95% de coincidencia"
-        },
-        {
-          "icon": "🛡️",
-          "title": "Verificación Total",
-          "description": "Todas las propiedades y usuarios son verificados exhaustivamente para garantizar tu seguridad y tranquilidad.",
-          "highlight": "100% seguro"
-        },
-        {
-          "icon": "⚡",
-          "title": "Proceso Rápido",
-          "description": "Desde la búsqueda hasta la firma del contrato en tiempo récord. Sin papeleo innecesario.",
-          "highlight": "72h promedio"
-        },
-        {
-          "icon": "📱",
-          "title": "App Móvil",
-          "description": "Gestiona todo desde tu smartphone: pagos, reportes, comunicación con propietarios y más.",
-          "highlight": "Disponible 24/7"
-        },
-        {
-          "icon": "💰",
-          "title": "Precios Justos",
-          "description": "Tarifas transparentes y competitivas. Sin comisiones ocultas ni sorpresas desagradables.",
-          "highlight": "Mejor valor"
-        },
-        {
-          "icon": "🌟",
-          "title": "Soporte Premium",
-          "description": "Equipo dedicado disponible para ayudarte en cada paso del proceso de arrendamiento.",
-          "highlight": "Respuesta en 2h"
-        }
-      ]
-    },
-    "mission": {
-      "title": "Nuestra Misión",
-      "text": "Facilitar el encuentro perfecto entre propiedades y personas, utilizando tecnología de vanguardia para crear experiencias excepcionales en el mercado inmobiliario.",
-      "points": [
-        "Democratizar el acceso a propiedades de calidad",
-        "Garantizar procesos transparentes y seguros",
-        "Innovar constantemente en tecnología inmobiliaria",
-        "Crear comunidades sostenibles y prósperas"
-      ]
-    },
-    "vision": {
-      "title": "Nuestra Visión",
-      "text": "Ser la plataforma líder en Latinoamérica que transforme completamente la forma en que las personas encuentran, alquilan y gestionan propiedades.",
-      "goals": [
-        "Expandir a 10 países para 2027",
-        "Alcanzar 10,000 propiedades verificadas",
-        "Implementar blockchain para contratos inteligentes",
-        "Lograr carbono neutral en todas nuestras operaciones"
-      ]
-    },
-    "process": {
-      "title": "Nuestro Proceso",
-      "description": "Un camino simple y transparente desde la búsqueda hasta mudarte a tu nuevo hogar",
-      "steps": [
-        {
-          "icon": "🔎",
-          "title": "Búsqueda Personalizada",
-          "description": "Utiliza nuestros filtros avanzados y IA para encontrar propiedades que se ajusten perfectamente a tus necesidades y presupuesto."
-        },
-        {
-          "icon": "👁️",
-          "title": "Visitas Virtuales o Presenciales",
-          "description": "Agenda tours virtuales en 360° o visitas presenciales según tu preferencia. Flexibilidad total."
-        },
-        {
-          "icon": "✅",
-          "title": "Verificación y Aprobación",
-          "description": "Proceso de verificación rápido y seguro. Aprobación en menos de 48 horas."
-        },
-        {
-          "icon": "📝",
-          "title": "Firma Digital del Contrato",
-          "description": "Contrato digital legalmente vinculante. Firma desde cualquier lugar en minutos."
-        },
-        {
-          "icon": "🏠",
-          "title": "Mudanza y Soporte Continuo",
-          "description": "Asistencia en tu mudanza y soporte 24/7 durante todo tu período de arrendamiento."
-        }
-      ]
-    },
-    "testimonials": {
-      "title": "Lo Que Dicen Nuestros Clientes",
-      "description": "Historias reales de personas que encontraron su hogar ideal con Rentus",
-      "items": [
-        {
-          "text": "Encontré mi departamento perfecto en menos de una semana. El proceso fue increíblemente rápido y transparente. La app móvil es excelente.",
-          "author": "María González",
-          "role": "Diseñadora Gráfica",
-          "avatar": "MG",
-          "date": "Hace 2 meses"
-        },
-        {
-          "text": "Como propietario, Rentus me ha facilitado todo. Los inquilinos son verificados y el pago es puntual. La mejor decisión que tomé.",
-          "author": "Roberto Sánchez",
-          "role": "Propietario",
-          "avatar": "RS",
-          "date": "Hace 3 meses"
-        },
-        {
-          "text": "La atención al cliente es sobresaliente. Respondieron todas mis dudas en tiempo récord. Me sentí acompañada en todo momento.",
-          "author": "Laura Martínez",
-          "role": "Estudiante",
-          "avatar": "LM",
-          "date": "Hace 1 mes"
-        },
-        {
-          "text": "Las visitas virtuales en 360° son impresionantes. Pude ver múltiples propiedades sin salir de casa. Ahorré tiempo y dinero.",
-          "author": "Diego Fernández",
-          "role": "Ingeniero de Software",
-          "avatar": "DF",
-          "date": "Hace 4 meses"
-        },
-        {
-          "text": "Proceso 100% digital y súper seguro. El contrato se firmó en minutos y todo quedó perfectamente documentado. Muy profesionales.",
-          "author": "Patricia Ruiz",
-          "role": "Contadora",
-          "avatar": "PR",
-          "date": "Hace 2 semanas"
-        },
-        {
-          "text": "Excelente relación calidad-precio. Las tarifas son justas y no hay comisiones ocultas. Todo fue exactamente como me lo explicaron.",
-          "author": "Andrés López",
-          "role": "Gerente de Ventas",
-          "avatar": "AL",
-          "date": "Hace 5 meses"
-        }
-      ]
-    },
-    "cta": {
-      "title": "¿Listo para Encontrar tu Hogar Ideal?",
-      "description": "Únete a miles de personas que ya confían en Rentus para sus necesidades inmobiliarias",
-      "button1": "Explorar Propiedades",
-      "button2": "Contactar Soporte"
-    }
-  },
-  "profile": {
-    "addLocation": "Agregar ubicación",
-    "bio": "Biografía",
-    "addBio": "Agregar biografía",
-    "bioPlaceholder": "Cuéntanos sobre ti...",
-    "stats": {
-      "properties": "Propiedades",
-      "rating": "Rating",
-      "reviews": "Reseñas"
-    },
-    "contact": {
-      "email": "Email",
-      "phone": "Teléfono",
-      "memberSince": "Miembro desde",
-      "notRegistered": "No registrado"
-    },
-    "properties": {
-      "title": "Mis Propiedades",
-      "new": "Nueva",
-      "empty": {
-        "title": "No tienes propiedades",
-        "description": "Comienza agregando tu primera propiedad",
-        "add": "Agregar Propiedad"
-      }
-    },
-    "locationModal": {
-      "title": "Ubicación",
-      "department": "Departamento",
-      "city": "Ciudad"
-    }
-  },
-  "contracts": {
-    "title": "Mis Contratos",
-    "loading": "Cargando contratos...",
-    "searchButton": "Buscar contrato",
-    "searchPlaceholder": "Buscar por ID o dirección...",
-    "noResults": "No se encontraron contratos",
-    "new": "Nuevo",
-    "actionRequired": "Acción requerida",
-    "status": "Estado",
-    "review": "Revisar",
-    "preview": "Vista previa",
-    "page": "Página",
-    "active": "Activos",
-    "total": "Total",
-    "pending": "Pendientes",
-    "empty": "No tienes contratos aún",
-    "previewLoading": "Generando vista previa del contrato...",
-    "previewUnavailable": "Vista previa no disponible",
-    "downloadPdf": "Descargar PDF",
-    "share": "Compartir",
-    "details": "Detalles del Contrato",
-    "property": "Propiedad",
-    "tenant": "Inquilino",
-    "landlord": "Arrendador",
-    "monthlyValue": "Valor Mensual",
-    "deposit": "Depósito",
-    "duration": "Duración",
-    "startDate": "Fecha Inicio",
-    "endDate": "Fecha Fin",
-    "reviewContract": "Revisar Contrato",
-    "loadingContract": "Cargando contrato...",
-    "summary": "Resumen del Contrato",
-    "importantClauses": "Cláusulas importantes:",
-    "acceptTerms": "He leído y acepto los términos del contrato",
-    "accept": "Aceptar Contrato",
-    "accepting": "Aceptando...",
-    "reject": "Rechazar Contrato",
-    "statusActive": "Activo",
-    "statusInactive": "Inactivo",
-    "statusExpired": "Expirado",
-    "statusPending": "Pendiente",
-    "statusRejected": "Rechazado",
-    "statusUnknown": "Desconocido"
-  },
-  "notifications": {
-    "title": "Notificaciones",
-    "markAll": "Marcar todas",
-    "loading": "Cargando notificaciones...",
-    "empty": {
-      "title": "Sin notificaciones",
-      "description": "Cuando recibas notificaciones aparecerán aquí"
-    },
-    "dates": {
-      "today": "Hoy",
-      "yesterday": "Ayer"
-    },
-    "newsEmails": "Correos de novedades",
-    "newsEmailsDesc": "Recibe actualizaciones sobre nuevas funcionalidades",
-    "propertyAlerts": "Alertas de propiedades",
-    "propertyAlertsDesc": "Notificaciones sobre propiedades que coinciden con tus criterios",
-    "reminders": "Recordatorios",
-    "remindersDesc": "Recordatorios sobre tus citas y actividades programadas",
-    "specialPromotions": "Promociones especiales",
-    "specialPromotionsDesc": "Ofertas y descuentos exclusivos"
-  },
-  "requests": {
-    "title": "Solicitudes de Arriendo",
-    "subtitle": "Revisa y gestiona solicitudes pendientes",
-    "loading": "Cargando solicitudes...",
-    "property": {
-      "requestedDate": "Fecha solicitada",
-      "proposedDate": "Fecha propuesta (esperando respuesta)"
-    },
-    "rating": {
-      "none": "Sin calificación",
-      "na": "N/A"
-    },
-    "actions": {
-      "review": "Revisar",
-      "reject": "Rechazar",
-      "continue": "Seguir proceso",
-      "finish": "Finalizar proceso",
-      "accept": "Aceptar solicitud",
-      "cancelProposal": "Cancelar propuesta",
-      "proposeDate": "Proponer otra fecha",
-      "sendProposal": "Enviar propuesta",
-      "cancel": "Cancelar",
-      "sendContract": "Enviar contrato"
-    },
-    "status": {
-      "pending": "Pendiente",
-      "accepted": "Aceptada",
-      "rejected": "Rechazada",
-      "counterProposed": "Contra-propuesta enviada",
-      "visitCompleted": "Visita completada",
-      "contractSent": "Contrato enviado"
-    },
-    "messages": {
-      "visitScheduled": "Visita programada para {date} {time}",
-      "waitingTenant": "Esperando respuesta del inquilino...",
-      "requestRejected": "Solicitud rechazada",
-      "contractWaiting": "Contrato enviado - Esperando aceptación",
-      "visitCompleted": "Visita completada"
-    },
-    "empty": {
-      "title": "No hay solicitudes",
-      "description": "Las solicitudes de arriendo aparecerán aquí"
-    },
-    "reviewModal": {
-      "title": "Revisar Solicitud",
-      "requestedDate": "Fecha solicitada"
-    },
-    "counterForm": {
-      "title": "Proponer nueva fecha y hora",
-      "newDate": "Nueva fecha",
-      "newTime": "Nueva hora"
-    },
-    "contractModal": {
-      "title": "Enviar Términos del Contrato",
-      "period": "Período del contrato",
-      "startDate": "Fecha de inicio",
-      "endDate": "Fecha de finalización",
-      "financial": "Información financiera",
-      "monthlyPrice": "Precio mensual ($)",
-      "deposit": "Depósito/Garantía ($)",
-      "paymentDay": "Día de pago (1-31)",
-      "lateFee": "Multa por retraso ($)",
-      "terms": "Servicios y términos",
-      "utilities": "Servicios incluidos",
-      "utilitiesHint": "Separados por coma",
-      "clauses": "Cláusulas del contrato",
-      "clausesHint": "Una por línea",
-      "specialConditions": "Condiciones especiales (opcional)",
-      "specialConditionsPlaceholder": "Condiciones adicionales..."
-    }
-  },
-  "myVisits": {
-    "title": "Mis Solicitudes de Visita",
-    "subtitle": "Seguimiento de tus citas programadas",
-    "loading": "Cargando solicitudes...",
-    "requestedDate": "Fecha solicitada",
-    "counterProposedByOwner": "Nueva fecha propuesta por el dueño",
-    "actions": {
-      "acceptNewDate": "Aceptar nueva fecha",
-      "viewContract": "Ver contrato",
-      "cancelRequest": "Cancelar solicitud",
-      "searchProperties": "Buscar propiedades"
-    },
-    "messages": {
-      "visitConfirmed": "Visita confirmada. El dueño te contactará pronto.",
-      "requestRejected": "Solicitud rechazada por el dueño",
-      "waitingOwner": "Esperando respuesta del dueño..."
-    },
-    "empty": {
-      "title": "No tienes solicitudes",
-      "description": "Aún no has solicitado visitas a propiedades"
-    }
-  },
-  "visitRequest": {
-    "title": "Solicitar Cita de Visita",
-    "form": {
-      "date": "Fecha de la visita",
-      "time": "Hora de la visita"
-    },
-    "info": "El dueño recibirá tu solicitud y podrá aceptarla o proponer otra fecha/hora.",
-    "actions": {
-      "send": "Enviar Solicitud",
-      "sending": "Enviando..."
-    },
-    "success": "¡Solicitud enviada exitosamente!",
-    "errors": {
-      "generic": "Ocurrió un error inesperado",
-      "sendRequest": "Error al enviar la solicitud"
-    }
-  },
-  "alerts": {
-    "confirm": "Confirmar",
-    "cancel": "Cancelar",
-    "close": "Cerrar alerta"
-  },
-  "languages": {
-    "es": "🇪🇸 Español",
-    "en": "🇺🇸 English",
-    "fr": "🇫🇷 Français",
-    "de": "🇩🇪 Deutsch"
-  },
-  "timezones": {
-    "bogota": "Colombia (GMT-5)",
-    "madrid": "España (GMT+1)",
-    "london": "Reino Unido (GMT+0)",
-    "newYork": "EE.UU. Este (GMT-5)",
-    "losAngeles": "EE.UU. Oeste (GMT-8)"
-  },
-  "settings": {
-    "language": "Idioma",
-    "timezone": "Zona horaria",
-    "units": "Unidades",
-    "unitsMetric": "Métrico (km, m²)",
-    "unitsImperial": "Imperial (mi, ft²)",
-    "sections": {
-      "profile": "Perfil",
-      "security": "Seguridad",
-      "notifications": "Notificaciones",
-      "preferences": "Preferencias"
     },
     "profile": {
-      "title": "Perfil",
-      "avatar": "Avatar del usuario",
-      "changeAvatar": "Cambiar foto",
-      "avatarHint": "Formatos permitidos: JPG, PNG, GIF o WEBP. Máx 5MB.",
-      "fullName": "Nombre completo",
-      "namePlaceholder": "Ingresa tu nombre",
-      "email": "Correo electrónico",
-      "emailPlaceholder": "Correo electrónico",
-      "emailNote": "El correo no se puede modificar",
-      "phone": "Teléfono",
-      "phonePlaceholder": "Ingresa tu teléfono",
-      "document": "Documento",
-      "documentPlaceholder": "Número de documento",
-      "bio": "Biografía",
-      "bioPlaceholder": "Cuéntanos un poco sobre ti",
-      "department": "Departamento",
-      "selectDepartment": "Selecciona un departamento",
-      "city": "Ciudad",
-      "selectCity": "Selecciona una ciudad"
+        "addLocation": "Agregar ubicación",
+        "bio": "Biografía",
+        "addBio": "Agregar biografía",
+        "bioPlaceholder": "Cuéntanos sobre ti...",
+        "stats": {
+            "properties": "Propiedades",
+            "rating": "Rating",
+            "reviews": "Reseñas"
+        },
+        "contact": {
+            "email": "Email",
+            "phone": "Teléfono",
+            "memberSince": "Miembro desde",
+            "notRegistered": "No registrado"
+        },
+        "properties": {
+            "title": "Mis Propiedades",
+            "new": "Nueva",
+            "empty": {
+                "title": "No tienes propiedades",
+                "description": "Comienza agregando tu primera propiedad",
+                "add": "Agregar Propiedad"
+            }
+        },
+        "locationModal": {
+            "title": "Ubicación",
+            "department": "Departamento",
+            "city": "Ciudad"
+        }
     },
-    "security": {
-      "title": "Seguridad",
-      "currentPassword": "Contraseña actual",
-      "currentPlaceholder": "Ingresa tu contraseña actual",
-      "newPassword": "Nueva contraseña",
-      "newPlaceholder": "Ingresa la nueva contraseña",
-      "confirmPassword": "Confirmar contraseña",
-      "confirmPlaceholder": "Confirma la contraseña",
-      "updatePassword": "Actualizar contraseña",
-      "requirementsTitle": "La contraseña debe contener:",
-      "minLength": "Al menos 8 caracteres",
-      "upperLower": "Mayúsculas y minúsculas",
-      "number": "Al menos un número",
-      "specialChar": "Un carácter especial",
-      "match": "Las contraseñas deben coincidir"
+    "contracts": {
+        "title": "Mis Contratos",
+        "loading": "Cargando contratos...",
+        "searchButton": "Buscar contrato",
+        "searchPlaceholder": "Buscar por ID o dirección...",
+        "noResults": "No se encontraron contratos",
+        "new": "Nuevo",
+        "actionRequired": "Acción requerida",
+        "status": "Estado",
+        "review": "Revisar",
+        "preview": "Vista previa",
+        "page": "Página",
+        "active": "Activos",
+        "total": "Total",
+        "pending": "Pendientes",
+        "empty": "No tienes contratos aún",
+        "previewLoading": "Generando vista previa del contrato...",
+        "previewUnavailable": "Vista previa no disponible",
+        "downloadPdf": "Descargar PDF",
+        "share": "Compartir",
+        "details": "Detalles del Contrato",
+        "property": "Propiedad",
+        "tenant": "Inquilino",
+        "landlord": "Arrendador",
+        "monthlyValue": "Valor Mensual",
+        "deposit": "Depósito",
+        "duration": "Duración",
+        "startDate": "Fecha Inicio",
+        "endDate": "Fecha Fin",
+        "reviewContract": "Revisar Contrato",
+        "loadingContract": "Cargando contrato...",
+        "summary": "Resumen del Contrato",
+        "importantClauses": "Cláusulas importantes:",
+        "acceptTerms": "He leído y acepto los términos del contrato",
+        "accept": "Aceptar Contrato",
+        "accepting": "Aceptando...",
+        "reject": "Rechazar Contrato",
+        "statusActive": "Activo",
+        "statusInactive": "Inactivo",
+        "statusExpired": "Expirado",
+        "statusPending": "Pendiente",
+        "statusRejected": "Rechazado",
+        "statusUnknown": "Desconocido"
     },
     "notifications": {
-      "title": "Notificaciones"
+        "title": "Notificaciones",
+        "markAll": "Marcar todas",
+        "loading": "Cargando notificaciones...",
+        "empty": {
+            "title": "Sin notificaciones",
+            "description": "Cuando recibas notificaciones aparecerán aquí"
+        },
+        "dates": {
+            "today": "Hoy",
+            "yesterday": "Ayer"
+        },
+        "newsEmails": "Correos de novedades",
+        "newsEmailsDesc": "Recibe actualizaciones sobre nuevas funcionalidades",
+        "propertyAlerts": "Alertas de propiedades",
+        "propertyAlertsDesc": "Notificaciones sobre propiedades que coinciden con tus criterios",
+        "reminders": "Recordatorios",
+        "remindersDesc": "Recordatorios sobre tus citas y actividades programadas",
+        "specialPromotions": "Promociones especiales",
+        "specialPromotionsDesc": "Ofertas y descuentos exclusivos"
     },
-    "preferences": {
-      "title": "Preferencias",
-      "theme": "Tema",
-      "save": "Guardar preferencias"
+    "requests": {
+        "title": "Solicitudes de Arriendo",
+        "subtitle": "Revisa y gestiona solicitudes pendientes",
+        "loading": "Cargando solicitudes...",
+        "property": {
+            "requestedDate": "Fecha solicitada",
+            "proposedDate": "Fecha propuesta (esperando respuesta)"
+        },
+        "rating": {
+            "none": "Sin calificación",
+            "na": "N/A"
+        },
+        "actions": {
+            "review": "Revisar",
+            "reject": "Rechazar",
+            "continue": "Seguir proceso",
+            "finish": "Finalizar proceso",
+            "accept": "Aceptar solicitud",
+            "cancelProposal": "Cancelar propuesta",
+            "proposeDate": "Proponer otra fecha",
+            "sendProposal": "Enviar propuesta",
+            "cancel": "Cancelar",
+            "sendContract": "Enviar contrato"
+        },
+        "status": {
+            "pending": "Pendiente",
+            "accepted": "Aceptada",
+            "rejected": "Rechazada",
+            "counterProposed": "Contra-propuesta enviada",
+            "visitCompleted": "Visita completada",
+            "contractSent": "Contrato enviado"
+        },
+        "messages": {
+            "visitScheduled": "Visita programada para {date} {time}",
+            "waitingTenant": "Esperando respuesta del inquilino...",
+            "requestRejected": "Solicitud rechazada",
+            "contractWaiting": "Contrato enviado - Esperando aceptación",
+            "visitCompleted": "Visita completada"
+        },
+        "empty": {
+            "title": "No hay solicitudes",
+            "description": "Las solicitudes de arriendo aparecerán aquí"
+        },
+        "reviewModal": {
+            "title": "Revisar Solicitud",
+            "requestedDate": "Fecha solicitada"
+        },
+        "counterForm": {
+            "title": "Proponer nueva fecha y hora",
+            "newDate": "Nueva fecha",
+            "newTime": "Nueva hora"
+        },
+        "contractModal": {
+            "title": "Enviar Términos del Contrato",
+            "period": "Período del contrato",
+            "startDate": "Fecha de inicio",
+            "endDate": "Fecha de finalización",
+            "financial": "Información financiera",
+            "monthlyPrice": "Precio mensual ($)",
+            "deposit": "Depósito/Garantía ($)",
+            "paymentDay": "Día de pago (1-31)",
+            "lateFee": "Multa por retraso ($)",
+            "terms": "Servicios y términos",
+            "utilities": "Servicios incluidos",
+            "utilitiesHint": "Separados por coma",
+            "clauses": "Cláusulas del contrato",
+            "clausesHint": "Una por línea",
+            "specialConditions": "Condiciones especiales (opcional)",
+            "specialConditionsPlaceholder": "Condiciones adicionales..."
+        }
     },
-    "themes": {
-      "light": "Claro",
-      "dark": "Oscuro",
-      "auto": "Automático"
+    "myVisits": {
+        "title": "Mis Solicitudes de Visita",
+        "subtitle": "Seguimiento de tus citas programadas",
+        "loading": "Cargando solicitudes...",
+        "requestedDate": "Fecha solicitada",
+        "counterProposedByOwner": "Nueva fecha propuesta por el dueño",
+        "actions": {
+            "acceptNewDate": "Aceptar nueva fecha",
+            "viewContract": "Ver contrato",
+            "cancelRequest": "Cancelar solicitud",
+            "searchProperties": "Buscar propiedades"
+        },
+        "messages": {
+            "visitConfirmed": "Visita confirmada. El dueño te contactará pronto.",
+            "requestRejected": "Solicitud rechazada por el dueño",
+            "waitingOwner": "Esperando respuesta del dueño..."
+        },
+        "empty": {
+            "title": "No tienes solicitudes",
+            "description": "Aún no has solicitado visitas a propiedades"
+        }
+    },
+    "visitRequest": {
+        "title": "Solicitar Cita de Visita",
+        "form": {
+            "date": "Fecha de la visita",
+            "time": "Hora de la visita"
+        },
+        "info": "El dueño recibirá tu solicitud y podrá aceptarla o proponer otra fecha/hora.",
+        "actions": {
+            "send": "Enviar Solicitud",
+            "sending": "Enviando..."
+        },
+        "success": "¡Solicitud enviada exitosamente!",
+        "errors": {
+            "generic": "Ocurrió un error inesperado",
+            "sendRequest": "Error al enviar la solicitud"
+        }
+    },
+    "alerts": {
+        "confirm": "Confirmar",
+        "cancel": "Cancelar",
+        "close": "Cerrar alerta"
+    },
+    "languages": {
+        "es": "🇪🇸 Español",
+        "en": "🇺🇸 English",
+        "fr": "🇫🇷 Français",
+        "de": "🇩🇪 Deutsch"
+    },
+    "timezones": {
+        "bogota": "Colombia (GMT-5)",
+        "madrid": "España (GMT+1)",
+        "london": "Reino Unido (GMT+0)",
+        "newYork": "EE.UU. Este (GMT-5)",
+        "losAngeles": "EE.UU. Oeste (GMT-8)"
+    },
+    "settings": {
+        "language": "Idioma",
+        "timezone": "Zona horaria",
+        "units": "Unidades",
+        "unitsMetric": "Métrico (km, m²)",
+        "unitsImperial": "Imperial (mi, ft²)",
+        "sections": {
+            "profile": "Perfil",
+            "security": "Seguridad",
+            "notifications": "Notificaciones",
+            "preferences": "Preferencias"
+        },
+        "profile": {
+            "title": "Perfil",
+            "avatar": "Avatar del usuario",
+            "changeAvatar": "Cambiar foto",
+            "avatarHint": "Formatos permitidos: JPG, PNG, GIF o WEBP. Máx 5MB.",
+            "fullName": "Nombre completo",
+            "namePlaceholder": "Ingresa tu nombre",
+            "email": "Correo electrónico",
+            "emailPlaceholder": "Correo electrónico",
+            "emailNote": "El correo no se puede modificar",
+            "phone": "Teléfono",
+            "phonePlaceholder": "Ingresa tu teléfono",
+            "document": "Documento",
+            "documentPlaceholder": "Número de documento",
+            "bio": "Biografía",
+            "bioPlaceholder": "Cuéntanos un poco sobre ti",
+            "department": "Departamento",
+            "selectDepartment": "Selecciona un departamento",
+            "city": "Ciudad",
+            "selectCity": "Selecciona una ciudad"
+        },
+        "security": {
+            "title": "Seguridad",
+            "currentPassword": "Contraseña actual",
+            "currentPlaceholder": "Ingresa tu contraseña actual",
+            "newPassword": "Nueva contraseña",
+            "newPlaceholder": "Ingresa la nueva contraseña",
+            "confirmPassword": "Confirmar contraseña",
+            "confirmPlaceholder": "Confirma la contraseña",
+            "updatePassword": "Actualizar contraseña",
+            "requirementsTitle": "La contraseña debe contener:",
+            "minLength": "Al menos 8 caracteres",
+            "upperLower": "Mayúsculas y minúsculas",
+            "number": "Al menos un número",
+            "specialChar": "Un carácter especial",
+            "match": "Las contraseñas deben coincidir"
+        },
+        "notifications": {
+            "title": "Notificaciones"
+        },
+        "preferences": {
+            "title": "Preferencias",
+            "theme": "Tema",
+            "save": "Guardar preferencias"
+        },
+        "themes": {
+            "light": "Claro",
+            "dark": "Oscuro",
+            "auto": "Automático"
+        }
+    },
+    "passwordStrength": {
+        "veryWeak": "Muy débil",
+        "weak": "Débil",
+        "medium": "Media",
+        "strong": "Fuerte"
+    },
+    "common": {
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "select": "Selecciona",
+        "month": "mes",
+        "close": "Cerrar",
+        "reject": "Rechazar",
+        "saveChanges": "Guardar cambios",
+        "saving": "Guardando...",
+        "updating": "Actualizando...",
+        "reset": "Restablecer",
+        "savePreferences": "Guardar preferencias",
+        "logout": "Cerrar sesión"
     }
-  },
-  "passwordStrength": {
-    "veryWeak": "Muy débil",
-    "weak": "Débil",
-    "medium": "Media",
-    "strong": "Fuerte"
-  },
-  "common": {
-    "save": "Guardar",
-    "cancel": "Cancelar",
-    "select": "Selecciona",
-    "month": "mes",
-    "close": "Cerrar",
-    "reject": "Rechazar",
-    "saveChanges": "Guardar cambios",
-    "saving": "Guardando...",
-    "updating": "Actualizando...",
-    "reset": "Restablecer",
-    "savePreferences": "Guardar preferencias",
-    "logout": "Cerrar sesión",
-    "yes": "Sí",
-    "no": "No"
-  }
 }

@@ -12,9 +12,6 @@ import { faFacebookF, faInstagram, faTwitter, faLinkedinIn } from '@fortawesome/
 import { faAlignLeft, faBan, faBell, faChevronDown, faChevronUp, faCircle, faCity, faClipboardList, faCloudUploadAlt, faCog, faHeading, faHeart as faHeartSolid, faImage, faInfoCircle, faLock, faPalette, faPeopleGroup, faSave, faSignOutAlt, faSort, faSortDown, faSortUp, faThList, faTicket, faToggleOn, faUpload, faUser, faUsers, faWrench } from '@fortawesome/free-solid-svg-icons'
 import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons'
 
-
-
-
 import { 
   faCamera, faCheckCircle, faMapMarkerAlt, faPlusCircle, 
   faPen, faEdit, faCheck, faTimes, faHome, faStar, 

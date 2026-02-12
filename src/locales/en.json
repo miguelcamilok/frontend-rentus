@@ -213,6 +213,7 @@
             "logout": "Sign Out",
             "greeting": "Hello"
         },
+        
         "dropdown": {
             "myProfile": "My Profile",
             "notifications": "Notifications",
@@ -225,7 +226,8 @@
             "maintenance": "Maintenance",
             "ownerRequests": "Owner Requests",
             "myRequests": "My Requests",
-            "settings": "Settings"
+            "settings": "Settings",
+            "adminPanel": "Admin Panel"
         },
         "alerts": {
             "logoutSuccess": {
