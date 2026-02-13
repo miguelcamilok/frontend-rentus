@@ -1,32 +1,22 @@
 <template>
   <div class="create-property-page">
-    <!-- Animated Background -->
+    <!-- Background animado -->
     <div class="page-background">
       <div class="gradient-orb orb-1"></div>
       <div class="gradient-orb orb-2"></div>
       <div class="gradient-orb orb-3"></div>
     </div>
 
-    <!-- Floating Particles -->
-    <div class="particles">
-      <div v-for="i in 20" :key="i" class="particle" :style="particleStyle()"></div>
-    </div>
-
-    <!-- Main Container -->
+    <!-- Contenido principal -->
     <main class="property-container">
       <!-- Hero Section -->
       <div class="hero-section">
-        <div class="hero-background">
-          <div class="hero-glow"></div>
-        </div>
         <div class="hero-content">
-          <div class="header-info">
-            <h1 class="page-title">
-              <font-awesome-icon :icon="['fas', 'home']" />
-              {{ t('property.create.title') }}
-            </h1>
-            <p class="page-subtitle">{{ t('property.create.subtitle') }}</p>
-          </div>
+          <h1 class="page-title">
+            <font-awesome-icon :icon="['fas', 'home']" />
+            {{ t('property.create.title') }}
+          </h1>
+          <p class="page-subtitle">{{ t('property.create.subtitle') }}</p>
         </div>
       </div>
 
@@ -45,7 +35,7 @@
         </div>
       </Transition>
 
-      <!-- Form Container -->
+      <!-- Formulario -->
       <div class="form-wrapper">
         <form @submit.prevent="openLocationModal">
           <!-- Información Básica -->
@@ -273,77 +263,106 @@
             </div>
           </div>
 
-          <!-- 🔥 SECCIÓN DE MÚLTIPLES IMÁGENES -->
+          <!-- 🎨 SECCIÓN DE IMÁGENES MEJORADA -->
           <div class="content-section">
             <div class="section-header">
               <h3>
                 <font-awesome-icon :icon="['fas', 'images']" />
                 Imágenes de la Propiedad
               </h3>
+              <p class="section-description">
+                Sube hasta 10 imágenes en formato JPG, PNG o WEBP (máx. 2MB cada una)
+              </p>
             </div>
 
-            <!-- Upload de múltiples imágenes -->
-            <div class="form-group full-width">
-              <label>
-                <font-awesome-icon :icon="['fas', 'cloud-upload-alt']" />
-                Subir Imágenes
-                <span class="help-text">(Máximo 10 imágenes, 10MB cada una)</span>
-              </label>
-              
-              <div class="image-upload-area">
-                <input
-                  ref="fileInput"
-                  type="file"
-                  accept="image/jpeg,image/png,image/jpg,image/webp"
-                  multiple
-                  class="file-input-hidden"
-                  @change="handleMultipleImages"
-                />
-                <button
-                  type="button"
-                  class="btn-upload-images"
-                  @click="triggerFileInput"
-                  :disabled="uploadedImages.length >= 10"
-                >
-                  <font-awesome-icon :icon="['fas', 'plus']" />
-                  Seleccionar Imágenes
-                </button>
-                <p class="upload-hint">
-                  Formatos: JPG, PNG, WEBP | Máximo: 10MB por imagen
-                </p>
+            <!-- Área de carga -->
+            <div class="image-upload-section">
+              <input
+                ref="fileInput"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                class="file-input-hidden"
+                @change="handleImageSelection"
+              />
+
+              <div
+                class="upload-dropzone"
+                :class="{ 'is-dragging': isDragging }"
+                @click="triggerFileInput"
+                @dragover.prevent="isDragging = true"
+                @dragleave.prevent="isDragging = false"
+                @drop.prevent="handleDrop"
+              >
+                <div class="dropzone-content">
+                  <font-awesome-icon :icon="['fas', 'cloud-upload-alt']" class="upload-icon" />
+                  <h4>Arrastra imágenes aquí o haz clic para seleccionar</h4>
+                  <p class="upload-hint">
+                    JPG, PNG, WEBP hasta 2MB | {{ images.length }}/10 imágenes
+                  </p>
+                </div>
+              </div>
+
+              <!-- Barra de progreso (opcional) -->
+              <div v-if="uploadProgress > 0 && uploadProgress < 100" class="upload-progress">
+                <div class="progress-bar" :style="{ width: uploadProgress + '%' }"></div>
+                <span class="progress-text">{{ uploadProgress }}%</span>
               </div>
             </div>
 
-            <!-- Grid de imágenes subidas -->
-            <div v-if="uploadedImages.length > 0" class="images-grid">
-              <TransitionGroup name="image-item">
-                <div
-                  v-for="(image, index) in uploadedImages"
-                  :key="index"
-                  class="image-item"
-                >
+            <!-- Grid de imágenes -->
+            <TransitionGroup name="image-list" tag="div" class="images-grid">
+              <div
+                v-for="(image, index) in images"
+                :key="image.id"
+                class="image-card"
+                :class="{ 'is-main': index === 0 }"
+              >
+                <!-- Preview de imagen -->
+                <div class="image-preview">
                   <img :src="image.preview" :alt="`Imagen ${index + 1}`" />
+                  
+                  <!-- Badge de imagen principal -->
+                  <div v-if="index === 0" class="main-badge">
+                    <font-awesome-icon :icon="['fas', 'star']" />
+                    Principal
+                  </div>
+
+                  <!-- Overlay con acciones -->
                   <div class="image-overlay">
-                    <span class="image-number">{{ index + 1 }}</span>
+                    <button
+                      v-if="index !== 0"
+                      type="button"
+                      @click="setAsMain(index)"
+                      class="btn-overlay"
+                      title="Establecer como principal"
+                    >
+                      <font-awesome-icon :icon="['fas', 'star']" />
+                    </button>
                     <button
                       type="button"
-                      class="btn-remove-image"
                       @click="removeImage(index)"
+                      class="btn-overlay btn-danger"
+                      title="Eliminar imagen"
                     >
                       <font-awesome-icon :icon="['fas', 'trash']" />
                     </button>
                   </div>
-                  <div class="image-info">
-                    <span class="image-size">{{ formatFileSize(image.size) }}</span>
-                  </div>
                 </div>
-              </TransitionGroup>
-            </div>
 
-            <div v-else class="empty-images">
-              <font-awesome-icon :icon="['fas', 'image']" />
-              <p>No has agregado imágenes aún</p>
-              <small>Las imágenes ayudan a atraer más interesados</small>
+                <!-- Info de imagen -->
+                <div class="image-info">
+                  <span class="image-number">#{{ index + 1 }}</span>
+                  <span class="image-size">{{ formatFileSize(image.size) }}</span>
+                </div>
+              </div>
+            </TransitionGroup>
+
+            <!-- Estado vacío -->
+            <div v-if="images.length === 0" class="empty-images">
+              <font-awesome-icon :icon="['fas', 'image']" class="empty-icon" />
+              <h4>No hay imágenes</h4>
+              <p>Agrega fotos para que tu propiedad sea más atractiva</p>
             </div>
           </div>
 
@@ -361,17 +380,20 @@
             <button
               type="submit"
               class="btn-primary"
-              :disabled="loading"
+              :disabled="loading || images.length === 0"
             >
-              <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
-              <span>Continuar a Ubicación →</span>
+              <font-awesome-icon 
+                :icon="loading ? ['fas', 'spinner'] : ['fas', 'map-marker-alt']" 
+                :spin="loading"
+              />
+              <span>{{ loading ? 'Procesando...' : 'Continuar a Ubicación →' }}</span>
             </button>
           </div>
         </form>
       </div>
     </main>
 
-    <!-- 🔥 MODAL DE UBICACIÓN -->
+    <!-- Modal de ubicación -->
     <PropertyLocationModal
       :show="showLocationModal"
       :property-data="{
@@ -393,51 +415,61 @@ import { useAlerts } from '../../composables/useAlerts'
 import { useI18n } from 'vue-i18n'
 import PropertyLocationModal from '../../admin/components/Properties/PropertyLocationModa.vue'
 
+// ==================== INTERFACES ====================
+interface PropertyImage {
+  id: string
+  file: File
+  preview: string
+  base64: string
+  size: number
+}
+
+interface PropertyForm {
+  title: string
+  description: string
+  address: string
+  city: string
+  status: string
+  monthly_price: number
+  area_m2: number | null
+  num_bedrooms: number | null
+  num_bathrooms: number | null
+  included_services: string[]
+  publication_date: string
+}
+
+// ==================== COMPOSABLES ====================
 const { t } = useI18n()
 const router = useRouter()
 const { success: successAlert, error: errorAlert, confirm } = useAlerts()
 
-// Estado del formulario
-const form = ref({
+// ==================== STATE ====================
+const form = ref<PropertyForm>({
   title: '',
   description: '',
   address: '',
   city: '',
   status: 'available',
   monthly_price: 0,
-  area_m2: null as number | null,
-  num_bedrooms: null as number | null,
-  num_bathrooms: null as number | null,
-  included_services: [] as string[],
+  area_m2: null,
+  num_bedrooms: null,
+  num_bathrooms: null,
+  included_services: [],
   publication_date: '',
 })
 
-// 🔥 ESTADO PARA MÚLTIPLES IMÁGENES
-interface UploadedImage {
-  file: File;
-  preview: string;
-  base64: string;
-  size: number;
-}
-
-const uploadedImages = ref<UploadedImage[]>([])
+const images = ref<PropertyImage[]>([])
 const fileInput = ref<HTMLInputElement | null>(null)
-
-// Campo de texto para servicios
 const servicesText = ref('')
-
-// Precio con formato
 const displayPrice = ref('')
-
-// Estados de la UI
 const loading = ref(false)
 const errorMessage = ref('')
 const success = ref(false)
-
-// Modal de ubicación
 const showLocationModal = ref(false)
+const isDragging = ref(false)
+const uploadProgress = ref(0)
 
-// Computed para precio formateado
+// ==================== COMPUTED ====================
 const formattedPrice = computed(() => {
   if (!form.value.monthly_price || form.value.monthly_price === 0) {
     return 'COP $0'
@@ -450,42 +482,23 @@ const formattedPrice = computed(() => {
   }).format(form.value.monthly_price)
 })
 
-/**
- * Formatear número con puntos de miles
- */
+// ==================== MÉTODOS DE PRECIO ====================
 const formatNumber = (value: number): string => {
   if (!value) return ''
   return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 }
 
-/**
- * Manejar input de precio en tiempo real
- */
 const handlePriceInput = (event: Event) => {
   const input = event.target as HTMLInputElement
-  let value = input.value
-
-  // Remover todo excepto números
-  value = value.replace(/[^\d]/g, '')
-
-  // Convertir a número
+  let value = input.value.replace(/[^\d]/g, '')
   const numericValue = parseInt(value) || 0
-
-  // Actualizar valor real
   form.value.monthly_price = numericValue
-
-  // Actualizar display con formato
   displayPrice.value = formatNumber(numericValue)
-
-  // Mover cursor al final
   setTimeout(() => {
     input.setSelectionRange(displayPrice.value.length, displayPrice.value.length)
   }, 0)
 }
 
-/**
- * Formatear precio al perder el foco
- */
 const formatPriceOnBlur = () => {
   if (form.value.monthly_price > 0) {
     displayPrice.value = formatNumber(form.value.monthly_price)
@@ -494,117 +507,194 @@ const formatPriceOnBlur = () => {
   }
 }
 
-/**
- * Genera estilos aleatorios para las partículas
- */
-const particleStyle = () => ({
-  left: `${Math.random() * 100}%`,
-  top: `${Math.random() * 100}%`,
-  animationDelay: `${Math.random() * 10}s`,
-  animationDuration: `${15 + Math.random() * 15}s`
-})
-
-/**
- * Parsea los servicios del input de texto a array
- */
+// ==================== MÉTODOS DE SERVICIOS ====================
 const parseServices = () => {
   if (!servicesText.value.trim()) {
     form.value.included_services = []
     return
   }
-  
   form.value.included_services = servicesText.value
     .split(',')
     .map(s => s.trim())
     .filter(Boolean)
 }
 
-/**
- * Remueve un servicio específico
- */
 const removeService = (index: number) => {
   form.value.included_services.splice(index, 1)
   servicesText.value = form.value.included_services.join(', ')
 }
 
+// ==================== MÉTODOS DE IMÁGENES ====================
+
 /**
- * 🔥 TRIGGER FILE INPUT
+ * Abre el selector de archivos
  */
 const triggerFileInput = () => {
   fileInput.value?.click()
 }
 
 /**
- * 🔥 MANEJAR MÚLTIPLES IMÁGENES
+ * Maneja la selección de imágenes desde el input
  */
-const handleMultipleImages = async (event: Event) => {
+const handleImageSelection = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const files = Array.from(target.files || [])
-
-  if (files.length === 0) return
-
-  // Validar que no exceda el máximo
-  if (uploadedImages.value.length + files.length > 10) {
-    errorAlert('Máximo 10 imágenes permitidas', 'Límite alcanzado')
-    return
-  }
-
-  for (const file of files) {
-    // Validar tipo
-    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
-    if (!validTypes.includes(file.type)) {
-      errorAlert(`${file.name}: Formato no válido`, 'Error')
-      continue
-    }
-
-    // Validar tamaño (10MB)
-    const maxSize = 10 * 1024 * 1024
-    if (file.size > maxSize) {
-      errorAlert(`${file.name}: Tamaño máximo 10MB`, 'Error')
-      continue
-    }
-
-    // Convertir a base64
-    const base64 = await fileToBase64(file)
-    const preview = URL.createObjectURL(file)
-
-    uploadedImages.value.push({
-      file,
-      preview,
-      base64,
-      size: file.size
-    })
-  }
-
-  // Limpiar input
+  await processFiles(files)
+  
+  // Limpiar input para permitir reselección del mismo archivo
   if (fileInput.value) {
     fileInput.value.value = ''
   }
 }
 
 /**
- * Convertir archivo a base64
+ * Maneja el drop de imágenes
  */
-const fileToBase64 = (file: File): Promise<string> => {
+const handleDrop = async (event: DragEvent) => {
+  isDragging.value = false
+  const files = Array.from(event.dataTransfer?.files || [])
+  await processFiles(files)
+}
+
+/**
+ * Procesa archivos seleccionados o dropeados
+ */
+const processFiles = async (files: File[]) => {
+  if (files.length === 0) return
+
+  // Validar límite total
+  if (images.value.length + files.length > 10) {
+    errorAlert('Máximo 10 imágenes permitidas', 'Límite alcanzado')
+    return
+  }
+
+  uploadProgress.value = 0
+  const totalFiles = files.length
+  let processedFiles = 0
+
+  for (const file of files) {
+    // Validar tipo
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!validTypes.includes(file.type)) {
+      errorAlert(`${file.name}: Formato no válido (usa JPG, PNG o WEBP)`, 'Error')
+      continue
+    }
+
+    // Validar tamaño (2MB)
+    const maxSize = 2 * 1024 * 1024
+    if (file.size > maxSize) {
+      errorAlert(
+        `${file.name}: Tamaño máximo 2MB (actual: ${formatFileSize(file.size)})`,
+        'Error'
+      )
+      continue
+    }
+
+    try {
+      // Comprimir y convertir a base64
+      const base64 = await compressAndConvertToBase64(file)
+      const preview = URL.createObjectURL(file)
+
+      images.value.push({
+        id: `${Date.now()}-${Math.random()}`,
+        file,
+        preview,
+        base64,
+        size: file.size
+      })
+
+      processedFiles++
+      uploadProgress.value = Math.round((processedFiles / totalFiles) * 100)
+    } catch (error) {
+      console.error(`Error procesando ${file.name}:`, error)
+      errorAlert(`Error procesando ${file.name}`, 'Error')
+    }
+  }
+
+  // Resetear progreso después de 1 segundo
+  setTimeout(() => {
+    uploadProgress.value = 0
+  }, 1000)
+}
+
+/**
+ * Comprime imagen y convierte a Base64
+ * Usa canvas para comprimir antes de convertir
+ */
+const compressAndConvertToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = reject
+    
+    reader.onload = (e) => {
+      const img = new Image()
+      
+      img.onload = () => {
+        // Crear canvas para comprimir
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        
+        if (!ctx) {
+          reject(new Error('No se pudo obtener contexto del canvas'))
+          return
+        }
+
+        // Mantener aspect ratio, máximo 1920px de ancho
+        const maxWidth = 1920
+        const maxHeight = 1920
+        let width = img.width
+        let height = img.height
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height *= maxWidth / width
+            width = maxWidth
+          }
+        } else {
+          if (height > maxHeight) {
+            width *= maxHeight / height
+            height = maxHeight
+          }
+        }
+
+        canvas.width = width
+        canvas.height = height
+
+        // Dibujar imagen redimensionada
+        ctx.drawImage(img, 0, 0, width, height)
+
+        // Convertir a Base64 con compresión (0.8 = 80% calidad)
+        const base64 = canvas.toDataURL('image/jpeg', 0.8)
+        resolve(base64)
+      }
+
+      img.onerror = () => reject(new Error('Error cargando imagen'))
+      img.src = e.target?.result as string
+    }
+
+    reader.onerror = () => reject(new Error('Error leyendo archivo'))
     reader.readAsDataURL(file)
   })
 }
 
 /**
- * 🔥 REMOVER IMAGEN
+ * Elimina una imagen del array
  */
 const removeImage = (index: number) => {
-  // Liberar URL del preview
-  URL.revokeObjectURL(uploadedImages.value[index].preview)
-  uploadedImages.value.splice(index, 1)
+  // Liberar URL de preview
+  URL.revokeObjectURL(images.value[index].preview)
+  images.value.splice(index, 1)
 }
 
 /**
- * Formatear tamaño de archivo
+ * Establece una imagen como principal
+ */
+const setAsMain = (index: number) => {
+  const image = images.value.splice(index, 1)[0]
+  images.value.unshift(image)
+}
+
+/**
+ * Formatea tamaño de archivo
  */
 const formatFileSize = (bytes: number): string => {
   if (bytes < 1024) return bytes + ' B'
@@ -612,18 +702,20 @@ const formatFileSize = (bytes: number): string => {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
 }
 
+// ==================== MÉTODOS DE FORMULARIO ====================
+
 /**
- * Cancela el formulario y vuelve atrás
+ * Cancela el formulario
  */
 const cancelForm = () => {
   confirm(
     t('property.create.confirmCancel'),
     () => {
+      // Liberar URLs de preview
+      images.value.forEach(img => URL.revokeObjectURL(img.preview))
       router.back()
     },
-    () => {
-      // Usuario canceló
-    },
+    () => {},
     {
       title: t('property.create.cancelTitle'),
       confirmText: t('common.yes'),
@@ -633,10 +725,9 @@ const cancelForm = () => {
 }
 
 /**
- * 🔥 ABRIR MODAL DE UBICACIÓN
+ * Abre modal de ubicación
  */
 const openLocationModal = () => {
-  // Asegurar que los servicios estén parseados
   parseServices()
   
   // Validar campos requeridos
@@ -650,23 +741,30 @@ const openLocationModal = () => {
     return
   }
 
-  // Abrir modal de ubicación
+  if (images.value.length === 0) {
+    errorAlert('Por favor agrega al menos una imagen', 'Imagen requerida')
+    return
+  }
+
   showLocationModal.value = true
 }
 
 /**
- * 🔥 MANEJAR CONFIRMACIÓN DE UBICACIÓN Y ENVIAR FORMULARIO
+ * Maneja confirmación de ubicación y envía formulario
  */
-const handleLocationConfirm = async (locationData: { lat: number; lng: number; accuracy: number }) => {
+const handleLocationConfirm = async (locationData: { 
+  lat: number
+  lng: number
+  accuracy: number 
+}) => {
   loading.value = true
   errorMessage.value = ''
   success.value = false
 
   try {
-    // 🔥 Preparar imágenes en base64
-    const imagesBase64 = uploadedImages.value.map(img => img.base64)
+    // Preparar array de base64 (solo los datos, sin metadata)
+    const imagesBase64 = images.value.map(img => img.base64)
 
-    // Preparar datos para enviar
     const payload = {
       title: form.value.title,
       description: form.value.description,
@@ -681,30 +779,28 @@ const handleLocationConfirm = async (locationData: { lat: number; lng: number; a
         ? JSON.stringify(form.value.included_services)
         : null,
       publication_date: form.value.publication_date || null,
-      // 🔥 Ubicación del modal
       lat: locationData.lat,
       lng: locationData.lng,
       accuracy: locationData.accuracy,
-      // 🔥 Imágenes en base64 (enviar como JSON string)
+      // Array de imágenes base64 como string JSON
       images: JSON.stringify(imagesBase64)
     }
 
-    console.log('📤 Enviando propiedad:', payload)
+    console.log('📤 Enviando propiedad con', images.value.length, 'imágenes')
 
-    // Llamada al API
     const response = await api.post('/properties', payload)
 
     success.value = true
     successAlert(t('property.create.successMessage'), t('property.create.successTitle'))
 
-    // Cerrar modal
     showLocationModal.value = false
 
-    // Redirigir después de 1.5 segundos
+    // Liberar URLs de preview
+    images.value.forEach(img => URL.revokeObjectURL(img.preview))
+
     setTimeout(() => {
       router.push('/propiedades')
     }, 1500)
-
   } catch (err: any) {
     console.error('Error al crear propiedad:', err)
     
@@ -724,7 +820,7 @@ const handleLocationConfirm = async (locationData: { lat: number; lng: number; a
 }
 
 /**
- * Cancelar modal de ubicación
+ * Cancela modal de ubicación
  */
 const handleLocationCancel = () => {
   showLocationModal.value = false
@@ -732,88 +828,138 @@ const handleLocationCancel = () => {
 </script>
 
 <style scoped>
-/* Importar CSS externo con ruta relativa */
 @import "../../assets/css/Properties/PropertyCreate.css";
 
-/* 🔥 ESTILOS ADICIONALES PARA MÚLTIPLES IMÁGENES */
+/* ==================== ESTILOS DE IMÁGENES ==================== */
+
 .file-input-hidden {
   display: none;
 }
 
-.image-upload-area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  padding: 2rem;
+.image-upload-section {
+  margin-bottom: 2rem;
+}
+
+.upload-dropzone {
   border: 2px dashed #cbd5e1;
-  border-radius: 12px;
-  background: #f8fafc;
-  transition: all 0.3s ease;
-}
-
-.image-upload-area:hover {
-  border-color: #3b251d;
-  background: #f1f5f9;
-}
-
-.btn-upload-images {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 2rem;
-  background: linear-gradient(135deg, #3b251d 0%, #8b6f47 100%);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 1rem;
+  border-radius: 16px;
+  padding: 3rem 2rem;
+  text-align: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.btn-upload-images:hover:not(:disabled) {
+.upload-dropzone:hover,
+.upload-dropzone.is-dragging {
+  border-color: #3b251d;
+  background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
   transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
-.btn-upload-images:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.dropzone-content {
+  pointer-events: none;
+}
+
+.upload-icon {
+  font-size: 3rem;
+  color: #8b6f47;
+  margin-bottom: 1rem;
+}
+
+.upload-dropzone h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
 }
 
 .upload-hint {
   font-size: 0.875rem;
   color: #64748b;
-  margin: 0;
 }
 
+/* Barra de progreso */
+.upload-progress {
+  position: relative;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  margin-top: 1rem;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #3b251d 0%, #8b6f47 100%);
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* Grid de imágenes */
 .images-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1.5rem;
-  margin-top: 1.5rem;
+  margin-top: 2rem;
 }
 
-.image-item {
+.image-card {
   position: relative;
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
-  background: #f1f5f9;
-  aspect-ratio: 4/3;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  background: #fff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+              0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.image-item:hover {
+.image-card.is-main {
+  box-shadow: 0 0 0 3px #3b251d,
+              0 10px 15px -3px rgba(0, 0, 0, 0.2);
+}
+
+.image-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
 }
 
-.image-item img {
+.image-preview {
+  position: relative;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+}
+
+.image-preview img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.main-badge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #1e293b;
+  padding: 0.375rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .image-overlay {
@@ -822,93 +968,133 @@ const handleLocationCancel = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.75rem;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
-.image-item:hover .image-overlay {
+.image-card:hover .image-overlay {
   opacity: 1;
 }
 
-.image-number {
-  position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
-  background: rgba(59, 37, 29, 0.9);
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 0.875rem;
-}
-
-.btn-remove-image {
+.btn-overlay {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  background: #dc2626;
-  color: white;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1e293b;
   border: none;
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 1.25rem;
+  font-size: 1rem;
 }
 
-.btn-remove-image:hover {
-  background: #b91c1c;
+.btn-overlay:hover {
   transform: scale(1.1);
+  background: #fff;
+}
+
+.btn-overlay.btn-danger {
+  background: rgba(220, 38, 38, 0.95);
+  color: #fff;
+}
+
+.btn-overlay.btn-danger:hover {
+  background: #dc2626;
 }
 
 .image-info {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 0.5rem;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  font-size: 0.75rem;
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
 }
 
+.image-number {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #3b251d;
+}
+
+.image-size {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+/* Estado vacío */
 .empty-images {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 1rem;
-  padding: 3rem;
-  border: 2px dashed #e5e7eb;
-  border-radius: 12px;
-  color: #94a3b8;
+  padding: 4rem 2rem;
+  border: 2px dashed #e2e8f0;
+  border-radius: 16px;
+  background: #f8fafc;
   text-align: center;
 }
 
-.empty-images svg {
-  font-size: 3rem;
+.empty-icon {
+  font-size: 4rem;
   color: #cbd5e1;
 }
 
-/* Animaciones para las imágenes */
-.image-item-enter-active,
-.image-item-leave-active {
-  transition: all 0.3s ease;
+.empty-images h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #475569;
+  margin: 0;
 }
 
-.image-item-enter-from {
-  opacity: 0;
-  transform: scale(0.8);
+.empty-images p {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  margin: 0;
 }
 
-.image-item-leave-to {
+/* Animaciones */
+.image-list-enter-active,
+.image-list-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.image-list-enter-from {
   opacity: 0;
-  transform: scale(0.8);
+  transform: scale(0.8) translateY(20px);
+}
+
+.image-list-leave-to {
+  opacity: 0;
+  transform: scale(0.8) translateY(-20px);
+}
+
+.image-list-move {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .images-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+
+  .upload-dropzone {
+    padding: 2rem 1rem;
+  }
+
+  .upload-icon {
+    font-size: 2rem;
+  }
 }
 </style>

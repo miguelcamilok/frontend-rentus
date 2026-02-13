@@ -4,6 +4,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -11,9 +12,12 @@
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-5px);
   }
@@ -23,6 +27,7 @@
   0% {
     background-position: -500px 0;
   }
+
   100% {
     background-position: 500px 0;
   }
@@ -701,12 +706,18 @@
 }
 
 .btn-owner {
-  background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
-  border: none;
-  color: white;
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.4) 0%,
+      rgba(76, 80, 82, 0.4) 100%);
+  color: rgba(255, 255, 255, 0.6);
   font-weight: 600;
-  cursor: default;
+  cursor: not-allowed;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: none;
+  opacity: 0.7;
 }
+
 
 /* ==================== NUEVOS ESTILOS: BOTONES DE PROPIETARIO ==================== */
 
@@ -718,7 +729,9 @@
 }
 
 .btn-edit {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg,
+      rgba(28, 45, 201, 0.4) 0%,
+      rgba(76, 80, 82, 0.4) 100%);
   border: none;
   color: white;
   transition: all 0.3s ease;
@@ -731,7 +744,9 @@
 }
 
 .btn-delete {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg,
+      rgba(163, 34, 34, 0.4) 0%,
+      rgba(76, 80, 82, 0.4) 100%);
   border: none;
   color: white;
   transition: all 0.3s ease;
@@ -883,7 +898,7 @@
     grid-template-columns: 1fr 300px;
     gap: 1.5rem;
   }
-  
+
   .services-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -893,37 +908,37 @@
   .content-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .sidebar-column {
     order: -1;
   }
-  
+
   .contact-card {
     position: static;
   }
-  
+
   .hero-section {
     height: 45vh;
     min-height: 300px;
   }
-  
+
   .breadcrumb-floating {
     font-size: 0.7rem;
     padding: 6px 10px;
     left: 2%;
   }
-  
+
   .features-grid-main {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 10px;
   }
-  
+
   .property-price-banner {
     flex-direction: column;
     gap: 1rem;
     text-align: center;
   }
-  
+
   .price-deposit {
     text-align: center;
   }
@@ -933,29 +948,29 @@
   .property-detail-page {
     padding-top: 60px;
   }
-  
+
   .main-content {
     padding: 1.5rem 2%;
   }
-  
+
   .hero-section {
     height: 40vh;
     min-height: 250px;
   }
-  
+
   .gallery-btn {
     width: 35px;
     height: 35px;
     font-size: 16px;
   }
-  
+
   .breadcrumb-floating {
     left: 2%;
     right: 2%;
     font-size: 0.65rem;
     padding: 5px 8px;
   }
-  
+
   .property-header,
   .features-showcase,
   .description-section,
@@ -964,36 +979,36 @@
   .contact-card {
     padding: 1rem;
   }
-  
+
   .property-title {
     font-size: 1.25rem;
   }
-  
+
   .price-amount {
     font-size: 1.5rem;
   }
-  
+
   .features-grid-main {
     grid-template-columns: 1fr;
   }
-  
+
   .services-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .secondary-actions {
     grid-template-columns: 1fr;
   }
-  
+
   .thumbnails-bar {
     padding: 10px 2%;
   }
-  
+
   .thumbnail-item {
     flex: 0 0 60px;
     height: 40px;
   }
-  
+
   .map-container {
     height: 250px;
   }
