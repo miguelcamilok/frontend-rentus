@@ -9,11 +9,8 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 import { faFacebookF, faInstagram, faTwitter, faLinkedinIn } from '@fortawesome/free-brands-svg-icons'
-import { faBan, faBell, faClipboardList, faCog, faHeart as faHeartSolid, faLock, faPalette, faPeopleGroup, faSignOutAlt, faTicket, faUser, faUsers, faWrench } from '@fortawesome/free-solid-svg-icons'
+import { faAlignLeft, faArrowLeft, faBan, faBell, faCar, faChevronDown, faChevronUp, faCircle, faCity, faClipboardList, faCloudUploadAlt, faCog, faExclamationTriangle, faHeading, faHeart as faHeartSolid, faImage, faInfoCircle, faLink, faLock, faPalette, faPeopleGroup, faRoad, faSave, faSignInAlt, faSignOutAlt, faSlidersH, faSort, faSortDown, faSortUp, faThList, faTicket, faToggleOn, faUpload, faUser, faUsers, faWrench } from '@fortawesome/free-solid-svg-icons'
 import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons'
-
-
-
 
 import { 
   faCamera, faCheckCircle, faMapMarkerAlt, faPlusCircle, 
@@ -35,7 +32,10 @@ library.add(
   faBuilding, faStore, faTree, faSearch, faDollarSign, faChevronLeft, faChevronRight, 
   faSpinner, faImages, faListCheck, faFileAlt, faMap, faCalendarCheck, faShareAlt,
   faClock, faHashtag, faShieldAlt,   faHeartSolid,faHeartRegular, faUser, faBell, faWrench,
-  faSignOutAlt, faClipboardList, faCog, faLock, faPalette, faPeopleGroup, faBan, faUsers, faTicket
+  faSignOutAlt, faClipboardList, faCog, faLock, faPalette, faPeopleGroup, faBan, faUsers, faTicket, 
+  faChevronDown, faChevronUp, faSort, faSortUp, faSortDown, faCircle, faInfoCircle, faAlignLeft, faThList,
+  faHeading, faCity, faToggleOn, faImage, faSave, faUpload, faCloudUploadAlt, faArrowLeft, faExclamationTriangle,
+  faRoad, faCar, faLink, faSlidersH, faSignInAlt
 )
 
 const app = createApp(App)

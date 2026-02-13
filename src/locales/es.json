@@ -235,6 +235,7 @@
       "maintenance": "Mantenimiento",
       "ownerRequests": "Solicitudes (Dueño)",
       "myRequests": "Mis Solicitudes",
+      "adminPanel": "Panel de Administración",
       "settings": "Ajustes"
     },
     "alerts": {

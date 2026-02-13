@@ -5,7 +5,7 @@
       <div class="navbar-left">
         <button class="menu-toggle" @click="$emit('toggleSidebar')">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M3 12h18M3 6h18M3 18h18" stroke-width="2" stroke-linecap="round"/>
+            <path d="M3 12h18M3 6h18M3 18h18" stroke-width="2" stroke-linecap="round" />
           </svg>
         </button>
 
@@ -18,16 +18,12 @@
 
       <!-- Right Section -->
       <div class="navbar-right">
+
         <!-- Search Bar -->
         <div class="search-container">
           <div class="search-icon">🔍</div>
-          <input
-            type="text"
-            placeholder="Buscar..."
-            class="search-input"
-            v-model="searchQuery"
-            @keyup.enter="handleSearch"
-          />
+          <input type="text" placeholder="Buscar..." class="search-input" v-model="searchQuery"
+            @keyup.enter="handleSearch" />
           <kbd class="search-kbd">⌘K</kbd>
         </div>
 
@@ -61,11 +57,17 @@
               <p class="dropdown-user-name">{{ currentUser?.name }}</p>
               <p class="dropdown-user-email">{{ currentUser?.email }}</p>
             </div>
+
+            <a href="#" class="dropdown-item" @click.prevent="goToHome">
+              <span class="dropdown-icon">🏠</span>
+              <span>Home</span>
+            </a>
             <div class="dropdown-divider"></div>
             <a href="#" class="dropdown-item" @click.prevent="goToProfile">
               <span class="dropdown-icon">👤</span>
               <span>Mi Perfil</span>
             </a>
+
             <a href="#" class="dropdown-item" @click.prevent="goToSettings">
               <span class="dropdown-icon">⚙️</span>
               <span>Configuración</span>
@@ -92,7 +94,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAdminAuth } from '../composables/useAdminAuth';
-import { useAlerts } from '../../composable/useAlerts';
+import { useAlerts } from '../../composables/useAlerts';
 import NotificationsDropdown from '../components/NotificationsDropdown.vue';
 
 const route = useRoute();
@@ -122,7 +124,7 @@ const currentPageTitle = computed(() => {
     '/admin/visits': 'Visitas',
     '/admin/reports': 'Reportes',
   };
-  
+
   return titles[route.path] || 'Admin Panel';
 });
 
@@ -148,6 +150,10 @@ const userRoleLabel = computed(() => {
 // Methods
 const toggleUserMenu = () => {
   showUserMenu.value = !showUserMenu.value;
+};
+
+const goToHome = () => {
+  router.push('/');
 };
 
 const handleSearch = () => {
@@ -181,7 +187,7 @@ const handleLogout = async () => {
         console.log('🚪 Cerrando sesión...');
         await logout();
         console.log('✅ Sesión cerrada exitosamente');
-        
+
         // Redirigir al login
         router.push({
           name: 'Login',

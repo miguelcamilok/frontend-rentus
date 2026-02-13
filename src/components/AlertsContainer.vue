@@ -51,8 +51,8 @@
 </template>
 
 <script setup lang="ts">
-import { useAlerts } from '../composable/useAlerts'
-import type { Alert } from '../composable/useAlerts'
+import { useAlerts } from '../composables/useAlerts'
+import type { Alert } from '../composables/useAlerts'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faCheckCircle, faTimesCircle, faExclamationTriangle, faInfoCircle, faQuestionCircle } from '@fortawesome/free-solid-svg-icons'
 

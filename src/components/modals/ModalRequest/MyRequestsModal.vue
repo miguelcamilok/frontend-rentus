@@ -173,7 +173,7 @@
 import { ref, watch, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { rentalRequestService } from "../../../services/rentalRequestService";
-import { useAlerts } from "../../../composable/useAlerts";
+import { useAlerts } from "../../../composables/useAlerts";
 import { useI18n } from 'vue-i18n';
 
 const { t, locale } = useI18n();

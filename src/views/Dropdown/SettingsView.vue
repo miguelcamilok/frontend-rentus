@@ -294,7 +294,7 @@ import { eventBus, EVENTS } from '../../events/eventBus'
 import { useI18n } from 'vue-i18n'
 
 import api from '../../services/api'
-import { useAlerts } from '../../composable/useAlerts'
+import { useAlerts } from '../../composables/useAlerts'
 
 const userPreferences = ref({
   theme: 'light',

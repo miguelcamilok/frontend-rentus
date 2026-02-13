@@ -90,8 +90,8 @@
             <div class="property-header">
               <div class="header-tags">
                 <span class="tag tag-type">
-                  <font-awesome-icon :icon="['fas', getTypeIcon(property.title)]" />
-                  <span class="type-text">{{ t(`property.type.${detectType(property.title).toLowerCase()}`) }}</span>
+                  <font-awesome-icon :icon="['fas', getTypeIcon(property)]" />
+                  <span class="type-text">{{ getTypeTranslated(property) }}</span>
                 </span>
                 <span v-if="property.featured" class="tag tag-featured">
                   <font-awesome-icon :icon="['fas', 'star']" />
@@ -363,13 +363,24 @@ const isAuthenticated = computed(() => {
   return !!localStorage.getItem("auth_token") || !!sessionStorage.getItem("auth_token")
 })
 
+// 🔥 CORRECCIÓN: Construir array de imágenes desde property.images
 const propertyImages = computed(() => {
   if (!property.value) return [DEFAULT_IMAGE]
+  
   const images = []
-  if (property.value.image_url) images.push(property.value.image_url)
-  if (property.value.additional_images && Array.isArray(property.value.additional_images)) {
-    images.push(...property.value.additional_images)
+  
+  // 🔥 NUEVA LÓGICA: Priorizar property.images (relación hasMany)
+  if (property.value.images && Array.isArray(property.value.images) && property.value.images.length > 0) {
+    // Ordenar por 'order' y extraer image_url
+    const sortedImages = [...property.value.images].sort((a, b) => a.order - b.order)
+    images.push(...sortedImages.map(img => img.image_url))
+  } 
+  // Fallback: usar image_url principal si existe
+  else if (property.value.image_url && property.value.image_url.trim() !== '') {
+    images.push(property.value.image_url)
   }
+  
+  // Si no hay imágenes, retornar default
   return images.length > 0 ? images : [DEFAULT_IMAGE]
 })
 
@@ -396,7 +407,20 @@ async function fetchProperty() {
   
   try {
     const response = await api.get(`/properties/${propertyId}`)
-    property.value = response.data
+    
+    // Manejar estructura de respuesta del backend
+    if (response.data.success && response.data.data) {
+      property.value = response.data.data
+    } else if (response.data.data) {
+      property.value = response.data.data
+    } else {
+      property.value = response.data
+    }
+    
+    console.log('✅ Propiedad cargada:', property.value)
+    console.log('📸 Imágenes disponibles:', property.value.images)
+    
+    // Incrementar vistas
     await api.post(`/properties/${propertyId}/view`)
   } catch (err) {
     console.error('Error al cargar la propiedad:', err)
@@ -407,6 +431,7 @@ async function fetchProperty() {
 }
 
 function onImgError(event) {
+  console.warn('❌ Error cargando imagen:', event.target.src)
   event.target.src = DEFAULT_IMAGE
 }
 
@@ -434,16 +459,45 @@ function openRequestVisitModal() {
   showRequestModal.value = true
 }
 
-const detectType = (title) => {
+const detectType = (propertyData) => {
+  if (!propertyData) return 'otro';
+  if (propertyData.type) return propertyData.type;
+  
+  const title = propertyData.title || '';
   const tTitle = title.toLowerCase();
+  
   if (tTitle.includes("casa")) return 'casa';
   if (tTitle.includes("apartamento") || tTitle.includes("apto")) return 'apartamento';
   if (tTitle.includes("local")) return 'local';
   if (tTitle.includes("finca")) return 'finca';
-  return 'propiedad';
+  return 'otro';
 };
 
-const getTypeIcon = (title) => {
+const getTypeTranslated = (propertyData) => {
+  const type = detectType(propertyData);
+  
+  const typeMap = {
+    casa: t('property.type.casa'),
+    apartamento: t('property.type.apartamento'),
+    local: t('property.type.local'),
+    finca: t('property.type.finca'),
+    otro: t('property.type.otro'),
+  };
+  
+  return typeMap[type] || t('property.type.otro');
+};
+
+const getTypeIcon = (propertyData) => {
+  if (!propertyData) return "home";
+  
+  const type = propertyData.type || '';
+  
+  if (type === 'casa') return "home";
+  if (type === 'apartamento') return "building";
+  if (type === 'local') return "store";
+  if (type === 'finca') return "tree";
+  
+  const title = propertyData.title || '';
   const t = title.toLowerCase();
   if (t.includes("casa")) return "home";
   if (t.includes("apartamento") || t.includes("apto")) return "building";
@@ -477,8 +531,6 @@ function shareProperty() {
     alert(t('property.contact.linkCopied'))
   }
 }
-
-// ==================== NUEVAS FUNCIONES: EDITAR Y ELIMINAR ====================
 
 function editProperty() {
   router.push({
@@ -514,8 +566,6 @@ async function deleteProperty() {
     loading.value = false
   }
 }
-
-// ==================== FIN NUEVAS FUNCIONES ====================
 
 function getServicesArray(services) {
   if (!services) return []

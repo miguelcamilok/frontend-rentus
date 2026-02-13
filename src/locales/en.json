@@ -235,6 +235,7 @@
       "maintenance": "Maintenance",
       "ownerRequests": "Requests (Owner)",
       "myRequests": "My Requests",
+      "adminPanel": "Admin Panel",
       "settings": "Settings"
     },
     "alerts": {

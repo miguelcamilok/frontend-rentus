@@ -195,6 +195,18 @@
                 <div class="divider-line"></div>
               </div>
 
+
+              <!-- Admin Panel (solo para admin/support) -->
+              <div v-if="currentUser?.role === 'admin' || currentUser?.role === 'support'" @click="goToAdminPanel"
+                class="dropdown-item admin-panel-item" style="animation-delay: 0.42s">
+                <div class="item-icon-wrapper">
+                  <font-awesome-icon icon="shield-alt" class="item-icon" />
+                  <div class="icon-glow"></div>
+                </div>
+                <div class="item-text">{{ $t('navbar.dropdown.adminPanel') }}</div>
+                <font-awesome-icon icon="chevron-right" class="item-arrow" />
+              </div>
+
               <!-- Ajustes -->
               <div @click="goAjustes" class="dropdown-item" style="animation-delay: 0.45s">
                 <div class="item-icon-wrapper">
@@ -379,6 +391,12 @@ const checkAuthAndLoadUser = async () => {
     console.error("Error verificando autenticación:", error);
     await handleLogout();
   }
+};
+
+const goToAdminPanel = () => {
+  router.push('/admin/dashboard');
+  closeDropdown();
+  closeMobileMenu();
 };
 
 const updateUserData = (user: User) => {
@@ -605,4 +623,14 @@ onBeforeUnmount(() => {
 
 <style scoped>
 @import "../assets/css/components/navbar.css";
+
+.admin-panel-item {
+  background: linear-gradient(135deg, #3b251d05 0%, #8b6f4705 100%);
+  border-left: 3px solid #3b251d;
+}
+
+.admin-panel-item:hover {
+  background: linear-gradient(135deg, #3b251d10 0%, #8b6f4710 100%);
+  border-left-color: #8b6f47;
+}
 </style>

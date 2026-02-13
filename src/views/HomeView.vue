@@ -463,7 +463,7 @@ import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import RequestVisitModal from "../components/modals/ModalRequest/RequestVisitModal.vue";
 import PropertySearch from '../components/search/PropertySearch.vue';
-import { usePropertyTypes } from '../composable/usePropertyTypes';  
+import { usePropertyTypes } from '../types/usePropertyTypes';  
 import api from "../services/api";
 
 const DEFAULT_PROPERTY_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjE4IiBmaWxsPSIjNmM3NTdkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2VuIG5vIGRpc3BvbmlibGU8L3RleHQ+PC9zdmc+";
