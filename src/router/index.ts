@@ -4,6 +4,7 @@ import type { RouteRecordRaw } from 'vue-router'
 import MainLayout from "../layouts/MainLayout.vue";
 import HomeView from "../views/HomeView.vue";
 import MapView from "../components/modals/Maps/MapView.vue";
+import MapExplorerView from "../views/Map/MapExplorerView.vue";         // ← NUEVO
 import PropertyDetail from "../views/Property/PropertyDetail.vue";
 import LoginView from "../views/Auth/LoginView.vue";
 import RegisterView from "../views/Auth/RegisterView.vue";
@@ -87,7 +88,15 @@ const routes: RouteRecordRaw[] = [
   // ==================== RUTAS DEL ADMIN PANEL ====================
   ...adminRoutes,
 
-  // ==================== MAPA (SIN LAYOUT) ====================
+  // ==================== MAPAS (SIN LAYOUT) ====================
+  // MapExplorerView: mapa global para explorar todas las propiedades
+  {
+    path: "/mapa",
+    name: "MapExplorer",
+    component: MapExplorerView,
+    meta: { title: "Explorar en Mapa" },
+  },
+  // MapView: mapa de detalle para una propiedad específica (existente)
   {
     path: "/map/:id",
     name: "MapView",
@@ -128,7 +137,6 @@ const routes: RouteRecordRaw[] = [
       next();
     },
   },
-
   {
     path: "/forgot-password",
     name: "ForgotPassword",
@@ -146,7 +154,6 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
-  // Comportamiento de scroll: siempre ir al inicio en cada navegación
   scrollBehavior(_to, _from, savedPosition) {
     if (savedPosition) {
       return savedPosition;
@@ -160,7 +167,6 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   console.log(`🧭 Navegando de ${from.path} → ${to.path}`);
 
-  // Actualizar título de la página
   if (to.meta.title) {
     document.title = `${to.meta.title} | RentUs`;
   } else {
@@ -173,29 +179,19 @@ router.beforeEach(async (to, from, next) => {
   const requiresAdmin = to.matched.some((record) => record.meta.requiresAdmin);
   const requiresRole = to.meta.requiresRole as string | undefined;
 
-  // ==================== CASO 1: Ruta requiere autenticación ====================
+  // CASO 1: Ruta protegida sin sesión
   if (requiresAuth && !isAuthenticated) {
     console.log("🔒 Ruta protegida, redirigiendo a login");
-
-    // Guardar la ruta a la que intentaba acceder
     localStorage.setItem("redirectAfterLogin", to.fullPath);
-
-    next({
-      name: "Login",
-      query: { redirect: to.fullPath },
-    });
+    next({ name: "Login", query: { redirect: to.fullPath } });
     return;
   }
 
-  // ==================== CASO 2: Usuario autenticado intenta acceder a login/register ====================
+  // CASO 2: Usuario autenticado intenta acceder a login/register
   if (hideForAuth && isAuthenticated) {
     console.log("👤 Usuario autenticado, redirigiendo");
-
     try {
-      // Obtener información del usuario para decidir redirección
       const user = await authService.getMe();
-
-      // Si es admin o support, redirigir al dashboard admin
       if (user.role === 'admin' || user.role === 'support') {
         console.log("🔐 Usuario admin/support detectado, redirigiendo al dashboard");
         next({ name: "admin-dashboard" });
@@ -209,36 +205,25 @@ router.beforeEach(async (to, from, next) => {
     return;
   }
 
-  // ==================== CASO 3: Verificar validez del token en rutas protegidas ====================
+  // CASO 3: Verificar validez del token en rutas protegidas
   if (isAuthenticated && requiresAuth) {
     try {
-      // Intentar obtener el usuario para validar el token
       const user = await authService.getMe();
       console.log("✅ Token válido, permitiendo acceso");
 
-      // ==================== CASO 3.1: Verificar acceso al admin panel ====================
       if (requiresAdmin) {
         const userRole = user.role;
-
         console.log(`🔐 Verificando acceso admin. Rol del usuario: ${userRole}`);
 
-        // Solo admin y support pueden acceder
         if (userRole !== 'admin' && userRole !== 'support') {
           console.warn("🚫 Acceso denegado: Se requiere rol de administrador");
-          next({
-            name: "home",
-            query: { error: 'unauthorized' }
-          });
+          next({ name: "home", query: { error: 'unauthorized' } });
           return;
         }
 
-        // ==================== CASO 3.2: Verificar rol específico ====================
         if (requiresRole && userRole !== requiresRole) {
           console.warn(`🚫 Acceso denegado: Se requiere rol ${requiresRole}, tienes ${userRole}`);
-          next({
-            name: "admin-dashboard",
-            query: { error: 'insufficient_permissions' }
-          });
+          next({ name: "admin-dashboard", query: { error: 'insufficient_permissions' } });
           return;
         }
 
@@ -248,53 +233,36 @@ router.beforeEach(async (to, from, next) => {
       next();
     } catch (error) {
       console.error("❌ Token inválido:", error);
-
-      // Token inválido, limpiar y redirigir a login
       await authService.logout();
       localStorage.setItem("redirectAfterLogin", to.fullPath);
-
-      next({
-        name: "Login",
-        query: { redirect: to.fullPath },
-      });
+      next({ name: "Login", query: { redirect: to.fullPath } });
     }
     return;
   }
 
-  // ==================== CASO 4: Rutas admin sin autenticación ====================
+  // CASO 4: Rutas admin sin autenticación
   if (requiresAdmin && !isAuthenticated) {
     console.log("🔒 Admin panel requiere autenticación, redirigiendo a login");
     localStorage.setItem("redirectAfterLogin", to.fullPath);
-
-    next({
-      name: "Login",
-      query: { redirect: to.fullPath },
-    });
+    next({ name: "Login", query: { redirect: to.fullPath } });
     return;
   }
 
-  // ==================== CASO 5: Permitir navegación ====================
+  // CASO 5: Permitir navegación
   console.log("✅ Navegación permitida");
   next();
 });
 
 // ==================== GUARD DESPUÉS DE CADA NAVEGACIÓN ====================
 router.afterEach((to, from) => {
-  // Log para debugging en desarrollo
   if (import.meta.env.DEV) {
     console.log(`📍 Navegación completada: ${from.path} → ${to.path}`);
   }
-
-  // Aquí puedes agregar analytics, tracking, etc.
-  // Ejemplo: trackPageView(to.path);
 });
 
 // ==================== MANEJO DE ERRORES DE NAVEGACIÓN ====================
 router.onError((error) => {
   console.error("❌ Error en navegación:", error);
-
-  // Puedes mostrar un mensaje al usuario o registrar el error
-  // Ejemplo: notifyError('Error al cargar la página');
 });
 
 export default router;

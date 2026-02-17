@@ -74,7 +74,7 @@
           </div>
         </div>
 
-        <!-- Imagen decorativa con efecto -->
+        <!-- Imagen decorativa con mapa integrado -->
         <div class="hero-image-section" data-aos="fade-left">
           <div class="floating-card card-1">
             <font-awesome-icon :icon="['fas', 'home']" class="card-icon" />
@@ -84,12 +84,28 @@
             <font-awesome-icon :icon="['fas', 'star']" class="card-icon" />
             <div class="card-text">{{ $t('home.hero.floatingCards.rated') }}</div>
           </div>
-          <div class="hero-image-placeholder">
-            <div class="image-grid">
-              <div class="grid-item item-1"></div>
-              <div class="grid-item item-2"></div>
-              <div class="grid-item item-3"></div>
-              <div class="grid-item item-4"></div>
+
+          <!-- Mini Mapa Preview -->
+          <div class="hero-image-placeholder map-preview-wrapper" @click="handleMapClick">
+            <div ref="miniMapEl" class="mini-map"></div>
+
+            <!-- Overlay con CTA -->
+            <div class="map-overlay">
+              <div class="map-overlay-content">
+                <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="map-overlay-icon" />
+                <span v-if="isUserAuthenticated">
+                  {{ $t('home.hero.map.explore') || 'Explorar en mapa' }}
+                </span>
+                <span v-else>
+                  {{ $t('home.hero.map.login') || 'Inicia sesión para explorar' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Pulse animado en esquina -->
+            <div class="map-live-badge">
+              <span class="live-dot"></span>
+              <span class="live-text">En vivo</span>
             </div>
           </div>
         </div>
@@ -98,8 +114,6 @@
 
     <!-- Buscador Moderno Flotante -->
     <PropertySearch v-model="filters" />
-
-
 
     <!-- Propiedades Section -->
     <section class="properties-modern-section">
@@ -451,19 +465,22 @@
         </div>
       </div>
     </Transition>
-    
+
     <RequestVisitModal :open="showRequestModal" :property="propertyForRequest" @close="showRequestModal = false"
       @success="handleVisitRequestSuccess" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, onUnmounted, computed, watchEffect } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import RequestVisitModal from "../components/modals/ModalRequest/RequestVisitModal.vue";
 import PropertySearch from '../components/search/PropertySearch.vue';
-import { usePropertyTypes } from '../types/usePropertyTypes';  
+import { usePropertyTypes } from '../types/usePropertyTypes';
+import { authService } from "../services/auth";
 import api from "../services/api";
 
 const DEFAULT_PROPERTY_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjE4IiBmaWxsPSIjNmM3NTdkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2VuIG5vIGRpc3BvbmlibGU8L3RleHQ+PC9zdmc+";
@@ -471,10 +488,10 @@ const DEFAULT_PROPERTY_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIi
 // ==================== Composables ====================
 const { t } = useI18n();
 const router = useRouter();
-const { 
+const {
   detectTypeNormalized,
   detectTypeTranslated,
-  getTypeIcon 
+  getTypeIcon
 } = usePropertyTypes();
 
 // ==================== State ====================
@@ -488,6 +505,12 @@ const activeClientsCount = ref(0);
 const propertyCount = ref(0);
 const modalOpen = ref(false);
 
+// Mini mapa
+const miniMapEl = ref<HTMLElement | null>(null);
+const isUserAuthenticated = ref(authService.isAuthenticated());
+let miniMap: L.Map | null = null;
+let miniMarkersAdded = false;
+
 const PROPERTIES_LIMIT = 4;
 
 const filters = ref({
@@ -498,10 +521,8 @@ const filters = ref({
 });
 
 // ==================== Computed ====================
-
 const filteredProperties = computed(() => {
   return properties.value.filter((p) => {
-    // 🔥 Usa detectTypeNormalized del composable para comparar
     const typeFromTitle = detectTypeNormalized(p.title);
 
     const matchSearch =
@@ -530,8 +551,58 @@ const displayedProperties = computed(() => {
   return [...featured, ...regular].slice(0, PROPERTIES_LIMIT);
 });
 
-// ==================== Methods ====================
+// ==================== Mini Mapa ====================
+function handleMapClick() {
+  if (isUserAuthenticated.value) {
+    router.push({ name: 'MapExplorer' });
+  } else {
+    router.push({ name: 'Login' });
+  }
+}
 
+function initMiniMap() {
+  if (!miniMapEl.value) return;
+
+  miniMap = L.map(miniMapEl.value, {
+    center: [4.5709, -74.2973],
+    zoom: 6,
+    zoomControl: false,
+    dragging: false,
+    scrollWheelZoom: false,
+    doubleClickZoom: false,
+    boxZoom: false,
+    keyboard: false,
+    attributionControl: false,
+    touchZoom: false
+  });
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19
+  }).addTo(miniMap);
+}
+
+// Agregar marcadores al mini mapa cuando las propiedades estén listas
+watchEffect(() => {
+  if (miniMap && properties.value.length > 0 && !miniMarkersAdded) {
+    miniMarkersAdded = true;
+
+    properties.value
+      .filter(p => p.lat && p.lng && !isNaN(parseFloat(p.lat)) && !isNaN(parseFloat(p.lng)))
+      .slice(0, 30)
+      .forEach(p => {
+        L.circleMarker([parseFloat(p.lat), parseFloat(p.lng)], {
+          radius: 7,
+          fillColor: '#1e40af',
+          color: '#ffffff',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.85
+        }).addTo(miniMap!);
+      });
+  }
+});
+
+// ==================== Methods ====================
 function onImgError(event: Event) {
   const img = event.target as HTMLImageElement;
   if (img && img.src !== DEFAULT_PROPERTY_IMAGE) {
@@ -575,7 +646,7 @@ const viewOnMap = (property: any) => {
 const friendlyStatus = (s: string) => {
   if (!s) return t('home.properties.card.status.available');
   const statusKey = s.toString().trim().toLowerCase();
-  
+
   const statusMap: Record<string, string> = {
     available: t('home.properties.card.status.available'),
     rented: t('home.properties.card.status.rented'),
@@ -583,7 +654,7 @@ const friendlyStatus = (s: string) => {
     sold: t('home.properties.card.status.sold'),
     maintenance: t('home.properties.card.status.maintenance'),
   };
-  
+
   return statusMap[statusKey] || t('home.properties.card.status.available');
 };
 
@@ -621,12 +692,7 @@ async function fetchAllData() {
       api.get("/properties"),
       api.get("/users")
     ]);
-    
-    // Manejar diferentes formatos de respuesta
-    // Formato 1: Respuesta directa (array)
-    // Formato 2: Respuesta con data y meta
-    
-    // Para propiedades
+
     if (propRes.data && Array.isArray(propRes.data)) {
       properties.value = propRes.data;
     } else if (propRes.data && propRes.data.data && Array.isArray(propRes.data.data)) {
@@ -634,10 +700,9 @@ async function fetchAllData() {
     } else {
       properties.value = [];
     }
-    
+
     propertyCount.value = properties.value.length;
-    
-    // Para usuarios
+
     if (usersRes.data && Array.isArray(usersRes.data)) {
       activeClientsCount.value = usersRes.data.length;
     } else if (usersRes.data && usersRes.data.data && Array.isArray(usersRes.data.data)) {
@@ -645,7 +710,7 @@ async function fetchAllData() {
     } else {
       activeClientsCount.value = 0;
     }
-    
+
   } catch (error) {
     console.error("Error cargando datos:", error);
     errorProperties.value = t('home.properties.error');
@@ -694,15 +759,10 @@ function getStatusText(status: string) {
 
 function getServicesArray(services: any) {
   if (!services) return [];
-
-  if (Array.isArray(services)) {
-    return services;
-  }
-
+  if (Array.isArray(services)) return services;
   if (typeof services === 'string') {
     return services.split(',').map(s => s.trim()).filter(s => s.length > 0);
   }
-
   return [];
 }
 
@@ -739,9 +799,143 @@ function getParticleStyle(_n: number) {
 // ==================== Lifecycle ====================
 onMounted(() => {
   fetchAllData();
+  initMiniMap();
+});
+
+onUnmounted(() => {
+  if (miniMap) {
+    miniMap.remove();
+    miniMap = null;
+  }
+  miniMarkersAdded = false;
 });
 </script>
 
 <style scoped>
 @import "../assets/css/HomeView.css";
+
+/* ── Mini Mapa Hero ── */
+.map-preview-wrapper {
+  position: relative;
+  cursor: pointer;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22);
+  min-height: 320px;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.map-preview-wrapper:hover {
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.32);
+  transform: translateY(-4px);
+}
+
+.mini-map {
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  border-radius: 18px;
+  pointer-events: none;
+  display: block;
+}
+
+/* Overlay degradado + CTA */
+.map-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 35%,
+    rgba(10, 20, 50, 0.6) 100%
+  );
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 28px;
+  border-radius: 18px;
+  transition: background 0.3s ease;
+}
+
+.map-preview-wrapper:hover .map-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 20, 50, 0.08) 0%,
+    rgba(10, 20, 50, 0.72) 100%
+  );
+}
+
+.map-overlay-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: 50px;
+  letter-spacing: 0.02em;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.map-preview-wrapper:hover .map-overlay-content {
+  background: rgba(255, 255, 255, 0.24);
+  transform: scale(1.04);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.3);
+}
+
+.map-overlay-icon {
+  font-size: 15px;
+}
+
+/* Badge "En vivo" */
+.map-live-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50px;
+  padding: 5px 12px;
+  z-index: 10;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: #22c55e;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
+  animation: live-pulse 2s ease-in-out infinite;
+}
+
+.live-text {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+@keyframes live-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); }
+  50%  { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+/* Asegurar que Leaflet no tape los floating cards */
+:deep(.leaflet-pane),
+:deep(.leaflet-tile-pane) {
+  z-index: 1 !important;
+}
 </style>
