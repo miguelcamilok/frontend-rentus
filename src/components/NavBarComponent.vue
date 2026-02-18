@@ -622,7 +622,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-@import "../assets/css/components/navbar.css";
+@import "./../assets/css/components/navbar.css";
 
 .admin-panel-item {
   background: linear-gradient(135deg, #3b251d05 0%, #8b6f4705 100%);
