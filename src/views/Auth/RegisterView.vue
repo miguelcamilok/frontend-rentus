@@ -7,7 +7,7 @@
         <div class="content-wrapper">
             <div class="brand-section">
                 <div class="logo-wrapper">
-                    <img src="../../assets/logo-black.png" alt="Logo RentUs" class="logo-icon" />
+                    <img src="/favicon-dark.png" alt="Logo RentUs" class="logo-icon" />
                     <h1 class="brand-name">
                         <span class="brand-rent">Rent</span>
                         <span class="brand-us">Us</span>

@@ -1,7 +1,7 @@
 <template>
   <header class="property-header">
     <div class="logo" @click="goHome" style="cursor: pointer">
-      <img src="../assets/logo-white.png" alt="Logo" />
+      <img src="/favicon-light.png" alt="Logo" />
       <div class="logo-text"><strong>Rent</strong><span>Us</span></div>
     </div>
 
