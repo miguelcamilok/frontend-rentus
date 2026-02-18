@@ -1,250 +1,393 @@
 <template>
-    <div class="nosotros-page">
-        <!-- Particles Background Effect -->
-        <div class="particles-container">
-            <div class="particle" v-for="i in 30" :key="i" :style="{
-                left: Math.random() * 100 + '%',
-                animationDelay: Math.random() * 15 + 's',
-                animationDuration: (Math.random() * 10 + 10) + 's'
-            }">
+    <div class="about">
+
+        <!-- ░░ CANVAS PARTICLES ░░ -->
+        <canvas class="about__canvas" ref="canvasRef" aria-hidden="true"></canvas>
+
+        <!-- ░░ HERO ░░ -->
+        <section class="hero">
+            <div class="hero__inner">
+                <div class="hero__kicker reveal reveal--fade">
+                    <span class="kicker-line"></span>
+                    Sobre Rentus
+                </div>
+                <h1 class="hero__headline reveal reveal--up" style="--delay:.1s">
+                    Una nueva forma<br />
+                    <em>de encontrar hogar.</em>
+                </h1>
+                <p class="hero__sub reveal reveal--up" style="--delay:.22s">
+                    Nacimos en 2024 con una convicción: arrendar una propiedad
+                    debería ser claro, rápido y confiable. Sin letra pequeña,
+                    sin intermediarios innecesarios.
+                </p>
+                <div class="hero__cta reveal reveal--up" style="--delay:.34s">
+                    <router-link to="/propiedades" class="btn btn--fill">
+                        Ver propiedades
+                    </router-link>
+                    <a href="#story" class="btn btn--ghost">
+                        Nuestra historia
+                    </a>
+                </div>
+            </div>
+
+            <!-- floating badge -->
+            <div class="hero__badge reveal reveal--scale" style="--delay:.5s" aria-hidden="true">
+                <span class="badge-year">2024</span>
+                <span class="badge-label">Fundados</span>
+            </div>
+
+            <!-- scroll indicator -->
+            <div class="hero__scroll" aria-hidden="true">
+                <span class="scroll-text">scroll</span>
+                <div class="scroll-track">
+                    <div class="scroll-thumb"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ░░ STATS BAR ░░ -->
+        <div class="stats-bar">
+            <div class="stats-bar__inner">
+                <div class="stats-bar__item reveal reveal--up" v-for="(s, i) in stats" :key="s.label"
+                    :style="`--delay:${i * 0.1}s`">
+                    <span class="stats-bar__value">{{ s.display }}</span>
+                    <span class="stats-bar__label">{{ s.label }}</span>
+                </div>
             </div>
         </div>
 
-        <main class="nosotros-main">
-            <!-- 1. Hero Header -->
-            <section class="barra-encabezado">
-                <div class="hero-decoration">
-                    <div class="hero-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" />
-                        </svg>
-                    </div>
+        <!-- ░░ STORY ░░ -->
+        <section class="story" id="story">
+            <div class="story__layout">
+                <div class="story__left">
+                    <span class="section-label reveal reveal--fade">Nuestra historia</span>
+                    <h2 class="section-title reveal reveal--up" style="--delay:.1s">
+                        Empezamos<br />con un problema real.
+                    </h2>
+                    <p class="story__body reveal reveal--up" style="--delay:.2s">
+                        Encontrar arriendo en Colombia es complicado, opaco y lleno de
+                        fricción. Vimos eso de cerca y decidimos construir la plataforma
+                        que nos hubiera gustado tener: una donde propietarios e inquilinos
+                        se encuentren de forma directa y segura.
+                    </p>
+                    <p class="story__body reveal reveal--up" style="--delay:.28s">
+                        Somos un equipo pequeño pero comprometido. No prometemos ser los
+                        más grandes — prometemos ser los más honestos.
+                    </p>
                 </div>
-                <h1>{{ t('about.title') }}</h1>
-                <p class="subti">{{ t('about.subtitle') }}</p>
-                <div class="hero-stats">
-                    <div class="stat-item">
-                        <div class="stat-number">10+</div>
-                        <div class="stat-label">{{ t('about.stats.years') }}</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">500+</div>
-                        <div class="stat-label">{{ t('about.stats.properties') }}</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">1000+</div>
-                        <div class="stat-label">{{ t('about.stats.clients') }}</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">98%</div>
-                        <div class="stat-label">{{ t('about.stats.satisfaction') }}</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 2. Timeline/Historia -->
-            <section class="timeline-section">
-                <h2 class="section-title">
-                    <span class="title-icon">📖</span>
-                    {{ t('about.history.title') }}
-                </h2>
-                <div class="timeline">
-                    <div v-for="(item, i) in tm('about.history.timeline')" :key="i" class="timeline-item"
-                        :class="{ 'timeline-left': i % 2 === 0, 'timeline-right': i % 2 !== 0 }">
-                        <div class="timeline-marker">
-                            <div class="timeline-dot"></div>
-                            <div class="timeline-year">{{ item.year }}</div>
-                        </div>
-                        <div class="timeline-content">
-                            <h3>{{ item.title }}</h3>
-                            <p>{{ item.description }}</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 3. Equipo y Valores -->
-            <section class="seccion-doble-cards">
-                <div class="card card-team">
-                    <div class="card-header-img">
-                        <img src="../assets/img/nosotros.jpg" alt="Nuestro equipo" class="card-img" />
-                        <div class="card-overlay">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                <path
-                                    d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="card-content">
-                        <h2 class="subtitulo">{{ t('about.team.title') }}</h2>
-                        <p class="parrafo">{{ t('about.team.text') }}</p>
-                        <div class="team-members">
-                            <div v-for="(member, i) in tm('about.team.members')" :key="i" class="member-badge">
-                                <div class="member-avatar">{{ member.initials }}</div>
-                                <div class="member-info">
-                                    <div class="member-name">{{ member.name }}</div>
-                                    <div class="member-role">{{ member.role }}</div>
-                                </div>
+                <div class="story__right">
+                    <div class="timeline">
+                        <div class="tl-entry reveal reveal--slide-right" v-for="(e, i) in timeline" :key="i"
+                            :style="`--delay:${i * 0.12}s`">
+                            <div class="tl-entry__marker">
+                                <div class="tl-entry__dot"></div>
+                            </div>
+                            <div class="tl-entry__body">
+                                <span class="tl-entry__date">{{ e.date }}</span>
+                                <p class="tl-entry__text">{{ e.text }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </section>
 
-                <div class="card card-values">
-                    <div class="card-header-img">
-                        <img src="../assets/img/casa3.webp" alt="Nuestros valores" class="card-img" />
-                        <div class="card-overlay">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                <path
-                                    d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="card-content">
-                        <h2 class="subtitulo">{{ t('about.values.title') }}</h2>
-                        <div class="values-grid">
-                            <div v-for="(value, i) in tm('about.values.list')" :key="i" class="value-item">
-                                <div class="value-icon">{{ value.icon }}</div>
-                                <h4>{{ value.title }}</h4>
-                                <p>{{ value.description }}</p>
-                            </div>
-                        </div>
-                    </div>
+        <!-- ░░ MISSION / VISION / VALUES ░░ -->
+        <section class="mvv">
+            <div class="mvv__grid">
+                <div class="mvv-card reveal reveal--up" v-for="(card, i) in mvv" :key="card.title"
+                    :style="`--delay:${i * 0.12}s`" :class="`mvv-card--${card.accent}`">
+                    <div class="mvv-card__icon" v-html="card.icon"></div>
+                    <h3 class="mvv-card__title">{{ card.title }}</h3>
+                    <p class="mvv-card__text">{{ card.text }}</p>
+                    <div class="mvv-card__bar"></div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- 4. Why Choose Us - Features Grid -->
-            <section class="features-section">
-                <h2 class="section-title">
-                    <span class="title-icon">⭐</span>
-                    {{ t('about.why.title') }}
+        <!-- ░░ DIFFERENTIATORS ░░ -->
+        <section class="diff">
+            <div class="diff__head">
+                <span class="section-label reveal reveal--fade">¿Por qué Rentus?</span>
+                <h2 class="section-title reveal reveal--up" style="--delay:.1s">
+                    Menos fricción.<br /><em>Más confianza.</em>
                 </h2>
-                <div class="features-grid">
-                    <div v-for="(feature, i) in tm('about.why.features')" :key="i" class="feature-card">
-                        <div class="feature-icon-wrapper">
-                            <div class="feature-icon">{{ feature.icon }}</div>
-                        </div>
-                        <h3>{{ feature.title }}</h3>
-                        <p>{{ feature.description }}</p>
-                        <div class="feature-highlight">{{ feature.highlight }}</div>
-                    </div>
+            </div>
+            <div class="diff__grid">
+                <div class="diff-item reveal reveal--up" v-for="(d, i) in differentiators" :key="d.title"
+                    :style="`--delay:${i * 0.1}s`">
+                    <div class="diff-item__num">{{ String(i + 1).padStart(2, '0') }}</div>
+                    <div class="diff-item__icon">{{ d.icon }}</div>
+                    <h4 class="diff-item__title">{{ d.title }}</h4>
+                    <p class="diff-item__desc">{{ d.description }}</p>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- 5. Misión y Visión - Side by Side -->
-            <section class="mission-vision-section">
-                <div class="mission-card">
-                    <div class="mv-icon mission-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                        </svg>
-                    </div>
-                    <h2>{{ t('about.mission.title') }}</h2>
-                    <p>{{ t('about.mission.text') }}</p>
-                    <div class="mission-points">
-                        <div v-for="(point, i) in tm('about.mission.points')" :key="i" class="point-item">
-                            <span class="point-check">✓</span>
-                            <span>{{ point }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="vision-card">
-                    <div class="mv-icon vision-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path
-                                d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
-                        </svg>
-                    </div>
-                    <h2>{{ t('about.vision.title') }}</h2>
-                    <p>{{ t('about.vision.text') }}</p>
-                    <div class="vision-goals">
-                        <div v-for="(goal, i) in tm('about.vision.goals')" :key="i" class="goal-item">
-                            <div class="goal-number">{{ i + 1 }}</div>
-                            <div class="goal-text">{{ goal }}</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 6. Services/Process -->
-            <section class="process-section">
-                <h2 class="section-title">
-                    <span class="title-icon">🔄</span>
-                    {{ t('about.process.title') }}
+        <!-- ░░ PROCESS ░░ -->
+        <section class="process">
+            <div class="process__head">
+                <span class="section-label reveal reveal--fade">Cómo funciona</span>
+                <h2 class="section-title reveal reveal--up" style="--delay:.1s">
+                    Del interés al contrato,<br />sin vueltas.
                 </h2>
-                <p class="section-description">{{ t('about.process.description') }}</p>
-                <div class="process-steps">
-                    <div v-for="(step, i) in tm('about.process.steps')" :key="i" class="process-step">
-                        <div class="step-number">{{ i + 1 }}</div>
-                        <div class="step-icon">{{ step.icon }}</div>
-                        <h3>{{ step.title }}</h3>
-                        <p>{{ step.description }}</p>
+            </div>
+            <div class="process__track">
+                <div class="process-step reveal reveal--up" v-for="(step, i) in processSteps" :key="step.title"
+                    :style="`--delay:${i * 0.13}s`">
+                    <div class="process-step__bubble">
+                        <span class="process-step__n">{{ i + 1 }}</span>
                     </div>
+                    <div class="process-step__icon">{{ step.icon }}</div>
+                    <h4 class="process-step__title">{{ step.title }}</h4>
+                    <p class="process-step__desc">{{ step.description }}</p>
+                    <div class="process-step__connector" v-if="i < processSteps.length - 1" aria-hidden="true"></div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- 7. Testimonios Mejorado -->
-            <section class="seccion-testimonios">
-                <h2 class="section-title">
-                    <span class="title-icon">💬</span>
-                    {{ t('about.testimonials.title') }}
+        <!-- ░░ TEAM ░░ -->
+        <section class="team">
+            <div class="team__head">
+                <span class="section-label reveal reveal--fade">El equipo</span>
+                <h2 class="section-title reveal reveal--up" style="--delay:.1s">
+                    Cuatro personas.<br /><em>Una misma visión.</em>
                 </h2>
-                <p class="section-description">{{ t('about.testimonials.description') }}</p>
+                <p class="team__sub reveal reveal--up" style="--delay:.2s">
+                    Somos desarrolladores que decidieron resolver un problema real.
+                    Sin grandes inversores — solo trabajo, iteración y compromiso.
+                </p>
+            </div>
+            <div class="team__grid">
+                <div class="team-card reveal reveal--up" v-for="(m, i) in members" :key="m.name"
+                    :style="`--delay:${i * 0.1}s`">
+                    <div class="team-card__avatar">{{ m.initials }}</div>
+                    <span class="team-card__name">{{ m.name }}</span>
+                    <span class="team-card__role">{{ m.role }}</span>
+                </div>
+            </div>
+        </section>
 
-                <div class="testimonios-grid">
-                    <div v-for="(testimonio, i) in tm('about.testimonials.items')" :key="i" class="testimonio">
-                        <div class="testimonio-header">
-                            <div class="testimonio-avatar">
-                                {{ testimonio.avatar }}
-                            </div>
-                            <div class="testimonio-author-info">
-                                <span class="autor">{{ testimonio.author }}</span>
-                                <span class="autor-role">{{ testimonio.role }}</span>
-                            </div>
+        <!-- ░░ TESTIMONIALS ░░ -->
+        <section class="testimonials">
+            <div class="testimonials__head">
+                <span class="section-label reveal reveal--fade">Lo que dicen</span>
+                <h2 class="section-title reveal reveal--up" style="--delay:.1s">
+                    Experiencias reales.
+                </h2>
+            </div>
+            <div class="testimonials__grid">
+                <div class="testi-card reveal reveal--up" v-for="(t, i) in testimonials" :key="t.author"
+                    :style="`--delay:${i * 0.1}s`">
+                    <div class="testi-card__stars">
+                        <span v-for="s in 5" :key="s" class="star">★</span>
+                    </div>
+                    <p class="testi-card__text">"{{ t.text }}"</p>
+                    <div class="testi-card__footer">
+                        <div class="testi-card__avatar">{{ t.avatar }}</div>
+                        <div>
+                            <span class="testi-card__name">{{ t.author }}</span>
+                            <span class="testi-card__role">{{ t.role }}</span>
                         </div>
-                        <div class="rating">
-                            <span v-for="star in 5" :key="star" class="star">⭐</span>
-                        </div>
-                        <p class="comentario">"{{ testimonio.text }}"</p>
-                        <div class="testimonio-date">{{ testimonio.date }}</div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- 8. CTA Section -->
-            <section class="cta-section">
-                <div class="cta-content">
-                    <h2>{{ t('about.cta.title') }}</h2>
-                    <p>{{ t('about.cta.description') }}</p>
-                    <div class="cta-buttons">
-                        <router-link to="/propiedades" class="btn-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                <path
-                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                            </svg>
-                            {{ t('about.cta.button1') }}
-                        </router-link>
-                        <button class="btn-secondary">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                <path
-                                    d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
-                            </svg>
-                            {{ t('about.cta.button2') }}
-                        </button>
-                    </div>
+        <!-- ░░ CTA ░░ -->
+        <section class="cta">
+            <div class="cta__inner reveal reveal--up">
+                <div class="cta__glow" aria-hidden="true"></div>
+                <span class="section-label">¿Listo?</span>
+                <h2 class="cta__title">
+                    Encuentra tu próximo<br /><em>hogar hoy mismo.</em>
+                </h2>
+                <p class="cta__body">
+                    Únete a Rentus. Sin costos ocultos, sin promesas vacías.
+                </p>
+                <div class="cta__actions">
+                    <router-link to="/propiedades" class="btn btn--fill btn--lg">
+                        Explorar propiedades
+                    </router-link>
+                    <router-link to="/contacto" class="btn btn--outline btn--lg">
+                        Contactar soporte
+                    </router-link>
                 </div>
-            </section>
-        </main>
+            </div>
+        </section>
+
     </div>
 </template>
 
 <script setup>
-import { useI18n } from 'vue-i18n'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
-const { t, tm } = useI18n()
+// ── Canvas ref ──────────────────────────────────────────────
+const canvasRef = ref(null)
+let animFrame = null
+
+// ── Data ────────────────────────────────────────────────────
+const stats = [
+    { display: '2024', label: 'Año de fundación' },
+    { display: '500+', label: 'Propiedades activas' },
+    { display: '1K+', label: 'Usuarios registrados' },
+    { display: '~1', label: 'Año de experiencia' },
+]
+
+const timeline = [
+    { date: 'Enero 2024', text: 'Nace Rentus: una plataforma pensada para simplificar el arrendamiento en Colombia.' },
+    { date: 'Junio 2024', text: 'Lanzamos la primera versión con propiedades en Popayán y los primeros arrendatarios.' },
+    { date: 'Octubre 2024', text: 'Superamos 500 usuarios y 200 propiedades verificadas en la plataforma.' },
+    { date: 'Hoy', text: 'Seguimos iterando, escuchando y construyendo — semana a semana.' },
+]
+
+const mvv = [
+    {
+        accent: 'a',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+        title: 'Misión',
+        text: 'Simplificar el acceso a propiedades mediante tecnología accesible, procesos claros y un equipo que responde cuando lo necesitas.',
+    },
+    {
+        accent: 'b',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+        title: 'Visión',
+        text: 'Ser la plataforma de arrendamiento de referencia en Colombia, expandiéndonos paso a paso con solidez y propósito.',
+    },
+    {
+        accent: 'c',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+        title: 'Valores',
+        text: 'Transparencia antes que marketing. Honestidad antes que números inflados. Calidad antes que velocidad.',
+    },
+]
+
+const differentiators = [
+    { icon: '🔍', title: 'Búsqueda real', description: 'Filtros que funcionan de verdad. Sin resultados irrelevantes ni propiedades fantasma.' },
+    { icon: '✅', title: 'Todo verificado', description: 'Revisamos cada publicación antes de que aparezca. Propietarios e inquilinos validados.' },
+    { icon: '📝', title: 'Contratos digitales', description: 'Firma tu contrato desde el celular. Legal, seguro y sin papeleos físicos.' },
+    { icon: '💬', title: 'Comunicación directa', description: 'Habla con el propietario o inquilino sin intermediarios que encarezcan el proceso.' },
+]
+
+const processSteps = [
+    { icon: '🔎', title: 'Busca', description: 'Usa filtros por ciudad, precio y área para encontrar lo que necesitas.' },
+    { icon: '📅', title: 'Agenda', description: 'Solicita una visita directamente desde la plataforma, en pocos clics.' },
+    { icon: '✅', title: 'Aprueba', description: 'El propietario confirma en menos de 48 h y coordina la visita contigo.' },
+    { icon: '📝', title: 'Firma', description: 'Firma el contrato digitalmente. Tu nuevo hogar te espera.' },
+]
+
+const members = [
+    { name: 'Alexander Camilo', role: 'Scrum Master', initials: 'AC' },
+    { name: 'Miguel Camilo', role: 'Developer', initials: 'MC' },
+    { name: 'Camila Acosta', role: 'Developer', initials: 'CA' },
+    { name: 'Jefferson Martinez', role: 'Developer', initials: 'JM' },
+]
+
+const testimonials = [
+    { text: 'Encontré mi apartamento en menos de una semana. El proceso fue claro y sin sorpresas.', author: 'María González', role: 'Diseñadora gráfica', avatar: 'MG' },
+    { text: 'Como propietario, me da tranquilidad que los inquilinos estén verificados antes de contactarme.', author: 'Roberto Sánchez', role: 'Propietario', avatar: 'RS' },
+    { text: 'La firma digital del contrato fue lo mejor. Todo desde mi celular, sin ir a ninguna parte.', author: 'Laura Martínez', role: 'Estudiante', avatar: 'LM' },
+    { text: 'Proceso súper transparente. Precios justos, sin comisiones escondidas. Volveré a usar Rentus sin dudarlo.', author: 'Diego Fernández', role: 'Ingeniero', avatar: 'DF' },
+]
+
+// ── Canvas Particles ────────────────────────────────────────
+function initCanvas() {
+    const canvas = canvasRef.value
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    let W, H, particles
+
+    const resize = () => {
+        W = canvas.width = window.innerWidth
+        H = canvas.height = window.innerHeight
+    }
+
+    const createParticle = () => ({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.2 + 0.3,
+        vx: (Math.random() - 0.5) * 0.22,
+        vy: (Math.random() - 0.5) * 0.22,
+        a: Math.random() * 0.45 + 0.1,
+    })
+
+    const setup = () => {
+        resize()
+        particles = Array.from({ length: 65 }, createParticle)
+    }
+
+    const draw = () => {
+        ctx.clearRect(0, 0, W, H)
+
+        // connections
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x
+                const dy = particles[i].y - particles[j].y
+                const dist = Math.sqrt(dx * dx + dy * dy)
+                if (dist < 125) {
+                    ctx.beginPath()
+                    ctx.strokeStyle = `rgba(201,145,92,${0.1 * (1 - dist / 125)})`
+                    ctx.lineWidth = 0.5
+                    ctx.moveTo(particles[i].x, particles[i].y)
+                    ctx.lineTo(particles[j].x, particles[j].y)
+                    ctx.stroke()
+                }
+            }
+        }
+
+        // dots
+        particles.forEach(p => {
+            ctx.beginPath()
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+            ctx.fillStyle = `rgba(201,145,92,${p.a})`
+            ctx.fill()
+            p.x += p.vx
+            p.y += p.vy
+            if (p.x < 0 || p.x > W) p.vx *= -1
+            if (p.y < 0 || p.y > H) p.vy *= -1
+        })
+
+        animFrame = requestAnimationFrame(draw)
+    }
+
+    setup()
+    draw()
+
+    let resizeTimer
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer)
+        resizeTimer = setTimeout(() => { setup() }, 200)
+    })
+}
+
+// ── Scroll Reveal ───────────────────────────────────────────
+function initReveal() {
+    const io = new IntersectionObserver(
+        entries => entries.forEach(e => {
+            if (e.isIntersecting) {
+                const delay = parseFloat(e.target.style.getPropertyValue('--delay')) || 0
+                setTimeout(() => e.target.classList.add('is-visible'), delay * 1000)
+                io.unobserve(e.target)
+            }
+        }),
+        { threshold: 0.1 }
+    )
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el))
+}
+
+// ── Lifecycle ───────────────────────────────────────────────
+onMounted(() => {
+    initCanvas()
+    initReveal()
+})
+
+onBeforeUnmount(() => {
+    if (animFrame) cancelAnimationFrame(animFrame)
+})
 </script>
 
 <style scoped>
-@import "../assets/css/AboutUsView.css";
+@import '../assets/css/AboutUsView.css';
 </style>
