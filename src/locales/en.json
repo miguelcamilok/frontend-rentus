@@ -534,7 +534,6 @@
     },
     "team": {
       "title": "Our Team",
-      "text": "We are a group of professionals passionate about the real estate sector, committed to providing the best experience to our customers. Each member brings their unique expertise to create innovative solutions.",
       "members": [
         {
           "name": "Alexander Camilo",
@@ -587,12 +586,6 @@
       "title": "Why Choose Rentus?",
       "features": [
         {
-          "icon": "🔍",
-          "title": "Smart Search",
-          "description": "Our AI algorithm finds the perfect property according to your specific needs and personal preferences.",
-          "highlight": "95% match rate"
-        },
-        {
           "icon": "🛡️",
           "title": "Total Verification",
           "description": "All properties and users are thoroughly verified to ensure your safety and peace of mind.",
@@ -615,12 +608,6 @@
           "title": "Fair Prices",
           "description": "Transparent and competitive rates. No hidden fees or unpleasant surprises.",
           "highlight": "Best value"
-        },
-        {
-          "icon": "🌟",
-          "title": "Premium Support",
-          "description": "Dedicated team available to help you at every step of the rental process.",
-          "highlight": "Response in 2h"
         }
       ]
     },
@@ -667,11 +654,6 @@
           "icon": "📝",
           "title": "Digital Contract Signing",
           "description": "Legally binding digital contract. Sign from anywhere in minutes."
-        },
-        {
-          "icon": "🏠",
-          "title": "Move-in and Continuous Support",
-          "description": "Assistance with your move and 24/7 support throughout your rental period."
         }
       ]
     },
