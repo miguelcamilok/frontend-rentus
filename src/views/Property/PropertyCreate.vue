@@ -214,56 +214,62 @@
             </div>
           </div>
 
-          <!-- Servicios Incluidos -->
+          <!-- ✅ SERVICIOS INCLUIDOS — ahora con checkboxes -->
           <div class="content-section">
             <div class="section-header">
               <h3>
                 <font-awesome-icon :icon="['fas', 'check-square']" />
                 {{ t('property.create.services') }}
               </h3>
+              <p class="section-description">
+                Selecciona los servicios que están incluidos en el arriendo
+              </p>
             </div>
 
-            <div class="form-group full-width">
-              <label for="services-input">{{ t('property.fields.services') }}</label>
-              <input
-                id="services-input"
-                v-model="servicesText"
-                type="text"
-                :placeholder="t('property.placeholders.services')"
-                @blur="parseServices"
-              />
-              <span class="help-text">
-                {{ t('property.create.servicesHint') }}
+            <div class="services-checklist">
+              <label
+                v-for="service in AVAILABLE_SERVICES"
+                :key="service.value"
+                class="service-checkbox-item"
+                :class="{ 'is-checked': form.included_services.includes(service.value) }"
+              >
+                <input
+                  type="checkbox"
+                  :value="service.value"
+                  v-model="form.included_services"
+                  class="service-hidden-checkbox"
+                />
+                <span class="service-check-icon">
+                  <font-awesome-icon
+                    :icon="form.included_services.includes(service.value)
+                      ? ['fas', 'check-circle']
+                      : ['far', 'circle']"
+                  />
+                </span>
+                <span class="service-emoji">{{ service.emoji }}</span>
+                <span class="service-name">{{ t(service.labelKey) }}</span>
+              </label>
+            </div>
+
+            <!-- Resumen de seleccionados -->
+            <div v-if="form.included_services.length > 0" class="services-summary">
+              <span class="summary-label">
+                <font-awesome-icon :icon="['fas', 'check']" />
+                {{ form.included_services.length }}
+                {{ form.included_services.length === 1 ? 'servicio seleccionado' : 'servicios seleccionados' }}
               </span>
+              <button type="button" class="btn-clear-services" @click="form.included_services = []">
+                Limpiar selección
+              </button>
             </div>
-
-            <div class="services-tags" v-if="form.included_services.length > 0">
-              <TransitionGroup name="tag">
-                <div
-                  v-for="(service, index) in form.included_services"
-                  :key="service"
-                  class="service-tag"
-                >
-                  <font-awesome-icon :icon="['fas', 'check']" />
-                  <span>{{ service }}</span>
-                  <button
-                    type="button"
-                    @click="removeService(index)"
-                    class="remove-tag"
-                  >
-                    <font-awesome-icon :icon="['fas', 'times']" />
-                  </button>
-                </div>
-              </TransitionGroup>
-            </div>
-
-            <div v-else class="empty-services">
+            <div v-else class="services-empty-hint">
               <font-awesome-icon :icon="['fas', 'info-circle']" />
-              <span>{{ t('property.create.noServices') }}</span>
+              <span>Ningún servicio seleccionado — opcional</span>
             </div>
           </div>
+          <!-- ✅ FIN SERVICIOS -->
 
-          <!-- 🎨 SECCIÓN DE IMÁGENES MEJORADA -->
+          <!-- Imágenes -->
           <div class="content-section">
             <div class="section-header">
               <h3>
@@ -275,7 +281,6 @@
               </p>
             </div>
 
-            <!-- Área de carga -->
             <div class="image-upload-section">
               <input
                 ref="fileInput"
@@ -303,14 +308,12 @@
                 </div>
               </div>
 
-              <!-- Barra de progreso (opcional) -->
               <div v-if="uploadProgress > 0 && uploadProgress < 100" class="upload-progress">
                 <div class="progress-bar" :style="{ width: uploadProgress + '%' }"></div>
                 <span class="progress-text">{{ uploadProgress }}%</span>
               </div>
             </div>
 
-            <!-- Grid de imágenes -->
             <TransitionGroup name="image-list" tag="div" class="images-grid">
               <div
                 v-for="(image, index) in images"
@@ -318,17 +321,12 @@
                 class="image-card"
                 :class="{ 'is-main': index === 0 }"
               >
-                <!-- Preview de imagen -->
                 <div class="image-preview">
                   <img :src="image.preview" :alt="`Imagen ${index + 1}`" />
-                  
-                  <!-- Badge de imagen principal -->
                   <div v-if="index === 0" class="main-badge">
                     <font-awesome-icon :icon="['fas', 'star']" />
                     Principal
                   </div>
-
-                  <!-- Overlay con acciones -->
                   <div class="image-overlay">
                     <button
                       v-if="index !== 0"
@@ -349,8 +347,6 @@
                     </button>
                   </div>
                 </div>
-
-                <!-- Info de imagen -->
                 <div class="image-info">
                   <span class="image-number">#{{ index + 1 }}</span>
                   <span class="image-size">{{ formatFileSize(image.size) }}</span>
@@ -358,7 +354,6 @@
               </div>
             </TransitionGroup>
 
-            <!-- Estado vacío -->
             <div v-if="images.length === 0" class="empty-images">
               <font-awesome-icon :icon="['fas', 'image']" class="empty-icon" />
               <h4>No hay imágenes</h4>
@@ -382,8 +377,8 @@
               class="btn-primary"
               :disabled="loading || images.length === 0"
             >
-              <font-awesome-icon 
-                :icon="loading ? ['fas', 'spinner'] : ['fas', 'map-marker-alt']" 
+              <font-awesome-icon
+                :icon="loading ? ['fas', 'spinner'] : ['fas', 'map-marker-alt']"
                 :spin="loading"
               />
               <span>{{ loading ? 'Procesando...' : 'Continuar a Ubicación →' }}</span>
@@ -434,9 +429,26 @@ interface PropertyForm {
   area_m2: number | null
   num_bedrooms: number | null
   num_bathrooms: number | null
-  included_services: string[]
+  included_services: string[]   // ← ahora se llena con checkboxes
   publication_date: string
 }
+
+// ==================== SERVICIOS DISPONIBLES ====================
+// Lista centralizada — mismos valores que EditProperty.vue usa en selectedServices
+const AVAILABLE_SERVICES = [
+  { value: 'water',       emoji: '💧', labelKey: 'editProperty.services.water' },
+  { value: 'electricity', emoji: '⚡', labelKey: 'editProperty.services.electricity' },
+  { value: 'gas',         emoji: '🔥', labelKey: 'editProperty.services.gas' },
+  { value: 'internet',    emoji: '🌐', labelKey: 'editProperty.services.internet' },
+  { value: 'cableTv',     emoji: '📺', labelKey: 'editProperty.services.cableTv' },
+  { value: 'security',    emoji: '🔒', labelKey: 'editProperty.services.security' },
+  { value: 'parking',     emoji: '🚗', labelKey: 'editProperty.services.parking' },
+  { value: 'gym',         emoji: '🏋️', labelKey: 'editProperty.services.gym' },
+  { value: 'pool',        emoji: '🏊', labelKey: 'editProperty.services.pool' },
+  { value: 'bbqArea',     emoji: '🍖', labelKey: 'editProperty.services.bbqArea' },
+  { value: 'laundry',     emoji: '👕', labelKey: 'editProperty.services.laundry' },
+  { value: 'elevator',    emoji: '🛗', labelKey: 'editProperty.services.elevator' },
+]
 
 // ==================== COMPOSABLES ====================
 const { t } = useI18n()
@@ -454,13 +466,12 @@ const form = ref<PropertyForm>({
   area_m2: null,
   num_bedrooms: null,
   num_bathrooms: null,
-  included_services: [],
+  included_services: [],  // ← array de valores, e.g. ['water', 'gas']
   publication_date: '',
 })
 
 const images = ref<PropertyImage[]>([])
 const fileInput = ref<HTMLInputElement | null>(null)
-const servicesText = ref('')
 const displayPrice = ref('')
 const loading = ref(false)
 const errorMessage = ref('')
@@ -471,9 +482,7 @@ const uploadProgress = ref(0)
 
 // ==================== COMPUTED ====================
 const formattedPrice = computed(() => {
-  if (!form.value.monthly_price || form.value.monthly_price === 0) {
-    return 'COP $0'
-  }
+  if (!form.value.monthly_price || form.value.monthly_price === 0) return 'COP $0'
   return new Intl.NumberFormat('es-CO', {
     style: 'currency',
     currency: 'COP',
@@ -482,7 +491,7 @@ const formattedPrice = computed(() => {
   }).format(form.value.monthly_price)
 })
 
-// ==================== MÉTODOS DE PRECIO ====================
+// ==================== PRECIO ====================
 const formatNumber = (value: number): string => {
   if (!value) return ''
   return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
@@ -490,7 +499,7 @@ const formatNumber = (value: number): string => {
 
 const handlePriceInput = (event: Event) => {
   const input = event.target as HTMLInputElement
-  let value = input.value.replace(/[^\d]/g, '')
+  const value = input.value.replace(/[^\d]/g, '')
   const numericValue = parseInt(value) || 0
   form.value.monthly_price = numericValue
   displayPrice.value = formatNumber(numericValue)
@@ -500,269 +509,138 @@ const handlePriceInput = (event: Event) => {
 }
 
 const formatPriceOnBlur = () => {
-  if (form.value.monthly_price > 0) {
-    displayPrice.value = formatNumber(form.value.monthly_price)
-  } else {
-    displayPrice.value = ''
-  }
+  displayPrice.value = form.value.monthly_price > 0
+    ? formatNumber(form.value.monthly_price)
+    : ''
 }
 
-// ==================== MÉTODOS DE SERVICIOS ====================
-const parseServices = () => {
-  if (!servicesText.value.trim()) {
-    form.value.included_services = []
-    return
-  }
-  form.value.included_services = servicesText.value
-    .split(',')
-    .map(s => s.trim())
-    .filter(Boolean)
-}
+// ==================== IMÁGENES (sin cambios) ====================
+const triggerFileInput = () => fileInput.value?.click()
 
-const removeService = (index: number) => {
-  form.value.included_services.splice(index, 1)
-  servicesText.value = form.value.included_services.join(', ')
-}
-
-// ==================== MÉTODOS DE IMÁGENES ====================
-
-/**
- * Abre el selector de archivos
- */
-const triggerFileInput = () => {
-  fileInput.value?.click()
-}
-
-/**
- * Maneja la selección de imágenes desde el input
- */
 const handleImageSelection = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const files = Array.from(target.files || [])
   await processFiles(files)
-  
-  // Limpiar input para permitir reselección del mismo archivo
-  if (fileInput.value) {
-    fileInput.value.value = ''
-  }
+  if (fileInput.value) fileInput.value.value = ''
 }
 
-/**
- * Maneja el drop de imágenes
- */
 const handleDrop = async (event: DragEvent) => {
   isDragging.value = false
   const files = Array.from(event.dataTransfer?.files || [])
   await processFiles(files)
 }
 
-/**
- * Procesa archivos seleccionados o dropeados
- */
 const processFiles = async (files: File[]) => {
   if (files.length === 0) return
-
-  // Validar límite total
   if (images.value.length + files.length > 10) {
     errorAlert('Máximo 10 imágenes permitidas', 'Límite alcanzado')
     return
   }
-
   uploadProgress.value = 0
   const totalFiles = files.length
   let processedFiles = 0
 
   for (const file of files) {
-    // Validar tipo
     const validTypes = ['image/jpeg', 'image/png', 'image/webp']
     if (!validTypes.includes(file.type)) {
       errorAlert(`${file.name}: Formato no válido (usa JPG, PNG o WEBP)`, 'Error')
       continue
     }
-
-    // Validar tamaño (2MB)
-    const maxSize = 2 * 1024 * 1024
-    if (file.size > maxSize) {
-      errorAlert(
-        `${file.name}: Tamaño máximo 2MB (actual: ${formatFileSize(file.size)})`,
-        'Error'
-      )
+    if (file.size > 2 * 1024 * 1024) {
+      errorAlert(`${file.name}: Tamaño máximo 2MB (actual: ${formatFileSize(file.size)})`, 'Error')
       continue
     }
-
     try {
-      // Comprimir y convertir a base64
       const base64 = await compressAndConvertToBase64(file)
       const preview = URL.createObjectURL(file)
-
-      images.value.push({
-        id: `${Date.now()}-${Math.random()}`,
-        file,
-        preview,
-        base64,
-        size: file.size
-      })
-
+      images.value.push({ id: `${Date.now()}-${Math.random()}`, file, preview, base64, size: file.size })
       processedFiles++
       uploadProgress.value = Math.round((processedFiles / totalFiles) * 100)
     } catch (error) {
-      console.error(`Error procesando ${file.name}:`, error)
       errorAlert(`Error procesando ${file.name}`, 'Error')
     }
   }
-
-  // Resetear progreso después de 1 segundo
-  setTimeout(() => {
-    uploadProgress.value = 0
-  }, 1000)
+  setTimeout(() => { uploadProgress.value = 0 }, 1000)
 }
 
-/**
- * Comprime imagen y convierte a Base64
- * Usa canvas para comprimir antes de convertir
- */
 const compressAndConvertToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
-    
     reader.onload = (e) => {
       const img = new Image()
-      
       img.onload = () => {
-        // Crear canvas para comprimir
         const canvas = document.createElement('canvas')
         const ctx = canvas.getContext('2d')
-        
-        if (!ctx) {
-          reject(new Error('No se pudo obtener contexto del canvas'))
-          return
+        if (!ctx) { reject(new Error('No canvas context')); return }
+        const maxDim = 1920
+        let { width, height } = img
+        if (width > height ? width > maxDim : height > maxDim) {
+          if (width > height) { height *= maxDim / width; width = maxDim }
+          else { width *= maxDim / height; height = maxDim }
         }
-
-        // Mantener aspect ratio, máximo 1920px de ancho
-        const maxWidth = 1920
-        const maxHeight = 1920
-        let width = img.width
-        let height = img.height
-
-        if (width > height) {
-          if (width > maxWidth) {
-            height *= maxWidth / width
-            width = maxWidth
-          }
-        } else {
-          if (height > maxHeight) {
-            width *= maxHeight / height
-            height = maxHeight
-          }
-        }
-
-        canvas.width = width
-        canvas.height = height
-
-        // Dibujar imagen redimensionada
+        canvas.width = width; canvas.height = height
         ctx.drawImage(img, 0, 0, width, height)
-
-        // Convertir a Base64 con compresión (0.8 = 80% calidad)
-        const base64 = canvas.toDataURL('image/jpeg', 0.8)
-        resolve(base64)
+        resolve(canvas.toDataURL('image/jpeg', 0.8))
       }
-
-      img.onerror = () => reject(new Error('Error cargando imagen'))
+      img.onerror = () => reject(new Error('Error loading image'))
       img.src = e.target?.result as string
     }
-
-    reader.onerror = () => reject(new Error('Error leyendo archivo'))
+    reader.onerror = () => reject(new Error('Error reading file'))
     reader.readAsDataURL(file)
   })
 }
 
-/**
- * Elimina una imagen del array
- */
 const removeImage = (index: number) => {
-  // Liberar URL de preview
   URL.revokeObjectURL(images.value[index].preview)
   images.value.splice(index, 1)
 }
 
-/**
- * Establece una imagen como principal
- */
 const setAsMain = (index: number) => {
   const image = images.value.splice(index, 1)[0]
   images.value.unshift(image)
 }
 
-/**
- * Formatea tamaño de archivo
- */
 const formatFileSize = (bytes: number): string => {
   if (bytes < 1024) return bytes + ' B'
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
 }
 
-// ==================== MÉTODOS DE FORMULARIO ====================
-
-/**
- * Cancela el formulario
- */
+// ==================== FORMULARIO ====================
 const cancelForm = () => {
   confirm(
     t('property.create.confirmCancel'),
     () => {
-      // Liberar URLs de preview
       images.value.forEach(img => URL.revokeObjectURL(img.preview))
       router.back()
     },
     () => {},
-    {
-      title: t('property.create.cancelTitle'),
-      confirmText: t('common.yes'),
-      cancelText: t('common.no')
-    }
+    { title: t('property.create.cancelTitle'), confirmText: t('common.yes'), cancelText: t('common.no') }
   )
 }
 
-/**
- * Abre modal de ubicación
- */
 const openLocationModal = () => {
-  parseServices()
-  
-  // Validar campos requeridos
   if (!form.value.title || !form.value.description || !form.value.address) {
     errorAlert('Por favor completa todos los campos requeridos', 'Campos incompletos')
     return
   }
-
   if (!form.value.monthly_price || form.value.monthly_price === 0) {
     errorAlert('Por favor ingresa el precio mensual', 'Precio requerido')
     return
   }
-
   if (images.value.length === 0) {
     errorAlert('Por favor agrega al menos una imagen', 'Imagen requerida')
     return
   }
-
   showLocationModal.value = true
 }
 
-/**
- * Maneja confirmación de ubicación y envía formulario
- */
-const handleLocationConfirm = async (locationData: { 
-  lat: number
-  lng: number
-  accuracy: number 
-}) => {
+const handleLocationConfirm = async (locationData: { lat: number; lng: number; accuracy: number }) => {
   loading.value = true
   errorMessage.value = ''
   success.value = false
 
   try {
-    // Preparar array de base64 (solo los datos, sin metadata)
     const imagesBase64 = images.value.map(img => img.base64)
 
     const payload = {
@@ -775,35 +653,27 @@ const handleLocationConfirm = async (locationData: {
       area_m2: form.value.area_m2 || null,
       num_bedrooms: form.value.num_bedrooms || null,
       num_bathrooms: form.value.num_bathrooms || null,
-      included_services: form.value.included_services.length > 0 
+      // ← se envía igual que EditProperty: JSON.stringify del array de valores
+      included_services: form.value.included_services.length > 0
         ? JSON.stringify(form.value.included_services)
         : null,
       publication_date: form.value.publication_date || null,
       lat: locationData.lat,
       lng: locationData.lng,
       accuracy: locationData.accuracy,
-      // Array de imágenes base64 como string JSON
       images: JSON.stringify(imagesBase64)
     }
 
-    console.log('📤 Enviando propiedad con', images.value.length, 'imágenes')
-
-    const response = await api.post('/properties', payload)
+    await api.post('/properties', payload)
 
     success.value = true
     successAlert(t('property.create.successMessage'), t('property.create.successTitle'))
-
     showLocationModal.value = false
-
-    // Liberar URLs de preview
     images.value.forEach(img => URL.revokeObjectURL(img.preview))
 
-    setTimeout(() => {
-      router.push('/propiedades')
-    }, 1500)
+    setTimeout(() => router.push('/propiedades'), 1500)
+
   } catch (err: any) {
-    console.error('Error al crear propiedad:', err)
-    
     if (err.response?.data?.errors) {
       const errors = Object.values(err.response.data.errors).flat() as string[]
       errorMessage.value = errors.join(', ')
@@ -812,16 +682,12 @@ const handleLocationConfirm = async (locationData: {
     } else {
       errorMessage.value = t('property.create.errorMessage')
     }
-
     errorAlert(errorMessage.value, t('property.create.errorTitle'))
   } finally {
     loading.value = false
   }
 }
 
-/**
- * Cancela modal de ubicación
- */
 const handleLocationCancel = () => {
   showLocationModal.value = false
 }
@@ -830,15 +696,10 @@ const handleLocationCancel = () => {
 <style scoped>
 @import "../../assets/css/Properties/PropertyCreate.css";
 
-/* ==================== ESTILOS DE IMÁGENES ==================== */
+/* ==================== IMÁGENES (sin cambios) ==================== */
+.file-input-hidden { display: none; }
 
-.file-input-hidden {
-  display: none;
-}
-
-.image-upload-section {
-  margin-bottom: 2rem;
-}
+.image-upload-section { margin-bottom: 2rem; }
 
 .upload-dropzone {
   border: 2px dashed #cbd5e1;
@@ -849,252 +710,217 @@ const handleLocationCancel = () => {
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 .upload-dropzone:hover,
 .upload-dropzone.is-dragging {
   border-color: #3b251d;
   background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
 }
+.dropzone-content { pointer-events: none; }
+.upload-icon { font-size: 3rem; color: #8b6f47; margin-bottom: 1rem; }
+.upload-dropzone h4 { font-size: 1.125rem; font-weight: 600; color: #1e293b; margin-bottom: 0.5rem; }
+.upload-hint { font-size: 0.875rem; color: #64748b; }
 
-.dropzone-content {
-  pointer-events: none;
-}
-
-.upload-icon {
-  font-size: 3rem;
-  color: #8b6f47;
-  margin-bottom: 1rem;
-}
-
-.upload-dropzone h4 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 0.5rem;
-}
-
-.upload-hint {
-  font-size: 0.875rem;
-  color: #64748b;
-}
-
-/* Barra de progreso */
 .upload-progress {
-  position: relative;
-  height: 8px;
-  background: #e2e8f0;
-  border-radius: 4px;
-  margin-top: 1rem;
-  overflow: hidden;
+  position: relative; height: 8px; background: #e2e8f0;
+  border-radius: 4px; margin-top: 1rem; overflow: hidden;
 }
-
 .progress-bar {
   height: 100%;
   background: linear-gradient(90deg, #3b251d 0%, #8b6f47 100%);
   transition: width 0.3s ease;
 }
-
 .progress-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
+  position: absolute; top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #1e293b;
+  font-size: 0.75rem; font-weight: 700; color: #1e293b;
 }
 
-/* Grid de imágenes */
 .images-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
+  gap: 1.5rem; margin-top: 2rem;
 }
-
 .image-card {
-  position: relative;
-  border-radius: 16px;
-  overflow: hidden;
+  position: relative; border-radius: 16px; overflow: hidden;
   background: #fff;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-              0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-.image-card.is-main {
-  box-shadow: 0 0 0 3px #3b251d,
-              0 10px 15px -3px rgba(0, 0, 0, 0.2);
-}
-
-.image-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
-}
-
-.image-preview {
-  position: relative;
-  aspect-ratio: 4/3;
-  overflow: hidden;
-}
-
-.image-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
+.image-card.is-main { box-shadow: 0 0 0 3px #3b251d, 0 10px 15px -3px rgba(0,0,0,0.2); }
+.image-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); }
+.image-preview { position: relative; aspect-ratio: 4/3; overflow: hidden; }
+.image-preview img { width: 100%; height: 100%; object-fit: cover; }
 .main-badge {
-  position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
+  position: absolute; top: 0.75rem; left: 0.75rem;
   background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  color: #1e293b;
-  padding: 0.375rem 0.75rem;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  color: #1e293b; padding: 0.375rem 0.75rem; border-radius: 8px;
+  font-size: 0.75rem; font-weight: 700; display: flex; align-items: center;
+  gap: 0.375rem; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
-
 .image-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  position: absolute; inset: 0; background: rgba(0,0,0,0.6);
+  display: flex; align-items: center; justify-content: center;
+  gap: 0.75rem; opacity: 0; transition: opacity 0.3s ease;
 }
-
-.image-card:hover .image-overlay {
-  opacity: 1;
-}
-
+.image-card:hover .image-overlay { opacity: 1; }
 .btn-overlay {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.95);
-  color: #1e293b;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; background: rgba(255,255,255,0.95);
+  color: #1e293b; border: none; border-radius: 50%; cursor: pointer;
+  transition: all 0.3s ease; font-size: 1rem;
 }
-
-.btn-overlay:hover {
-  transform: scale(1.1);
-  background: #fff;
-}
-
-.btn-overlay.btn-danger {
-  background: rgba(220, 38, 38, 0.95);
-  color: #fff;
-}
-
-.btn-overlay.btn-danger:hover {
-  background: #dc2626;
-}
-
+.btn-overlay:hover { transform: scale(1.1); background: #fff; }
+.btn-overlay.btn-danger { background: rgba(220,38,38,0.95); color: #fff; }
+.btn-overlay.btn-danger:hover { background: #dc2626; }
 .image-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem;
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.75rem; background: #f8fafc; border-top: 1px solid #e2e8f0;
+}
+.image-number { font-size: 0.875rem; font-weight: 700; color: #3b251d; }
+.image-size { font-size: 0.75rem; color: #64748b; }
+.empty-images {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 1rem; padding: 4rem 2rem;
+  border: 2px dashed #e2e8f0; border-radius: 16px;
+  background: #f8fafc; text-align: center;
+}
+.empty-icon { font-size: 4rem; color: #cbd5e1; }
+.empty-images h4 { font-size: 1.125rem; font-weight: 600; color: #475569; margin: 0; }
+.empty-images p { font-size: 0.875rem; color: #94a3b8; margin: 0; }
+
+/* ==================== SERVICIOS CON CHECKBOXES ==================== */
+
+.services-checklist {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
 }
 
-.image-number {
-  font-size: 0.875rem;
-  font-weight: 700;
+.service-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.service-checkbox-item:hover {
+  border-color: #8b6f47;
+  background: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+.service-checkbox-item.is-checked {
+  border-color: #3b251d;
+  background: linear-gradient(135deg, #fdf8f5 0%, #f5ece6 100%);
+  box-shadow: 0 0 0 2px rgba(59, 37, 29, 0.12);
+}
+
+/* Ocultar el checkbox nativo */
+.service-hidden-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.service-check-icon {
+  font-size: 1rem;
+  color: #cbd5e1;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.service-checkbox-item.is-checked .service-check-icon {
   color: #3b251d;
 }
 
-.image-size {
-  font-size: 0.75rem;
-  color: #64748b;
-}
-
-/* Estado vacío */
-.empty-images {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  padding: 4rem 2rem;
-  border: 2px dashed #e2e8f0;
-  border-radius: 16px;
-  background: #f8fafc;
-  text-align: center;
-}
-
-.empty-icon {
-  font-size: 4rem;
-  color: #cbd5e1;
-}
-
-.empty-images h4 {
+.service-emoji {
   font-size: 1.125rem;
-  font-weight: 600;
-  color: #475569;
-  margin: 0;
+  flex-shrink: 0;
 }
 
-.empty-images p {
+.service-name {
   font-size: 0.875rem;
+  font-weight: 500;
+  color: #475569;
+  line-height: 1.2;
+}
+
+.service-checkbox-item.is-checked .service-name {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+/* Resumen y acciones */
+.services-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #fdf8f5 0%, #f5ece6 100%);
+  border: 1.5px solid #d4a88a;
+  border-radius: 10px;
+  gap: 1rem;
+}
+
+.summary-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #3b251d;
+}
+
+.btn-clear-services {
+  background: none;
+  border: 1px solid #d4a88a;
+  color: #8b6f47;
+  font-size: 0.8rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-clear-services:hover {
+  background: #fff;
+  border-color: #3b251d;
+  color: #3b251d;
+}
+
+.services-empty-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.825rem;
   color: #94a3b8;
-  margin: 0;
+  padding: 0.5rem 0;
 }
 
 /* Animaciones */
 .image-list-enter-active,
-.image-list-leave-active {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.image-list-enter-from {
-  opacity: 0;
-  transform: scale(0.8) translateY(20px);
-}
-
-.image-list-leave-to {
-  opacity: 0;
-  transform: scale(0.8) translateY(-20px);
-}
-
-.image-list-move {
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
+.image-list-leave-active { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+.image-list-enter-from { opacity: 0; transform: scale(0.8) translateY(20px); }
+.image-list-leave-to { opacity: 0; transform: scale(0.8) translateY(-20px); }
+.image-list-move { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .images-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
-  }
-
-  .upload-dropzone {
-    padding: 2rem 1rem;
-  }
-
-  .upload-icon {
-    font-size: 2rem;
-  }
+  .images-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
+  .upload-dropzone { padding: 2rem 1rem; }
+  .upload-icon { font-size: 2rem; }
+  .services-checklist { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 }
 </style>

@@ -295,8 +295,8 @@ import {
 // ──────────────────────────────────────────────
 // CONSTANTS
 // ──────────────────────────────────────────────
-const COLOMBIA_CENTER = { lat: 4.5709, lng: -74.2973 };
-const DEFAULT_ZOOM = 6;
+const COLOMBIA_CENTER = { lat: 2.4448, lng: -76.6147 };
+const DEFAULT_ZOOM = 15;
 const DEBOUNCE_DELAY = 400;
 
 // ──────────────────────────────────────────────

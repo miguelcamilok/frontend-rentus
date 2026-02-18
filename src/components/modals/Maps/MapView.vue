@@ -1,5 +1,46 @@
 <template>
   <div class="map-container">
+
+    <!-- ===== BARRA DE BÚSQUEDA POR BARRIOS (solo en modo edición) ===== -->
+    <div v-if="canEdit" class="map-search-bar">
+      <div class="search-input-wrapper">
+        <span class="search-prefix-icon">🔍</span>
+        <input
+          v-model="neighborhoodQuery"
+          type="text"
+          placeholder="Buscar barrio, dirección o sector..."
+          class="search-neighborhood-input"
+          @input="onNeighborhoodInput"
+          @keydown.escape="closeSuggestions"
+          @keydown.enter.prevent="selectFirstSuggestion"
+          autocomplete="off"
+        />
+        <button
+          v-if="neighborhoodQuery"
+          class="search-clear-btn"
+          @click="clearNeighborhoodSearch"
+          title="Limpiar búsqueda"
+        >✕</button>
+      </div>
+
+      <!-- Sugerencias desplegables -->
+      <ul v-if="neighborhoodSuggestions.length > 0" class="neighborhood-suggestions">
+        <li
+          v-for="(s, i) in neighborhoodSuggestions"
+          :key="i"
+          class="suggestion-item"
+          @mousedown.prevent="selectNeighborhood(s)"
+        >
+          <span class="suggestion-type-icon">{{ s.isNeighborhood ? '🏘️' : '📍' }}</span>
+          <div class="suggestion-texts">
+            <span class="suggestion-name">{{ s.name }}</span>
+            <span class="suggestion-city">{{ s.city }}</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <!-- ===== FIN BARRA DE BÚSQUEDA ===== -->
+
     <div id="map"></div>
 
     <div v-if="isLoading" class="loading-overlay">
@@ -56,6 +97,17 @@ const currentUserId = ref<number | null>(null);
 const propertyAccuracy = ref<number>(50);
 const mapReady = ref(false);
 
+// ===== REFs PARA BÚSQUEDA DE BARRIOS =====
+const neighborhoodQuery = ref('');
+const neighborhoodSuggestions = ref<Array<{
+  name: string;
+  city: string;
+  lat: number;
+  lng: number;
+  isNeighborhood: boolean;
+}>>([]);
+let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
 // Instancias Leaflet
 let map: L.Map;
 let userMarker: L.Marker | null = null;
@@ -101,6 +153,106 @@ function getAccuracyColor(accuracy: number): string {
   if (accuracy > 1000) return "#e74c3c";
   return "#f39c12";
 }
+
+// ==================== BÚSQUEDA POR BARRIOS ====================
+
+const POPAYAN_NEIGHBORHOODS = [
+  { name: 'Centro Histórico',       city: 'Popayán', lat: 2.4413,  lng: -76.6053 },
+  { name: 'El Bolívar',             city: 'Popayán', lat: 2.4412,  lng: -76.6089 },
+  { name: 'La Esmeralda',           city: 'Popayán', lat: 2.4562,  lng: -76.6203 },
+  { name: 'Pandiguando',            city: 'Popayán', lat: 2.4478,  lng: -76.6234 },
+  { name: 'Alfonso López',          city: 'Popayán', lat: 2.4389,  lng: -76.6312 },
+  { name: 'La Paz',                 city: 'Popayán', lat: 2.4501,  lng: -76.6178 },
+  { name: 'Lomas de Granada',       city: 'Popayán', lat: 2.4523,  lng: -76.6145 },
+  { name: 'El Recuerdo',            city: 'Popayán', lat: 2.4456,  lng: -76.6267 },
+  { name: 'Camilo Torres',          city: 'Popayán', lat: 2.4434,  lng: -76.6198 },
+  { name: 'Las Palmas',             city: 'Popayán', lat: 2.4478,  lng: -76.6101 },
+  { name: 'El Portal',              city: 'Popayán', lat: 2.4534,  lng: -76.6089 },
+  { name: 'Las Américas',           city: 'Popayán', lat: 2.4398,  lng: -76.6156 },
+  { name: 'El Cadillal',            city: 'Popayán', lat: 2.4567,  lng: -76.6312 },
+  { name: 'Antonio Nariño',         city: 'Popayán', lat: 2.4345,  lng: -76.6234 },
+  { name: 'Los Comuneros',          city: 'Popayán', lat: 2.4612,  lng: -76.6189 },
+  { name: 'Urbanización Valencia',  city: 'Popayán', lat: 2.4489,  lng: -76.6167 },
+  { name: 'Santa Helena',           city: 'Popayán', lat: 2.4423,  lng: -76.6278 },
+  { name: 'El Uvo',                 city: 'Popayán', lat: 2.4378,  lng: -76.6345 },
+  { name: 'Seminario',              city: 'Popayán', lat: 2.4401,  lng: -76.6123 },
+  { name: 'La Pamba',               city: 'Popayán', lat: 2.4467,  lng: -76.6056 },
+  { name: 'Pubenza',                city: 'Popayán', lat: 2.4356,  lng: -76.6189 },
+  { name: 'Las Delicias',           city: 'Popayán', lat: 2.4590,  lng: -76.6267 },
+  { name: 'El Canelo',              city: 'Popayán', lat: 2.4612,  lng: -76.6098 },
+  { name: 'Yanaconas',              city: 'Popayán', lat: 2.4289,  lng: -76.6145 },
+  { name: 'La Estancia',            city: 'Popayán', lat: 2.4512,  lng: -76.6312 },
+];
+
+function onNeighborhoodInput() {
+  if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+  const q = neighborhoodQuery.value.trim();
+  if (q.length < 2) { neighborhoodSuggestions.value = []; return; }
+  searchDebounceTimer = setTimeout(() => performNeighborhoodSearch(q), 350);
+}
+
+async function performNeighborhoodSearch(query: string) {
+  const q = query.toLowerCase();
+
+  const localResults = POPAYAN_NEIGHBORHOODS
+    .filter(n => n.name.toLowerCase().includes(q))
+    .map(n => ({ name: n.name, city: n.city, lat: n.lat, lng: n.lng, isNeighborhood: true }));
+
+  neighborhoodSuggestions.value = localResults;
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?` +
+      `q=${encodeURIComponent(query + ' Colombia')}&format=json&limit=5&countrycodes=co&addressdetails=1&accept-language=es`;
+    const res = await fetch(url, { headers: { 'Accept-Language': 'es' } });
+    if (!res.ok) return;
+
+    const data = await res.json();
+    const apiResults = data
+      .filter((r: any) => r.lat && r.lon)
+      .map((r: any) => {
+        const addr = r.address || {};
+        const isNeighborhood = !!(addr.neighbourhood || addr.suburb || addr.quarter);
+        const name = addr.neighbourhood || addr.suburb || addr.quarter
+          || addr.road || addr.amenity || r.display_name.split(',')[0];
+        const city = addr.city || addr.town || addr.municipality || addr.county || 'Colombia';
+        return { name, city, lat: parseFloat(r.lat), lng: parseFloat(r.lon), isNeighborhood };
+      });
+
+    const combined = [...localResults];
+    apiResults.forEach((r: any) => {
+      if (!combined.find(c => c.name.toLowerCase() === r.name.toLowerCase())) {
+        combined.push(r);
+      }
+    });
+    neighborhoodSuggestions.value = combined.slice(0, 8);
+
+  } catch (err) {
+    console.warn('Nominatim no disponible, usando solo resultados locales');
+  }
+}
+
+function selectNeighborhood(s: typeof neighborhoodSuggestions.value[0]) {
+  neighborhoodQuery.value = s.name;
+  neighborhoodSuggestions.value = [];
+  placeMarker(s.lat, s.lng, 150);
+}
+
+function selectFirstSuggestion() {
+  if (neighborhoodSuggestions.value.length > 0) {
+    selectNeighborhood(neighborhoodSuggestions.value[0]);
+  }
+}
+
+function closeSuggestions() {
+  neighborhoodSuggestions.value = [];
+}
+
+function clearNeighborhoodSearch() {
+  neighborhoodQuery.value = '';
+  neighborhoodSuggestions.value = [];
+}
+
+// ==================== FIN BÚSQUEDA POR BARRIOS ====================
 
 // API FUNCTIONS
 async function savePropertyPoint(propId: number, lat: number, lng: number, accuracy: number) {
@@ -250,7 +402,7 @@ function getPreciseLocation(): Promise<{ lat: number; lng: number; acc: number }
 function clearExistingLayers() {
   if (userMarker) {
     try { 
-      userMarker.off(); // Remover todos los eventos
+      userMarker.off();
       map.removeLayer(userMarker); 
     } catch (e) { /* ignore */ }
     userMarker = null;
@@ -316,13 +468,11 @@ async function placeMarker(lat: number, lng: number, accuracy: number, fromProps
   const isDraggable = canEdit.value;
   console.log("🔍 placeMarker -> canEdit:", canEdit.value, "draggable:", isDraggable);
 
-  // Crear marcador
   userMarker = L.marker([lat, lng], {
     draggable: isDraggable,
     autoPan: true
   }).addTo(map);
 
-  // Configurar dragging
   if (userMarker.dragging) {
     if (isDraggable) {
       userMarker.dragging.enable();
@@ -331,7 +481,6 @@ async function placeMarker(lat: number, lng: number, accuracy: number, fromProps
     }
   }
 
-  // Crear círculo de precisión
   const circleColor = getAccuracyColor(accuracy);
   accuracyCircle = L.circle([lat, lng], {
     radius: accuracy,
@@ -341,21 +490,17 @@ async function placeMarker(lat: number, lng: number, accuracy: number, fromProps
     weight: 2
   }).addTo(map);
 
-  // Configurar vista
   const zoomLevel = accuracy <= GOOD_ACCURACY ? 18 : 16;
   map.flyTo([lat, lng], zoomLevel, { duration: 1 });
 
-  // Crear popup
   if (canEdit.value) {
     createEditablePopup(lat, lng, accuracy);
   } else {
     createReadonlyPopup(lat, lng, accuracy);
   }
 
-  // Configurar eventos
   setupMarkerEvents();
 
-  // Aplicar estilos DOM
   nextTick(() => {
     const element = userMarker?.getElement?.();
     if (element) {
@@ -373,7 +518,6 @@ function updatePopupContent(lat: number, lng: number, accuracy: number) {
 
   const content = popup.getContent();
   if (typeof content === "string") {
-    // Actualizar contenido del popup manteniendo la estructura
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = content;
     
@@ -446,36 +590,37 @@ function createEditablePopup(lat: number, lng: number, accuracy: number) {
     </div>
   `;
 
+  // ✅ FIX: Eliminar listeners previos de popupopen antes de registrar uno nuevo
+  userMarker!.off("popupopen");
   userMarker!.bindPopup(popupHtml, { 
     maxWidth: 350,
     closeOnClick: false
   }).openPopup();
 
-  // Configurar eventos del popup
-  userMarker!.once("popupopen", () => {
+  // ✅ FIX: Usar 'on' en lugar de 'once' para que funcione siempre,
+  // no solo la primera vez que se abre el popup
+  userMarker!.on("popupopen", () => {
     setTimeout(() => setupPopupEvents(), 50);
   });
 }
 
+// ✅ FIX PRINCIPAL: setupPopupEvents ahora siempre reemplaza y re-adjunta
+// los eventos correctamente, sin importar si el marcador fue arrastrado o no
 function setupPopupEvents() {
   const saveBtn = document.getElementById("savePointBtn");
   const retryBtn = document.getElementById("retryPointBtn");
 
   if (saveBtn) {
-    // Usar removeEventListener como alternativa
     const newSaveBtn = saveBtn.cloneNode(true) as HTMLElement;
     saveBtn.parentNode?.replaceChild(newSaveBtn, saveBtn);
-
     L.DomEvent.addListener(newSaveBtn, "click", async () => {
       await handleSaveLocation();
     });
   }
 
   if (retryBtn) {
-    // Usar removeEventListener como alternativa
     const newRetryBtn = retryBtn.cloneNode(true) as HTMLElement;
     retryBtn.parentNode?.replaceChild(newRetryBtn, retryBtn);
-
     L.DomEvent.addListener(newRetryBtn, "click", async () => {
       await handleRetryGPS(newRetryBtn as HTMLButtonElement);
     });
@@ -498,7 +643,6 @@ async function handleSaveLocation() {
   try {
     await savePropertyPoint(propertyId.value, pos.lat, pos.lng, propertyAccuracy.value);
     
-    // Mostrar popup de éxito
     const successHtml = `
       <div style="text-align: center; padding: 15px; font-family: Arial, sans-serif;">
         <div style="font-size: 40px; margin-bottom: 10px;">✅</div>
@@ -512,9 +656,10 @@ async function handleSaveLocation() {
       </div>
     `;
     
+    // ✅ FIX: Limpiar listener antes de mostrar el popup de éxito
+    userMarker!.off("popupopen");
     userMarker.bindPopup(successHtml, { maxWidth: 280 }).openPopup();
     
-    // Restaurar popup editable después de 3 segundos
     setTimeout(() => {
       if (userMarker) {
         createEditablePopup(pos.lat, pos.lng, propertyAccuracy.value);
@@ -589,10 +734,8 @@ function createReadonlyPopup(lat: number, lng: number, accuracy: number) {
 
 // MAP CONTROLS
 function addLocateButton() {
-  // Remover control existente si existe
   if (locateControl !== null) {
     try {
-      // Verificación explícita de null
       map.removeControl(locateControl);
     } catch (e) {
       console.warn("⚠️ Error al remover locate control:", e);
@@ -602,30 +745,52 @@ function addLocateButton() {
   
   if (!canEdit.value) return;
 
-  // Usar el método factory de Leaflet (recomendado)
   locateControl = (L as any).control({ position: "topleft" });
-  // Type assertion para asegurar el tipo
   const control = locateControl as L.Control;
   
   control.onAdd = (): HTMLElement => {
-    const btn = L.DomUtil.create("button", "locate-btn");
-    btn.innerHTML = "🎯";
-    btn.title = "Actualizar mi ubicación GPS";
+    const container = L.DomUtil.create("div", "locate-control-container");
+    container.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 8px;
+    `;
+
+    const btn = L.DomUtil.create("button", "locate-btn", container);
+    btn.innerHTML = `
+      <span class="locate-icon">🎯</span>
+      
+    `;
+    btn.title = "Ir a mi ubicación actual";
     btn.style.cssText = `
-      width: 50px;
-      height: 50px;
-      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 24px;
-      cursor: pointer;
       display: flex;
       align-items: center;
-      justify-content: center;
-      box-shadow: 0 3px 10px rgba(52, 152, 219, 0.4);
-      transition: all 0.3s ease;
+      gap: 6px;
+      padding: 8px 12px;
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(37,99,235,0.45);
+      transition: all 0.25s ease;
+      white-space: nowrap;
+      font-family: Arial, sans-serif;
     `;
+
+    btn.addEventListener("mouseenter", () => {
+      if (!btn.disabled) {
+        btn.style.transform = "translateY(-2px)";
+        btn.style.boxShadow = "0 6px 16px rgba(37,99,235,0.55)";
+      }
+    });
+    btn.addEventListener("mouseleave", () => {
+      btn.style.transform = "translateY(0)";
+      btn.style.boxShadow = "0 4px 12px rgba(37,99,235,0.45)";
+    });
 
     L.DomEvent.disableClickPropagation(btn);
     
@@ -633,13 +798,13 @@ function addLocateButton() {
       if (btn.disabled) return;
       
       btn.disabled = true;
-      btn.innerHTML = "⏳";
-      btn.style.opacity = "0.6";
+      btn.innerHTML = `<span>⏳</span><span class="locate-label">Localizando...</span>`;
+      btn.style.opacity = "0.7";
 
       const loc = await getPreciseLocation();
 
       btn.disabled = false;
-      btn.innerHTML = "🎯";
+      btn.innerHTML = `<span class="locate-icon">🎯</span><span class="locate-label">Mi ubicación</span>`;
       btn.style.opacity = "1";
 
       if (loc) {
@@ -652,7 +817,7 @@ function addLocateButton() {
 
     L.DomEvent.addListener(btn, "click", clickHandler);
 
-    return btn;
+    return container;
   };
 
   control.addTo(map);
@@ -660,7 +825,6 @@ function addLocateButton() {
 
 // INITIALIZATION
 async function initializeMap() {
-  // Obtener usuario actual
   const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
   if (userStr) {
     try {
@@ -672,7 +836,6 @@ async function initializeMap() {
     }
   }
 
-  // Inicializar mapa
   map = L.map("map", {
     zoomControl: true,
     attributionControl: true,
@@ -688,7 +851,6 @@ async function initializeMap() {
   mapReady.value = true;
   console.log("🗺️ Mapa inicializado");
 
-  // Mostrar ubicación inicial
   if (props.lat !== undefined && props.lng !== undefined) {
     const lat = Number(props.lat);
     const lng = Number(props.lng);
@@ -706,7 +868,6 @@ async function initializeMap() {
 
 function showDefaultLocation() {
   if (canEdit.value) {
-    // Intentar obtener ubicación GPS
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const lat = position.coords.latitude;
@@ -753,14 +914,12 @@ watch(() => canEdit.value, (newValue) => {
       const pos = userMarker.getLatLng();
       const accuracy = propertyAccuracy.value;
       
-      // Recrear popup según permisos
       if (newValue) {
         createEditablePopup(pos.lat, pos.lng, accuracy);
       } else {
         createReadonlyPopup(pos.lat, pos.lng, accuracy);
       }
       
-      // Actualizar draggable
       if (userMarker.dragging) {
         if (newValue) {
           userMarker.dragging.enable();
@@ -798,5 +957,118 @@ onUnmounted(() => {
 </script>
 
 <style>
-@import '../../../assets/css/components/MapView.css'
+@import '../../../assets/css/components/MapView.css';
+
+/* ===== BARRA DE BÚSQUEDA POR BARRIOS ===== */
+.map-search-bar {
+  position: relative;
+  padding: 10px 12px 0;
+  background: #fff;
+  z-index: 1000;
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #f1f5f9;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0 10px;
+  gap: 8px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.search-input-wrapper:focus-within {
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+
+.search-prefix-icon {
+  font-size: 15px;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.search-neighborhood-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 9px 0;
+  font-size: 0.875rem;
+  color: #1e293b;
+  outline: none;
+}
+
+.search-neighborhood-input::placeholder {
+  color: #94a3b8;
+}
+
+.search-clear-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  line-height: 1;
+  transition: color 0.15s, background 0.15s;
+}
+.search-clear-btn:hover {
+  color: #475569;
+  background: #e2e8f0;
+}
+
+/* Sugerencias */
+.neighborhood-suggestions {
+  position: absolute;
+  top: calc(100% - 2px);
+  left: 12px;
+  right: 12px;
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  max-height: 210px;
+  overflow-y: auto;
+  z-index: 2000;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.suggestion-item:hover {
+  background: #f8fafc;
+}
+
+.suggestion-type-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.suggestion-texts {
+  display: flex;
+  flex-direction: column;
+}
+
+.suggestion-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.suggestion-city {
+  font-size: 0.75rem;
+  color: #64748b;
+}
 </style>

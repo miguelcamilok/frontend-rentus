@@ -53,6 +53,19 @@
               </div>
             </div>
 
+            <!-- ✅ NUEVO: Botón de ubicación actual -->
+            <button
+              class="btn-locate"
+              :disabled="locating || saving"
+              @click="useCurrentLocation"
+            >
+              <font-awesome-icon
+                :icon="['fas', locating ? 'spinner' : 'crosshairs']"
+                :spin="locating"
+              />
+              {{ locating ? 'Obteniendo ubicación...' : 'Usar mi ubicación actual' }}
+            </button>
+
             <!-- Búsqueda de dirección -->
             <div class="address-search">
               <input
@@ -154,6 +167,7 @@ const emit = defineEmits<{
 
 // Estado
 const saving = ref(false);
+const locating = ref(false); // ✅ NUEVO
 const searchQuery = ref('');
 const searchResults = ref<any[]>([]);
 const currentLat = ref(2.4448); // Popayán por defecto
@@ -249,6 +263,52 @@ const selectSearchResult = (result: any) => {
   
   searchQuery.value = '';
   searchResults.value = [];
+};
+
+// ✅ NUEVO: Función de ubicación actual
+const useCurrentLocation = () => {
+  if (!navigator.geolocation) {
+    alert('Tu navegador no soporta geolocalización.');
+    return;
+  }
+
+  locating.value = true;
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      locating.value = false;
+      const { latitude: lat, longitude: lng, accuracy } = position.coords;
+
+      currentLat.value = lat;
+      currentLng.value = lng;
+      currentAccuracy.value = accuracy;
+
+      if (map && marker) {
+        const newLatLng = L.latLng(lat, lng);
+        marker.setLatLng(newLatLng);
+        map.flyTo(newLatLng, 17, { duration: 1 });
+
+        if (accuracyCircle) {
+          accuracyCircle.setLatLng(newLatLng);
+          accuracyCircle.setRadius(accuracy);
+          accuracyCircle.setStyle({
+            color: getAccuracyColor(),
+            fillColor: getAccuracyColor()
+          });
+        }
+      }
+    },
+    (error) => {
+      locating.value = false;
+      const msgs: Record<number, string> = {
+        1: 'Permiso de ubicación denegado. Verifica los permisos del navegador.',
+        2: 'No se pudo obtener la posición. Intenta en un lugar más abierto.',
+        3: 'Tiempo de espera agotado. Intenta nuevamente.',
+      };
+      alert(`❌ ${msgs[error.code] ?? 'Error desconocido al obtener ubicación.'}`);
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
 };
 
 // Inicializar mapa
@@ -741,6 +801,43 @@ onUnmounted(() => {
   .coordinates-display {
     flex-direction: column;
     gap: 0.75rem;
+  }
+}
+
+/* ✅ NUEVO: Botón de ubicación actual */
+.btn-locate {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+  transition: all 0.25s ease;
+  width: fit-content;
+  align-self: flex-start;
+}
+
+.btn-locate:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.5);
+}
+
+.btn-locate:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 768px) {
+  .btn-locate {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>
