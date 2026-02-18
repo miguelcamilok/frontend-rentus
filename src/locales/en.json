@@ -370,6 +370,22 @@
       "bathrooms": "0",
       "services": "WiFi, Gas, Water, Electricity, Parking",
       "imageUrl": "https://example.com/image.jpg"
+    },
+    "loading": {
+      "title": "Loading properties...",
+      "message": "We are fetching the available listings. This will only take a moment."
+    },
+    "error": {
+      "title": "Something went wrong",
+      "offline": "No internet connection. Please check your network and try again.",
+      "server": "Our server is having issues. Please try again in a few minutes.",
+      "notFound": "The properties endpoint could not be found. Contact support if this persists.",
+      "generic": "An unexpected error occurred while loading properties. Please try again.",
+      "retryButton": "Try again"
+    },
+    "empty": {
+      "titleFiltered": "No results found",
+      "messageFiltered": "No properties match your current filters. Try adjusting or clearing them."
     }
   },
   "time": {
