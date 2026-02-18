@@ -370,6 +370,22 @@
       "bathrooms": "0",
       "services": "WiFi, Gas, Agua, Luz, Parqueadero",
       "imageUrl": "https://ejemplo.com/imagen.jpg"
+    },
+    "loading": {
+      "title": "Cargando propiedades...",
+      "message": "Estamos obteniendo los inmuebles disponibles. Solo tomará un momento."
+    },
+    "error": {
+      "title": "Algo salió mal",
+      "offline": "Sin conexión a internet. Verifica tu red e intenta de nuevo.",
+      "server": "Nuestro servidor está presentando problemas. Intenta de nuevo en unos minutos.",
+      "notFound": "No se encontró el recurso de propiedades. Contacta soporte si el problema persiste.",
+      "generic": "Ocurrió un error inesperado al cargar las propiedades. Por favor intenta de nuevo.",
+      "retryButton": "Intentar de nuevo"
+    },
+    "empty": {
+      "titleFiltered": "Sin resultados",
+      "messageFiltered": "Ninguna propiedad coincide con los filtros actuales. Ajusta o limpia los filtros."
     }
   },
   "time": {
