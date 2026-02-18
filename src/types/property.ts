@@ -19,6 +19,7 @@ export type PropertyVisibility = 'published' | 'hidden';
  * Interfaz principal de Propiedad
  */
 export interface Property {
+  type: string;
   id: number;
   title: string;
   description: string;
