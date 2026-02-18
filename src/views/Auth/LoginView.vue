@@ -441,5 +441,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-@import '../../assets/css/auth/auth.css';
+@import '../../assets/css/Auth/auth.css';
 </style>
