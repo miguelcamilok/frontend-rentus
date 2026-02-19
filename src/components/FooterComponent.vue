@@ -27,7 +27,7 @@
             <img
               src="https://img.icons8.com/ios-glyphs/20/ffffff/new-post.png"
             />
-            <a :href="`mailto:${$t('footer.contact.email')}`">{{ $t('footer.contact.email') }}</a>
+            <a href="mailto:support@rentusco.com">support@rentusco.com</a>
           </li>
           <li>
             <img src="https://img.icons8.com/ios-filled/20/ffffff/phone.png" />
