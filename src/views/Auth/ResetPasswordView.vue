@@ -680,6 +680,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-@import "../../assets/css/auth/auth.css";
-@import "../../assets/css/auth/reset-password.css";
+@import "../../assets/css/Auth/auth.css";
+@import "../../assets/css/Auth/reset-password.css";
 </style>

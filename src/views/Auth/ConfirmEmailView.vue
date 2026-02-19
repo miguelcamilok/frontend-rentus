@@ -463,6 +463,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-@import "../../assets/css/auth/auth.css";
-@import "../../assets/css/auth/confirm-email.css";
+@import "../../assets/css/Auth/auth.css";
+@import "../../assets/css/Auth/confirm-email.css";
 </style>
