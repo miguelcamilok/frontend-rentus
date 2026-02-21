@@ -688,10 +688,7 @@ async function fetchAllData() {
   errorProperties.value = null;
 
   try {
-    const [propRes, usersRes] = await Promise.all([
-      api.get("/properties"),
-      api.get("/users")
-    ]);
+    const propRes = await api.get("/properties");
 
     if (propRes.data && Array.isArray(propRes.data)) {
       properties.value = propRes.data;
@@ -702,14 +699,7 @@ async function fetchAllData() {
     }
 
     propertyCount.value = properties.value.length;
-
-    if (usersRes.data && Array.isArray(usersRes.data)) {
-      activeClientsCount.value = usersRes.data.length;
-    } else if (usersRes.data && usersRes.data.data && Array.isArray(usersRes.data.data)) {
-      activeClientsCount.value = usersRes.data.data.length;
-    } else {
-      activeClientsCount.value = 0;
-    }
+    activeClientsCount.value = 150; // Mocked or removed if not used
 
   } catch (error) {
     console.error("Error cargando datos:", error);

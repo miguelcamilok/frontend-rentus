@@ -53,7 +53,7 @@ export interface ContractTermsData {
 
 export const rentalRequestService = {
   // ==================== INQUILINO ====================
-  
+
   // Crear solicitud de cita
   async createRequest(data: {
     property_id: number;
@@ -83,10 +83,10 @@ export const rentalRequestService = {
   },
 
   // ==================== DUEÑO ====================
-  
+
   // Obtener solicitudes recibidas (dueño)
   async getOwnerRequests() {
-    const response = await api.get("/rental-requests/owner");
+    const response = await api.get("/rental-requests/my-received");
     return response.data;
   },
 
@@ -124,7 +124,7 @@ export const rentalRequestService = {
   },
 
   // ==================== GENERAL ====================
-  
+
   // Obtener detalles de una solicitud
   async getRequestDetails(requestId: number) {
     const response = await api.get(`/rental-requests/${requestId}`);

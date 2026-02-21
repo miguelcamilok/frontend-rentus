@@ -89,6 +89,10 @@
       "floatingCards": {
         "verified": "Propiedades Verificadas",
         "rated": "Mejor Valoradas"
+      },
+      "map": {
+        "login": "Inicia sesión para explorar el mapa",
+        "explore": "Explorar en el mapa"
       }
     },
     "search": {
@@ -271,7 +275,8 @@
       "apartamento": "Apartamento",
       "local": "Local Comercial",
       "finca": "Finca",
-      "propiedad": "Propiedad"
+      "propiedad": "Propiedad",
+      "otro": "Otro"
     },
     "featured": "Destacada",
     "new": "Nueva",
@@ -488,7 +493,6 @@
     "bathrooms": "Baño|Baños",
     "parking": "Parqueo|Parqueos"
   },
-  
   "profile": {
     "addLocation": "Agregar ubicación",
     "bio": "Biografía",

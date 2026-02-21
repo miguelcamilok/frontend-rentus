@@ -6,20 +6,29 @@
       
       <form @submit.prevent="submitMaintenanceRequest" class="maintenance-form">
         <div class="form-group">
-          <label for="category">Categoría:</label>
+          <label for="property">Propiedad / Inmueble:</label>
           <select 
-            id="category" 
-            v-model="formData.category" 
+            id="property" 
+            v-model="formData.property_id" 
             required
           >
-            <option value="">Seleccione una opción</option>
-            <option value="electricidad">Electricidad</option>
-            <option value="plomeria">Plomería</option>
-            <option value="estructural">Estructural</option>
-            <option value="pintura">Pintura</option>
-            <option value="jardineria">Jardinería</option>
-            <option value="otros">Otros</option>
+            <option value="">Seleccione una propiedad</option>
+            <option v-for="contract in userContracts" :key="contract.property_id" :value="contract.property_id">
+              {{ contract.property?.title || 'Propiedad ID: ' + contract.property_id }} (Contrato #{{ contract.id }})
+            </option>
           </select>
+        </div>
+
+        <div class="form-group">
+          <label for="title">Asunto de Mantenimiento:</label>
+          <input 
+            type="text" 
+            id="title" 
+            v-model="formData.title" 
+            required
+            class="form-input"
+            placeholder="Ej: Fuga de agua en el baño principal"
+          />
         </div>
 
         <div class="form-group">
@@ -29,10 +38,10 @@
             v-model="formData.priority" 
             required
           >
-            <option value="baja">Baja</option>
-            <option value="media">Media</option>
-            <option value="alta">Alta</option>
-            <option value="urgente">Urgente</option>
+            <option value="low">Baja</option>
+            <option value="medium">Media</option>
+            <option value="high">Alta</option>
+            <option value="urgent">Urgente</option>
           </select>
         </div>
 
@@ -101,7 +110,9 @@
 </template>
 
 <script>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { contractService } from '@/services/contractService'
+import api from '@/services/api'
 
 export default {
   name: 'MaintenanceModal',
@@ -118,8 +129,9 @@ export default {
   setup(props, { emit }) {
     // Estado del formulario 
     const formData = reactive({
-      category: '',
-      priority: 'media',
+      title: '',
+      property_id: '',
+      priority: 'medium',
       description: '',
       image: null
     })
@@ -129,6 +141,18 @@ export default {
     const uploading = ref(false)
     const uploadProgress = ref(0)
     const uploadedImageUrl = ref('')
+    const userContracts = ref([])
+
+    onMounted(async () => {
+      try {
+        const response = await contractService.getUserContracts()
+        // Filtrar solo contratos activos
+        const contracts = Array.isArray(response.data) ? response.data : (response || [])
+        userContracts.value = contracts.filter(c => c.status === 'active')
+      } catch (err) {
+        console.error('Error fetching contracts for maintenance:', err)
+      }
+    })
 
     // Computed properties
     const imagePreviewUrl = computed(() => {
@@ -230,8 +254,9 @@ export default {
     }
 
     const resetForm = () => {
-      formData.category = ''
-      formData.priority = 'media'
+      formData.title = ''
+      formData.property_id = ''
+      formData.priority = 'medium'
       formData.description = ''
       formData.image = null
       loading.value = false
@@ -242,8 +267,13 @@ export default {
 
     const submitMaintenanceRequest = async () => {
       // Validaciones básicas
-      if (!formData.category) {
-        alert('Por favor selecciona una categoría')
+      if (!formData.title) {
+        alert('Por favor ingresa un título para el asunto')
+        return
+      }
+
+      if (!formData.property_id) {
+        alert('Por favor selecciona una propiedad afectada')
         return
       }
 
@@ -267,31 +297,30 @@ export default {
           uploadedImageUrl.value = imageUrl
         }
 
-        // Simular envío a la API de mantenimiento
-        console.log('Enviando solicitud de mantenimiento:', {
-          ...formData,
-          imageUrl: imageUrl
-        })
-        
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        // Éxito - Emitir evento con todos los datos
-        emit('submitted', {
-          category: formData.category,
+        const payload = {
+          title: formData.title,
           priority: formData.priority,
-          description: formData.description,
-          image: formData.image,
-          imageUrl: imageUrl,
-          timestamp: new Date().toISOString(),
-          status: 'pendiente'
-        })
+          description: formData.description + (imageUrl ? `\n\n[Imagen adjunta: ${imageUrl}]` : ''),
+          property_id: formData.property_id
+        }
+
+        const res = await api.post('/maintenances', payload)
+        
+        // Éxito - Emitir evento con todos los datos devueltos
+        emit('submitted', res.data?.data || payload)
         
         alert('¡Solicitud de mantenimiento enviada correctamente! Te contactaremos pronto.')
         closeModal()
         
       } catch (error) {
         console.error('Error enviando solicitud:', error)
-        alert(error.message || 'Error al enviar la solicitud. Por favor intenta nuevamente.')
+        if (error.response?.status === 422 && error.response.data?.errors) {
+          const errors = error.response.data.errors;
+          const messages = Object.values(errors).flat().join('\n');
+          alert(`Error de validación:\n${messages}`);
+        } else {
+          alert(error.response?.data?.message || 'Error al enviar la solicitud. Por favor intenta nuevamente.')
+        }
       } finally {
         loading.value = false
       }
@@ -304,6 +333,7 @@ export default {
       uploadProgress,
       uploadedImageUrl,
       imagePreviewUrl,
+      userContracts,
       getSubmitButtonText,
       closeModal,
       handleImageUpload,

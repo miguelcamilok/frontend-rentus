@@ -1,363 +1,302 @@
 <template>
-  <aside class="sidebar" :class="{ collapsed: isCollapsed }">
-    <!-- Logo Section -->
-    <div class="sidebar-header">
-      <div class="logo-container">
-        <div class="logo-icon">
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-            <rect width="32" height="32" rx="8" fill="url(#gradient)" />
-            <path d="M16 8L8 14V24H24V14L16 8Z" fill="white" />
-            <defs>
-              <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32">
-                <stop offset="0%" stop-color="#3b251d" />
-                <stop offset="100%" stop-color="#8b6f47" />
-              </linearGradient>
-            </defs>
-          </svg>
+  <aside class="admin-sidebar" :class="{ collapsed: isCollapsed, 'mobile-open': mobileOpen }">
+    <!-- Overlay for mobile -->
+    <div v-if="mobileOpen" class="sidebar-overlay" @click="$emit('closeMobile')"></div>
+
+    <div class="sidebar-inner">
+      <!-- Logo -->
+      <div class="sidebar-brand">
+        <div class="brand-logo">
+          <font-awesome-icon :icon="['fas', 'building']" />
         </div>
-        <transition name="fade">
-          <span v-if="!isCollapsed" class="logo-text">Admin Panel</span>
+        <transition name="slide-text">
+          <div v-if="!isCollapsed" class="brand-text">
+            <span class="brand-name">RentUs</span>
+            <span class="brand-label">Admin</span>
+          </div>
         </transition>
       </div>
+
+      <!-- Navigation -->
+      <nav class="sidebar-menu">
+        <div class="menu-group">
+          <span v-if="!isCollapsed" class="menu-group-label">General</span>
+          <router-link to="/admin/dashboard" class="menu-item" :class="{ active: isActive('/admin/dashboard') }">
+            <span class="menu-icon"><font-awesome-icon :icon="['fas', 'chart-pie']" /></span>
+            <span v-if="!isCollapsed" class="menu-label">Dashboard</span>
+          </router-link>
+        </div>
+
+        <div class="menu-group">
+          <span v-if="!isCollapsed" class="menu-group-label">Gestión</span>
+          <router-link
+            v-for="item in managementItems"
+            :key="item.path"
+            :to="item.path"
+            class="menu-item"
+            :class="{ active: isActive(item.path) }"
+          >
+            <span class="menu-icon"><font-awesome-icon :icon="['fas', item.icon]" /></span>
+            <span v-if="!isCollapsed" class="menu-label">{{ item.label }}</span>
+          </router-link>
+        </div>
+
+        <div class="menu-group">
+          <span v-if="!isCollapsed" class="menu-group-label">Sistema</span>
+          <router-link
+            v-for="item in systemItems"
+            :key="item.path"
+            :to="item.path"
+            class="menu-item"
+            :class="{ active: isActive(item.path) }"
+          >
+            <span class="menu-icon"><font-awesome-icon :icon="['fas', item.icon]" /></span>
+            <span v-if="!isCollapsed" class="menu-label">{{ item.label }}</span>
+          </router-link>
+        </div>
+      </nav>
+
+      <!-- Footer -->
+      <div class="sidebar-footer">
+        <button class="collapse-toggle" @click="$emit('toggle')" :title="isCollapsed ? 'Expandir' : 'Colapsar'">
+          <font-awesome-icon :icon="['fas', isCollapsed ? 'chevron-right' : 'chevron-left']" />
+        </button>
+      </div>
     </div>
-
-    <!-- Navigation Menu -->
-    <nav class="sidebar-nav">
-      <div class="nav-section">
-        <p v-if="!isCollapsed" class="nav-section-title">Principal</p>
-        
-        <router-link
-          v-for="item in mainMenuItems"
-          :key="item.path"
-          :to="item.path"
-          class="nav-item"
-          :class="{ active: isActive(item.path) }"
-        >
-          <span class="nav-icon" v-html="item.icon"></span>
-          <transition name="fade">
-            <span v-if="!isCollapsed" class="nav-text">{{ item.label }}</span>
-          </transition>
-          <span v-if="item.badge && !isCollapsed" class="nav-badge">{{ item.badge }}</span>
-        </router-link>
-      </div>
-
-      <div class="nav-section">
-        <p v-if="!isCollapsed" class="nav-section-title">Gestión</p>
-        
-        <router-link
-          v-for="item in managementMenuItems"
-          :key="item.path"
-          :to="item.path"
-          class="nav-item"
-          :class="{ active: isActive(item.path) }"
-        >
-          <span class="nav-icon" v-html="item.icon"></span>
-          <transition name="fade">
-            <span v-if="!isCollapsed" class="nav-text">{{ item.label }}</span>
-          </transition>
-        </router-link>
-      </div>
-
-      <div class="nav-section">
-        <p v-if="!isCollapsed" class="nav-section-title">Sistema</p>
-        
-        <router-link
-          v-for="item in systemMenuItems"
-          :key="item.path"
-          :to="item.path"
-          class="nav-item"
-          :class="{ active: isActive(item.path) }"
-        >
-          <span class="nav-icon" v-html="item.icon"></span>
-          <transition name="fade">
-            <span v-if="!isCollapsed" class="nav-text">{{ item.label }}</span>
-          </transition>
-        </router-link>
-      </div>
-    </nav>
-
-    <!-- Collapse Button -->
-    <button class="collapse-btn" @click="$emit('toggle')">
-      <span v-html="isCollapsed ? expandIcon : collapseIcon"></span>
-    </button>
   </aside>
 </template>
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
 
-interface MenuItem {
-  path: string;
-  label: string;
-  icon: string;
-  badge?: string;
-}
-
-// Props
 defineProps<{
   isCollapsed: boolean;
+  mobileOpen: boolean;
 }>();
 
-// Emits
 defineEmits<{
   toggle: [];
+  closeMobile: [];
 }>();
 
 const route = useRoute();
 
-// Menú principal
-const mainMenuItems: MenuItem[] = [
-  {
-    path: '/admin/dashboard',
-    label: 'Dashboard',
-    icon: '📊',
-  },
+const managementItems = [
+  { path: '/admin/users', label: 'Usuarios', icon: 'users' },
+  { path: '/admin/properties', label: 'Propiedades', icon: 'building' },
+  { path: '/admin/contracts', label: 'Contratos', icon: 'file-contract' },
+  { path: '/admin/payments', label: 'Pagos', icon: 'credit-card' },
+  { path: '/admin/maintenances', label: 'Mantenimiento', icon: 'tools' },
+  { path: '/admin/visits', label: 'Visitas', icon: 'calendar-check' },
 ];
 
-// Menú de gestión
-const managementMenuItems: MenuItem[] = [
-  {
-    path: '/admin/users',
-    label: 'Usuarios',
-    icon: '👥',
-  },
-  {
-    path: '/admin/properties',
-    label: 'Propiedades',
-    icon: '🏠',
-  },
-  {
-    path: '/admin/contracts',
-    label: 'Contratos',
-    icon: '📄',
-  },
-  {
-    path: '/admin/payments',
-    label: 'Pagos',
-    icon: '💳',
-  },
-  {
-    path: '/admin/maintenances',
-    label: 'Mantenimiento',
-    icon: '🔧',
-  },
-  {
-    path: '/admin/visits',
-    label: 'Visitas',
-    icon: '📅',
-  },
+const systemItems = [
+  { path: '/admin/reports', label: 'Reportes', icon: 'flag' },
+  { path: '/admin/notifications', label: 'Notificaciones', icon: 'bell' },
 ];
 
-// Menú de sistema
-const systemMenuItems: MenuItem[] = [
-  {
-    path: '/admin/reports',
-    label: 'Reportes',
-    icon: '📈',
-  },
-];
-
-// Icons
-const collapseIcon = '◀';
-const expandIcon = '▶';
-
-// Verificar si la ruta está activa
-const isActive = (path: string) => {
-  return route.path.startsWith(path);
-};
+const isActive = (path: string) => route.path.startsWith(path);
 </script>
 
 <style scoped>
-.sidebar {
+.admin-sidebar {
   position: fixed;
   left: 0;
   top: 0;
   height: 100vh;
-  width: 280px;
-  background: white;
-  border-right: 1px solid #e5e7eb;
+  width: 260px;
+  z-index: 200;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-sidebar.collapsed {
+  width: 72px;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: -1;
+}
+
+.sidebar-inner {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 100;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
   overflow: hidden;
 }
 
-.sidebar.collapsed {
-  width: 80px;
-}
-
-/* Header */
-.sidebar-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.logo-container {
+/* Brand */
+.sidebar-brand {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid var(--sidebar-border);
+  min-height: 64px;
 }
 
-.logo-icon {
-  flex-shrink: 0;
-}
-
-.logo-text {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #1f2937;
-  letter-spacing: -0.5px;
-}
-
-/* Navigation */
-.sidebar-nav {
-  flex: 1;
-  padding: 1.5rem 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.sidebar-nav::-webkit-scrollbar {
-  width: 4px;
-}
-
-.sidebar-nav::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 4px;
-}
-
-.nav-section {
-  margin-bottom: 1.5rem;
-}
-
-.nav-section-title {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #9ca3af;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 0 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1.5rem;
-  color: #6b7280;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  position: relative;
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-.nav-item::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 0;
-  background: linear-gradient(135deg, #3b251d 0%, #8b6f47 100%);
-  border-radius: 0 3px 3px 0;
-  transition: height 0.2s ease;
-}
-
-.nav-item:hover {
-  background: #f9fafb;
-  color: #3b251d;
-}
-
-.nav-item.active {
-  background: linear-gradient(90deg, rgba(59, 37, 29, 0.08) 0%, rgba(59, 37, 29, 0.02) 100%);
-  color: #3b251d;
-  font-weight: 700;
-}
-
-.nav-item.active::before {
-  height: 80%;
-}
-
-.nav-icon {
-  font-size: 1.25rem;
+.brand-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  color: white;
+  font-size: 1.1rem;
   flex-shrink: 0;
+  box-shadow: 0 4px 12px var(--accent-shadow);
 }
 
-.nav-text {
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.brand-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--sidebar-text-primary);
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.brand-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Menu */
+.sidebar-menu {
   flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.75rem 0;
+}
+
+.sidebar-menu::-webkit-scrollbar { width: 3px; }
+.sidebar-menu::-webkit-scrollbar-thumb { background: var(--sidebar-border); border-radius: 3px; }
+
+.menu-group {
+  margin-bottom: 0.5rem;
+}
+
+.menu-group-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--sidebar-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 0.75rem 1.25rem 0.4rem;
+  display: block;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  margin: 0.15rem 0.5rem;
+  border-radius: 10px;
+  color: var(--sidebar-text-secondary);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.menu-item:hover {
+  background: var(--sidebar-hover);
+  color: var(--sidebar-text-primary);
+}
+
+.menu-item.active {
+  background: var(--sidebar-active-bg);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.menu-item.active .menu-icon {
+  color: var(--accent);
+}
+
+.menu-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.menu-label {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.nav-badge {
-  background: linear-gradient(135deg, #3b251d 0%, #8b6f47 100%);
-  color: white;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.15rem 0.5rem;
-  border-radius: 12px;
-  min-width: 20px;
-  text-align: center;
+/* Footer */
+.sidebar-footer {
+  padding: 0.75rem;
+  border-top: 1px solid var(--sidebar-border);
 }
 
-/* Collapse Button */
-.collapse-btn {
-  position: absolute;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: white;
-  border: 1px solid #e5e7eb;
-  width: 36px;
+.collapse-toggle {
+  width: 100%;
   height: 36px;
-  border-radius: 50%;
+  border-radius: 8px;
+  border: 1px solid var(--sidebar-border);
+  background: var(--sidebar-hover);
+  color: var(--sidebar-text-muted);
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   font-size: 0.75rem;
-  color: #6b7280;
+  transition: all 0.2s ease;
 }
 
-.collapse-btn:hover {
-  background: #f9fafb;
-  border-color: #3b251d;
-  color: #3b251d;
-  transform: translateX(-50%) scale(1.1);
-  box-shadow: 0 4px 12px rgba(59, 37, 29, 0.15);
+.collapse-toggle:hover {
+  background: var(--sidebar-active-bg);
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 /* Transitions */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
+.slide-text-enter-active, .slide-text-leave-active {
+  transition: all 0.2s ease;
 }
-
-.fade-enter-from,
-.fade-leave-to {
+.slide-text-enter-from, .slide-text-leave-to {
   opacity: 0;
+  transform: translateX(-8px);
 }
 
 /* Responsive */
 @media (max-width: 1024px) {
-  .sidebar {
+  .admin-sidebar {
     transform: translateX(-100%);
+    width: 260px !important;
   }
-
-  .sidebar.collapsed {
+  .admin-sidebar.mobile-open {
     transform: translateX(0);
+  }
+  .admin-sidebar.collapsed {
+    width: 260px !important;
   }
 }
 </style>

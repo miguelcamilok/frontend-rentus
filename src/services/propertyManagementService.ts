@@ -68,82 +68,32 @@ export const propertyManagementService = {
   /**
    * Obtener estadísticas de propiedades
    */
+  /**
+   * Fetches aggregated property statistics from the admin endpoint.
+   * Returns an empty stats object on failure — never fetches all properties as fallback.
+   */
   async getPropertyStats(): Promise<PropertyStats> {
+    const EMPTY: PropertyStats = {
+      total: 0, available: 0, rented: 0, maintenance: 0,
+      pending_approval: 0, approved: 0, rejected: 0,
+      published: 0, hidden: 0, total_views: 0, average_price: 0,
+    };
+
     try {
       const response = await api.get('/admin/properties/stats');
 
-      console.log('📊 Respuesta de stats del admin:', response.data);
-
       if (response.data.success && response.data.data) {
         return response.data.data as PropertyStats;
-      } else if (response.data) {
+      }
+      if (response.data) {
         return response.data as PropertyStats;
       }
 
-      throw new Error('Estructura de stats inesperada');
-
-    } catch (error) {
-      console.error("❌ Error obteniendo estadísticas de propiedades:", error);
-
-      // Fallback: intentar obtener todas las propiedades y calcular manualmente
-      try {
-        const propertiesResponse = await this.getProperties({ perPage: 1000 });
-        const properties = propertiesResponse.data;
-
-        const stats: PropertyStats = {
-          total: properties.length,
-          available: 0,
-          rented: 0,
-          maintenance: 0,
-          pending_approval: 0,
-          approved: 0,
-          rejected: 0,
-          published: 0,
-          hidden: 0,
-          total_views: 0,
-          average_price: 0,
-        };
-
-        let totalPrice = 0;
-
-        properties.forEach(property => {
-          if (property.status === 'available') stats.available++;
-          if (property.status === 'rented') stats.rented++;
-          if (property.status === 'maintenance') stats.maintenance++;
-
-          if (property.approval_status === 'pending') stats.pending_approval++;
-          if (property.approval_status === 'approved') stats.approved++;
-          if (property.approval_status === 'rejected') stats.rejected++;
-
-          if (property.visibility === 'published') stats.published++;
-          if (property.visibility === 'hidden') stats.hidden++;
-
-          stats.total_views += property.views || 0;
-          totalPrice += property.monthly_price || 0;
-        });
-
-        if (properties.length > 0) {
-          stats.average_price = totalPrice / properties.length;
-        }
-
-        return stats;
-      } catch (fallbackError) {
-        console.error("❌ Error en fallback de stats:", fallbackError);
-
-        return {
-          total: 0,
-          available: 0,
-          rented: 0,
-          maintenance: 0,
-          pending_approval: 0,
-          approved: 0,
-          rejected: 0,
-          published: 0,
-          hidden: 0,
-          total_views: 0,
-          average_price: 0,
-        };
-      }
+      return EMPTY;
+    } catch {
+      // Do NOT fall back to fetching all 1000 properties.
+      // The backend /admin/properties/stats endpoint must be reliable.
+      return EMPTY;
     }
   },
 
@@ -153,14 +103,14 @@ export const propertyManagementService = {
   async getProperty(id: number): Promise<Property> {
     try {
       const response = await api.get(`/properties/${id}`);
-      
+
       console.log('📦 Respuesta completa del backend:', response.data);
-      
+
       if (response.data.success && response.data.data) {
         console.log('✅ Propiedad extraída correctamente:', response.data.data);
         return response.data.data;
       }
-      
+
       console.log('⚠️ Respuesta sin wrapper, retornando directamente');
       return response.data;
     } catch (error: any) {
@@ -436,94 +386,72 @@ export const propertyManagementService = {
   /**
    * Obtener configuración de color para el estado de disponibilidad
    */
-  getStatusConfig(status: PropertyAvailabilityStatus): {
+  getStatusConfig(status: any): {
     color: string;
     bg: string;
     label: string;
     icon: string;
   } {
-    const configs = {
-      available: {
-        color: '#059669',
-        bg: '#f0fdf4',
-        label: 'Disponible',
-        icon: 'check-circle',
-      },
-      rented: {
-        color: '#dc2626',
-        bg: '#fef2f2',
-        label: 'Rentada',
-        icon: 'home',
-      },
-      maintenance: {
-        color: '#f59e0b',
-        bg: '#fffbeb',
-        label: 'Mantenimiento',
-        icon: 'wrench',
-      },
+    const s = (status || '').toLowerCase();
+    const configs: Record<string, any> = {
+      available: { color: '#059669', bg: '#f0fdf4', label: 'Disponible', icon: 'check-circle' },
+      rented: { color: '#dc2626', bg: '#fef2f2', label: 'Rentada', icon: 'home' },
+      maintenance: { color: '#f59e0b', bg: '#fffbeb', label: 'Mantenimiento', icon: 'wrench' },
+      // Spanish keys
+      disponible: { color: '#059669', bg: '#f0fdf4', label: 'Disponible', icon: 'check-circle' },
+      rentada: { color: '#dc2626', bg: '#fef2f2', label: 'Rentada', icon: 'home' },
+      // mantenimiento is the same in English and Spanish here
     };
 
-    return configs[status] || configs.available;
+    return configs[s] || configs.available;
   },
 
   /**
    * Obtener configuración de color para el estado de aprobación
    */
-  getApprovalConfig(status?: PropertyApprovalStatus): {
+  getApprovalConfig(status?: any): {
     color: string;
     bg: string;
     label: string;
     icon: string;
   } {
-    const configs = {
-      pending: {
-        color: '#f59e0b',
-        bg: '#fffbeb',
-        label: 'Pendiente',
-        icon: 'clock',
-      },
-      approved: {
-        color: '#059669',
-        bg: '#f0fdf4',
-        label: 'Aprobada',
-        icon: 'check-circle',
-      },
-      rejected: {
-        color: '#dc2626',
-        bg: '#fef2f2',
-        label: 'Rechazada',
-        icon: 'times-circle',
-      },
+    const s = (status || 'pending').toLowerCase();
+    const configs: Record<string, any> = {
+      pending: { color: '#f59e0b', bg: '#fffbeb', label: 'Pendiente', icon: 'clock' },
+      approved: { color: '#059669', bg: '#f0fdf4', label: 'Aprobada', icon: 'check-circle' },
+      rejected: { color: '#dc2626', bg: '#fef2f2', label: 'Rechazada', icon: 'times-circle' },
+      // Spanish keys
+      pendiente: { color: '#f59e0b', bg: '#fffbeb', label: 'Pendiente', icon: 'clock' },
+      aprobada: { color: '#059669', bg: '#f0fdf4', label: 'Aprobada', icon: 'check-circle' },
+      aprobado: { color: '#059669', bg: '#f0fdf4', label: 'Aprobada', icon: 'check-circle' },
+      rechazada: { color: '#dc2626', bg: '#fef2f2', label: 'Rechazada', icon: 'times-circle' },
+      rechazado: { color: '#dc2626', bg: '#fef2f2', label: 'Rechazada', icon: 'times-circle' },
     };
 
-    return configs[status || 'pending'] || configs.pending;
+    return configs[s] || configs.pending;
   },
 
   /**
    * Obtener configuración de color para la visibilidad
    */
-  getVisibilityConfig(visibility?: PropertyVisibility): {
+  getVisibilityConfig(visibility?: any): {
     color: string;
     bg: string;
     label: string;
     icon: string;
   } {
-    const configs = {
-      published: {
-        color: '#2563eb',
-        bg: '#eff6ff',
-        label: 'Publicada',
-        icon: 'eye',
-      },
-      hidden: {
-        color: '#6b7280',
-        bg: '#f9fafb',
-        label: 'Oculta',
-        icon: 'lock',
-      },
+    const v = (visibility || 'published').toLowerCase();
+    const configs: Record<string, any> = {
+      published: { color: '#2563eb', bg: '#eff6ff', label: 'Publicada', icon: 'eye' },
+      hidden: { color: '#6b7280', bg: '#f9fafb', label: 'Oculta', icon: 'lock' },
+      // Spanish keys
+      publicada: { color: '#2563eb', bg: '#eff6ff', label: 'Publicada', icon: 'eye' },
+      publicado: { color: '#2563eb', bg: '#eff6ff', label: 'Publicada', icon: 'eye' },
+      oculta: { color: '#6b7280', bg: '#f9fafb', label: 'Oculta', icon: 'lock' },
+      oculto: { color: '#6b7280', bg: '#f9fafb', label: 'Oculta', icon: 'lock' },
     };
 
-    return configs[visibility || 'published'] || configs.published;
+    return configs[v] || configs.published;
   },
 };
 

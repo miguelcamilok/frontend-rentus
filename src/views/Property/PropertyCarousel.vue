@@ -169,13 +169,14 @@ const getMainImage = (property) => {
   return DEFAULT_IMAGE
 }
 
-// Computed
 const carouselProperties = computed(() => {
-  // Filtrar propiedades que tengan al menos una imagen válida
-  return props.properties.filter(p => {
-    const mainImg = getMainImage(p)
-    return mainImg && mainImg !== DEFAULT_IMAGE
-  })
+  // Mostrar propiedades incluso si no tienen imagen cargada (usando DEFAULT_IMAGE)
+  // Mostrar máximo las 10 propiedades más recientes o destacadas
+  const propsArray = props.properties || []
+  const featured = propsArray.filter(p => p.featured)
+  const regular = propsArray.filter(p => !p.featured)
+  
+  return [...featured, ...regular].slice(0, 10)
 })
 
 const currentProperty = computed(() => {

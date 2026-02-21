@@ -147,9 +147,10 @@
           </div>
 
           <div class="social-buttons">
-            <button class="social-btn" @click="socialLogin('google')" type="button">
-              <img src="https://img.icons8.com/color/48/google-logo.png" alt="Google" />
-              <span>Google</span>
+            <!-- Google OAuth coming soon -->
+            <button class="social-btn" type="button" disabled title="Próximamente">
+              <img src="https://img.icons8.com/color/48/google-logo.png" alt="" aria-hidden="true" />
+              <span>Google (próximamente)</span>
             </button>
           </div>
 
@@ -168,7 +169,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { authService } from "../../services/auth";
+import { authService } from "@/services/auth";
+import { useHead } from '@unhead/vue';
+
+useHead({
+  title: 'Iniciar Sesión | RentUs',
+  meta: [{ name: 'description', content: 'Accede a tu cuenta Rentus para gestionar tus propiedades e inquilinos.' }],
+});
 
 const email = ref("");
 const password = ref("");
@@ -242,18 +249,15 @@ const clearFieldError = (field: string) => {
 // Manejar login
 // En LoginView.vue, modifica la función handleLogin
 const handleLogin = async () => {
-  errorMessage.value = "";
+  errorMessage.value = '';
   validationErrors.value = {};
 
-  // Validar todos los campos
   const emailError = validateEmail(email.value);
   const passwordError = validatePassword(password.value);
-
   if (emailError) validationErrors.value.email = emailError;
   if (passwordError) validationErrors.value.password = passwordError;
-
   if (Object.keys(validationErrors.value).length > 0) {
-    errorMessage.value = "Por favor corrige los errores en el formulario";
+    errorMessage.value = 'Por favor corrige los errores en el formulario';
     return;
   }
 
@@ -263,45 +267,30 @@ const handleLogin = async () => {
     const response = await authService.login({
       email: email.value,
       password: password.value,
-      remember: rememberMe.value
+      remember: rememberMe.value,
     });
 
     if (response.success && response.token) {
-      console.log('✅ Login exitoso, redirigiendo...');
-
-      // Obtener información del usuario para decidir redirección
       const user = await authService.getMe();
-      console.log('👤 Usuario logueado con rol:', user.role);
 
-      // Verificar si hay una URL de redirección guardada
-      let redirectUrl = localStorage.getItem('redirectAfterLogin') ||
-        (route.query.redirect as string);
-
+      // Determine redirect destination
+      const savedRedirect = localStorage.getItem('redirectAfterLogin');
+      const queryRedirect = route.query.redirect as string | undefined;
       localStorage.removeItem('redirectAfterLogin');
 
-      // Si no hay redirección específica, decidir según el rol
-      if (!redirectUrl) {
-        // Si es admin o support, ir al dashboard admin
-        if (user.role === 'admin' || user.role === 'support') {
-          redirectUrl = '/admin/dashboard';
-          console.log('🔐 Redirigiendo admin/support al dashboard');
-        } else {
-          // Usuario normal va al home
-          redirectUrl = '/';
-          console.log('👤 Redirigiendo usuario normal al home');
-        }
-      }
+      const redirectUrl =
+        savedRedirect ||
+        queryRedirect ||
+        (user.role === 'admin' || user.role === 'support' ? '/admin/dashboard' : '/');
 
-      // Pequeño delay para asegurar que el token se guardó
-      setTimeout(() => {
-        router.push(redirectUrl);
-      }, 100);
+      // Await navigation directly — no fragile setTimeout
+      await router.push(redirectUrl);
     } else {
-      errorMessage.value = response.message || "Correo o contraseña incorrectos";
+      errorMessage.value = response.message || 'Correo o contraseña incorrectos';
     }
-  } catch (err: any) {
-    console.error('❌ Error en login:', err);
-    errorMessage.value = err.message || "Error al iniciar sesión. Intenta nuevamente";
+  } catch (err: unknown) {
+    errorMessage.value =
+      err instanceof Error ? err.message : 'Error al iniciar sesión. Intenta nuevamente';
   } finally {
     isLoading.value = false;
   }
@@ -314,34 +303,21 @@ const setTab = (tab: string) => {
 };
 
 const goBack = () => router.push("/");
-const socialLogin = (provider: string) => console.log(`Login con ${provider}`);
+// socialLogin: to be implemented with OAuth2 (Google, etc.)
+// const socialLogin = (provider: string) => { ... };
 const forgotPassword = () => router.push("/forgot-password");
 
 // Animación de mensajes
 let messageInterval: number | null = null;
 
-onMounted(() => {
-  // Verificar si hay sesión guardada con "recordarme"
-  const savedToken = localStorage.getItem('auth_token');
-  if (savedToken) {
-    rememberMe.value = true;
-  }
-
-  messageInterval = window.setInterval(() => {
-    currentMessageIndex.value = (currentMessageIndex.value + 1) % messages.length;
-  }, 5000);
-});
-
-onUnmounted(() => {
-  if (messageInterval) clearInterval(messageInterval);
-});
-
-/* -------------------- ANIMACIÓN DE FONDO CON CANVAS -------------------- */
+// Canvas animation variables — declared here to share between onMounted/onUnmounted
 const canvasEl = ref<HTMLCanvasElement | null>(null);
 let ctx: CanvasRenderingContext2D | null = null;
 let animationId: number | null = null;
-let particles: any[] = [];
+let particles: Particle[] = [];
 const PARTICLE_COUNT = 45;
+
+
 
 class Particle {
   w: number;
@@ -409,9 +385,16 @@ function resize(canvas: HTMLCanvasElement) {
 }
 
 onMounted(() => {
+  // ── Message rotation ────────────────────────────────────────────────────
+  if (localStorage.getItem('auth_token')) rememberMe.value = true;
+  messageInterval = window.setInterval(() => {
+    currentMessageIndex.value = (currentMessageIndex.value + 1) % messages.length;
+  }, 5000);
+
+  // ── Canvas particle animation ────────────────────────────────────────────
   const canvas = canvasEl.value;
   if (!canvas) return;
-  ctx = canvas.getContext("2d");
+  ctx = canvas.getContext('2d');
   let { w, h, dpr } = resize(canvas);
 
   particles = Array.from({ length: PARTICLE_COUNT }, () => new Particle(w, h, dpr));
@@ -419,23 +402,35 @@ onMounted(() => {
   const onResize = () => {
     const r = resize(canvas);
     w = r.w; h = r.h; dpr = r.dpr;
-    particles.forEach(p => p.reset());
+    particles.forEach((p) => p.reset());
   };
-  window.addEventListener("resize", onResize);
+  window.addEventListener('resize', onResize);
+
+  // Pause animation when the tab is not visible (saves CPU/battery)
+  const onVisibilityChange = () => {
+    if (document.hidden) {
+      if (animationId) { cancelAnimationFrame(animationId); animationId = null; }
+    } else {
+      if (!animationId) animationId = requestAnimationFrame(animate);
+    }
+  };
+  document.addEventListener('visibilitychange', onVisibilityChange);
 
   let last = performance.now();
   const animate = (now: number) => {
     const delta = Math.min(50, now - last);
     last = now;
     ctx?.clearRect(0, 0, canvas.width, canvas.height);
-    particles.forEach(p => (p.update(delta), p.draw()));
+    particles.forEach((p) => { p.update(delta); p.draw(); });
     animationId = requestAnimationFrame(animate);
   };
   animationId = requestAnimationFrame(animate);
 
   onUnmounted(() => {
+    if (messageInterval) clearInterval(messageInterval);
     if (animationId) cancelAnimationFrame(animationId);
-    window.removeEventListener("resize", onResize);
+    window.removeEventListener('resize', onResize);
+    document.removeEventListener('visibilitychange', onVisibilityChange);
   });
 });
 </script>

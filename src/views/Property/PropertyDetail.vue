@@ -98,7 +98,7 @@
                   {{ t('property.featured') }}
                 </span>
                 <span v-if="property.new_construction" class="tag tag-new">
-                  <font-awesome-icon :icon="['fas', 'hard-hat']" />
+                  <font-awesome-icon :icon="['fas', 'helmet-safety']" />
                   {{ t('property.new') }}
                 </span>
                 <span v-if="property.pet_friendly" class="tag tag-pet">
@@ -262,7 +262,7 @@
                       <span>{{ t('property.contact.editProperty') }}</span>
                     </button>
                     <button @click="deleteProperty" class="btn-action btn-delete">
-                      <font-awesome-icon :icon="['fas', 'trash-alt']" />
+                      <font-awesome-icon :icon="['fas', 'trash-can']" />
                       <span>{{ t('property.contact.deleteProperty') }}</span>
                     </button>
                   </div>
@@ -363,24 +363,52 @@ const isAuthenticated = computed(() => {
   return !!localStorage.getItem("auth_token") || !!sessionStorage.getItem("auth_token")
 })
 
-// 🔥 CORRECCIÓN: Construir array de imágenes desde property.images
+// Build image array — handles both object arrays AND JSON-stringified strings
 const propertyImages = computed(() => {
   if (!property.value) return [DEFAULT_IMAGE]
-  
+
   const images = []
-  
-  // 🔥 NUEVA LÓGICA: Priorizar property.images (relación hasMany)
-  if (property.value.images && Array.isArray(property.value.images) && property.value.images.length > 0) {
-    // Ordenar por 'order' y extraer image_url
-    const sortedImages = [...property.value.images].sort((a, b) => a.order - b.order)
-    images.push(...sortedImages.map(img => img.image_url))
-  } 
-  // Fallback: usar image_url principal si existe
-  else if (property.value.image_url && property.value.image_url.trim() !== '') {
+
+  let rawImages = property.value.images
+
+  // If the backend returned a JSON-stringified array, parse it first
+  if (typeof rawImages === 'string') {
+    try {
+      rawImages = JSON.parse(rawImages)
+    } catch {
+      // Not valid JSON — might be a single URL or data URI
+      if (rawImages.startsWith('data:') || rawImages.startsWith('http')) {
+        images.push(rawImages)
+      }
+    }
+  }
+
+  // Array of image objects (hasMany relation) with image_url field
+  if (Array.isArray(rawImages) && rawImages.length > 0) {
+    // Could be an array of objects { image_url, order, ... } OR plain strings (base64 / URLs)
+    for (const img of rawImages) {
+      if (typeof img === 'string') {
+        images.push(img)
+      } else if (img?.image_url) {
+        images.push(img.image_url)
+      }
+    }
+    // Sort by order if objects had that field
+    if (typeof rawImages[0] === 'object' && 'order' in rawImages[0]) {
+      const sorted = [...rawImages].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+      images.length = 0
+      sorted.forEach((img) => {
+        if (typeof img === 'string') images.push(img)
+        else if (img?.image_url) images.push(img.image_url)
+      })
+    }
+  }
+
+  // Fallback: use main image_url if exists
+  if (images.length === 0 && property.value.image_url?.trim()) {
     images.push(property.value.image_url)
   }
-  
-  // Si no hay imágenes, retornar default
+
   return images.length > 0 ? images : [DEFAULT_IMAGE]
 })
 
@@ -606,7 +634,7 @@ function getStatusIcon(status) {
     rented: ['fas', 'times-circle'],
     reserved: ['fas', 'clock'],
     sold: ['fas', 'lock'],
-    maintenance: ['fas', 'tools'],
+    maintenance: ['fas', 'toolbox'],
   }
   return iconMap[status] || ['fas', 'info-circle']
 }

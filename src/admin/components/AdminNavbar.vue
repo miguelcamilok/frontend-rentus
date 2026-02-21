@@ -1,93 +1,81 @@
 <template>
-  <nav class="admin-navbar">
-    <div class="navbar-content">
-      <!-- Left Section -->
-      <div class="navbar-left">
-        <button class="menu-toggle" @click="$emit('toggleSidebar')">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M3 12h18M3 6h18M3 18h18" stroke-width="2" stroke-linecap="round" />
-          </svg>
+  <header class="admin-header">
+    <div class="header-inner">
+      <!-- Left -->
+      <div class="header-left">
+        <button class="hamburger-btn" @click="$emit('toggleSidebar')">
+          <font-awesome-icon :icon="['fas', 'bars']" />
         </button>
-
-        <div class="breadcrumb">
-          <span class="breadcrumb-item">Admin</span>
-          <span class="breadcrumb-separator">/</span>
-          <span class="breadcrumb-item current">{{ currentPageTitle }}</span>
+        <div class="breadcrumb-nav">
+          <span class="bc-root">Admin</span>
+          <font-awesome-icon :icon="['fas', 'chevron-right']" class="bc-sep" />
+          <span class="bc-current">{{ currentPageTitle }}</span>
         </div>
       </div>
 
-      <!-- Right Section -->
-      <div class="navbar-right">
-
-        <!-- Search Bar -->
-        <div class="search-container">
-          <div class="search-icon">🔍</div>
-          <input type="text" placeholder="Buscar..." class="search-input" v-model="searchQuery"
-            @keyup.enter="handleSearch" />
-          <kbd class="search-kbd">⌘K</kbd>
+      <!-- Right -->
+      <div class="header-right">
+        <!-- Search -->
+        <div class="header-search">
+          <font-awesome-icon :icon="['fas', 'search']" class="search-ico" />
+          <input type="text" v-model="searchQuery" placeholder="Buscar..." @keyup.enter="handleSearch" />
         </div>
 
-        <!-- Notifications Dropdown -->
-        <NotificationsDropdown />
-
-        <!-- Settings -->
-        <button class="icon-btn" @click="goToSettings">
-          <font-awesome-icon icon="cog" class="icon" />
+        <!-- Theme Toggle -->
+        <button class="icon-circle" @click="toggleTheme" :title="isDark ? 'Modo claro' : 'Modo oscuro'">
+          <font-awesome-icon :icon="['fas', isDark ? 'sun' : 'moon']" />
         </button>
 
-        <!-- User Profile -->
-        <div class="user-profile" @click="toggleUserMenu">
-          <div class="avatar">
-            <img v-if="currentUser?.photo" :src="currentUser.photo" :alt="currentUser.name" />
-            <span v-else class="avatar-placeholder">
-              {{ userInitials }}
-            </span>
+        <!-- Notifications -->
+        <NotificationsDropdown />
+
+        <!-- User Menu -->
+        <div class="user-pill" ref="userMenuRef" @click="showUserMenu = !showUserMenu">
+          <div class="user-avatar">
+            <img v-if="currentUser?.photo" :src="currentUser.photo" :alt="currentUser?.name" />
+            <span v-else>{{ userInitials }}</span>
           </div>
-          <div class="user-info">
-            <p class="user-name">{{ currentUser?.name || 'Admin' }}</p>
-            <p class="user-role">{{ userRoleLabel }}</p>
+          <div class="user-meta">
+            <span class="user-name-text">{{ currentUser?.name || 'Admin' }}</span>
+            <span class="user-role-text">{{ userRoleLabel }}</span>
           </div>
-          <span class="dropdown-arrow">▼</span>
+          <font-awesome-icon :icon="['fas', 'chevron-down']" class="user-caret" />
         </div>
 
-        <!-- User Dropdown Menu -->
-        <transition name="dropdown">
-          <div v-if="showUserMenu" class="user-dropdown">
-            <div class="dropdown-header">
-              <p class="dropdown-user-name">{{ currentUser?.name }}</p>
-              <p class="dropdown-user-email">{{ currentUser?.email }}</p>
+        <!-- User dropdown -->
+        <transition name="pop">
+          <div v-if="showUserMenu" class="user-dropdown-menu">
+            <div class="udm-header">
+              <p class="udm-name">{{ currentUser?.name }}</p>
+              <p class="udm-email">{{ currentUser?.email }}</p>
             </div>
-
-            <a href="#" class="dropdown-item" @click.prevent="goToHome">
-              <span class="dropdown-icon">🏠</span>
-              <span>Home</span>
-            </a>
-            <div class="dropdown-divider"></div>
-            <a href="#" class="dropdown-item" @click.prevent="goToProfile">
-              <span class="dropdown-icon">👤</span>
-              <span>Mi Perfil</span>
-            </a>
-
-            <a href="#" class="dropdown-item" @click.prevent="goToSettings">
-              <span class="dropdown-icon">⚙️</span>
-              <span>Configuración</span>
-            </a>
-            <div class="dropdown-divider"></div>
-            <a href="#" class="dropdown-item danger" @click.prevent="handleLogout">
-              <span class="dropdown-icon">🚪</span>
-              <span>{{ isLoggingOut ? 'Cerrando sesión...' : 'Cerrar Sesión' }}</span>
-            </a>
+            <div class="udm-body">
+              <a class="udm-item" @click.prevent="goTo('/')">
+                <font-awesome-icon :icon="['fas', 'home']" /> <span>Inicio</span>
+              </a>
+              <a class="udm-item" @click.prevent="goTo('/perfil')">
+                <font-awesome-icon :icon="['fas', 'user']" /> <span>Mi Perfil</span>
+              </a>
+              <a class="udm-item" @click.prevent="goTo('/ajustes')">
+                <font-awesome-icon :icon="['fas', 'cog']" /> <span>Configuración</span>
+              </a>
+              <div class="udm-divider"></div>
+              <a class="udm-item danger" @click.prevent="handleLogout">
+                <font-awesome-icon :icon="['fas', 'sign-out-alt']" />
+                <span>{{ isLoggingOut ? 'Cerrando...' : 'Cerrar Sesión' }}</span>
+              </a>
+            </div>
           </div>
         </transition>
       </div>
     </div>
 
-    <!-- Loading Overlay -->
-    <div v-if="isLoggingOut" class="logout-overlay">
-      <div class="logout-spinner"></div>
+    <!-- Logout overlay -->
+    <div v-if="isLoggingOut" class="logout-veil">
+      <div class="logout-ring"></div>
       <p>Cerrando sesión...</p>
     </div>
-  </nav>
+  </header>
 </template>
 
 <script setup lang="ts">
@@ -95,26 +83,23 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAdminAuth } from '../composables/useAdminAuth';
 import { useAlerts } from '../../composables/useAlerts';
-import NotificationsDropdown from '../components/NotificationsDropdown.vue';
+import { useTheme } from '../composables/useTheme';
+import NotificationsDropdown from './NotificationsDropdown.vue';
+
+defineEmits<{ toggleSidebar: [] }>();
 
 const route = useRoute();
 const router = useRouter();
 const { user: currentUser, logout } = useAdminAuth();
 const { confirm } = useAlerts();
+const { isDark, toggleTheme } = useTheme();
 
-// Emits
-defineEmits<{
-  toggleSidebar: [];
-}>();
-
-// State
 const searchQuery = ref('');
 const showUserMenu = ref(false);
 const isLoggingOut = ref(false);
 
-// Computed
 const currentPageTitle = computed(() => {
-  const titles: Record<string, string> = {
+  const map: Record<string, string> = {
     '/admin/dashboard': 'Dashboard',
     '/admin/users': 'Usuarios',
     '/admin/properties': 'Propiedades',
@@ -123,140 +108,262 @@ const currentPageTitle = computed(() => {
     '/admin/maintenances': 'Mantenimiento',
     '/admin/visits': 'Visitas',
     '/admin/reports': 'Reportes',
+    '/admin/notifications': 'Notificaciones',
   };
-
-  return titles[route.path] || 'Admin Panel';
+  return map[route.path] || 'Admin Panel';
 });
 
 const userInitials = computed(() => {
   if (!currentUser.value?.name) return 'AD';
-  return currentUser.value.name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
+  return currentUser.value.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 });
 
 const userRoleLabel = computed(() => {
-  const roles: Record<string, string> = {
-    admin: 'Administrador',
-    support: 'Soporte',
-    user: 'Usuario',
-  };
+  const roles: Record<string, string> = { admin: 'Administrador', support: 'Soporte', user: 'Usuario' };
   return roles[currentUser.value?.role || 'user'];
 });
 
-// Methods
-const toggleUserMenu = () => {
-  showUserMenu.value = !showUserMenu.value;
-};
+const handleSearch = () => { /* TODO */ };
 
-const goToHome = () => {
-  router.push('/');
-};
-
-const handleSearch = () => {
-  if (searchQuery.value.trim()) {
-    console.log('🔍 Buscando:', searchQuery.value);
-    // TODO: Implementar búsqueda
-  }
-};
-
-const goToProfile = () => {
+const goTo = (path: string) => {
   showUserMenu.value = false;
-  router.push('/perfil');
-};
-
-const goToSettings = () => {
-  showUserMenu.value = false;
-  router.push('/ajustes');
+  router.push(path);
 };
 
 const handleLogout = async () => {
   if (isLoggingOut.value) return;
-
   confirm(
     '¿Estás seguro que deseas cerrar sesión?',
     async () => {
-      // Usuario confirmó
       showUserMenu.value = false;
       isLoggingOut.value = true;
-
       try {
-        console.log('🚪 Cerrando sesión...');
         await logout();
-        console.log('✅ Sesión cerrada exitosamente');
-
-        // Redirigir al login
-        router.push({
-          name: 'Login',
-          query: { message: 'Sesión cerrada exitosamente' }
-        });
-      } catch (error) {
-        console.error('❌ Error al cerrar sesión:', error);
+        router.push({ name: 'Login', query: { message: 'Sesión cerrada exitosamente' } });
       } finally {
         isLoggingOut.value = false;
       }
     },
-    () => {
-      // Usuario canceló
-      console.log('❌ Logout cancelado');
-    },
-    {
-      title: 'Cerrar Sesión',
-      confirmText: 'Sí, cerrar sesión',
-      cancelText: 'Cancelar'
-    }
+    () => {},
+    { title: 'Cerrar Sesión', confirmText: 'Sí, cerrar sesión', cancelText: 'Cancelar' }
   );
 };
 
-// Close dropdown when clicking outside
-const handleClickOutside = (event: MouseEvent) => {
-  const target = event.target as HTMLElement;
-  if (!target.closest('.user-profile') && !target.closest('.user-dropdown')) {
+const outsideClick = (e: MouseEvent) => {
+  const t = e.target as HTMLElement;
+  if (!t.closest('.user-pill') && !t.closest('.user-dropdown-menu')) {
     showUserMenu.value = false;
   }
 };
 
-// Lifecycle
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside);
-});
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside);
-});
+onMounted(() => document.addEventListener('click', outsideClick));
+onUnmounted(() => document.removeEventListener('click', outsideClick));
 </script>
 
 <style scoped>
-.admin-navbar {
+.admin-header {
   position: fixed;
   top: 0;
   right: 0;
-  left: 280px;
-  height: 72px;
-  background: white;
-  border-bottom: 1px solid #e5e7eb;
-  z-index: 90;
+  left: var(--sidebar-width);
+  height: 64px;
+  z-index: 150;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--header-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.navbar-content {
+.header-inner {
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 2rem;
-  gap: 2rem;
+  padding: 0 1.5rem;
+  gap: 1rem;
 }
 
-/* Logout Overlay */
-.logout-overlay {
+/* Left */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.hamburger-btn {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: var(--header-btn-bg);
+  color: var(--header-text-secondary);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+  align-items: center;
+  justify-content: center;
+}
+.hamburger-btn:hover {
+  background: var(--header-btn-hover);
+  color: var(--accent);
+}
+
+.breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+}
+.bc-root { color: var(--header-text-muted); font-weight: 500; }
+.bc-sep { color: var(--header-text-muted); font-size: 0.6rem; opacity: 0.5; }
+.bc-current { color: var(--header-text-primary); font-weight: 700; }
+
+/* Right */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
+/* Search */
+.header-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--header-btn-bg);
+  border: 1px solid var(--header-border);
+  border-radius: 10px;
+  padding: 0.45rem 0.85rem;
+  width: 240px;
+  transition: all 0.2s;
+}
+.header-search:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+.search-ico { color: var(--header-text-muted); font-size: 0.85rem; }
+.header-search input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.85rem;
+  color: var(--header-text-primary);
+  width: 100%;
+}
+.header-search input::placeholder { color: var(--header-text-muted); }
+
+/* Icon circle */
+.icon-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--header-border);
+  background: var(--header-btn-bg);
+  color: var(--header-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  transition: all 0.25s ease;
+}
+.icon-circle:hover {
+  background: var(--header-btn-hover);
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.05);
+}
+
+/* User pill */
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 0.75rem 0.35rem 0.35rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--header-btn-bg);
+  border: 1px solid var(--header-border);
+}
+.user-pill:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px var(--accent-ring);
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  line-height: 1.2;
+}
+.user-name-text { font-size: 0.82rem; font-weight: 700; color: var(--header-text-primary); }
+.user-role-text { font-size: 0.68rem; color: var(--header-text-muted); font-weight: 500; }
+.user-caret { font-size: 0.6rem; color: var(--header-text-muted); transition: transform 0.2s; }
+
+/* User dropdown */
+.user-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: 240px;
+  background: var(--dropdown-bg);
+  border: 1px solid var(--header-border);
+  border-radius: 14px;
+  box-shadow: 0 16px 48px var(--dropdown-shadow);
+  overflow: hidden;
+  z-index: 1000;
+}
+.udm-header {
+  padding: 1rem 1.15rem;
+  border-bottom: 1px solid var(--header-border);
+  background: var(--dropdown-header-bg);
+}
+.udm-name { font-size: 0.9rem; font-weight: 700; color: var(--header-text-primary); margin: 0 0 0.15rem; }
+.udm-email { font-size: 0.78rem; color: var(--header-text-muted); margin: 0; }
+.udm-body { padding: 0.4rem 0; }
+.udm-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem 1.15rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--header-text-secondary);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.udm-item:hover { background: var(--header-btn-hover); color: var(--accent); }
+.udm-item.danger { color: #ef4444; }
+.udm-item.danger:hover { background: rgba(239, 68, 68, 0.08); }
+.udm-divider { height: 1px; background: var(--header-border); margin: 0.25rem 0; }
+
+/* Logout veil */
+.logout-veil {
   position: fixed;
   inset: 0;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(4px);
+  background: var(--logout-overlay);
+  backdrop-filter: blur(8px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -264,359 +371,31 @@ onUnmounted(() => {
   gap: 1rem;
   z-index: 9999;
 }
-
-.logout-spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid #f3f4f6;
-  border-top: 4px solid #3b251d;
+.logout-ring {
+  width: 44px;
+  height: 44px;
+  border: 3px solid var(--header-border);
+  border-top-color: var(--accent);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
 }
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.logout-overlay p {
-  color: #1f2937;
-  font-weight: 700;
-  font-size: 1.1rem;
-}
-
-/* Left Section */
-.navbar-left {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.menu-toggle {
-  display: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #6b7280;
-  padding: 0.5rem;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-
-.menu-toggle:hover {
-  background: #f9fafb;
-  color: #3b251d;
-}
-
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.95rem;
-}
-
-.breadcrumb-item {
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.breadcrumb-item.current {
-  color: #1f2937;
-  font-weight: 700;
-}
-
-.breadcrumb-separator {
-  color: #d1d5db;
-}
-
-/* Right Section */
-.navbar-right {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  position: relative;
-}
-
-/* Search */
-.search-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 0.5rem 1rem;
-  width: 300px;
-  transition: all 0.2s ease;
-}
-
-.search-container:focus-within {
-  background: white;
-  border-color: #3b251d;
-  box-shadow: 0 0 0 3px rgba(59, 37, 29, 0.1);
-}
-
-.search-icon {
-  font-size: 1rem;
-  margin-right: 0.5rem;
-}
-
-.search-input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  outline: none;
-  font-size: 0.9rem;
-  color: #1f2937;
-}
-
-.search-input::placeholder {
-  color: #9ca3af;
-}
-
-.search-kbd {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 4px;
-  padding: 0.15rem 0.4rem;
-  font-size: 0.75rem;
-  color: #6b7280;
-  font-family: monospace;
-}
-
-/* Icon Buttons */
-.icon-btn {
-  position: relative;
-  background: none;
-  border: none;
-  cursor: pointer;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.icon-btn:hover {
-  background: #f9fafb;
-}
-
-.icon {
-  font-size: 1.25rem;
-}
-
-.notification-badge {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: white;
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 0.15rem 0.4rem;
-  border-radius: 10px;
-  min-width: 18px;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
-}
-
-/* User Profile */
-.user-profile {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 1rem;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-}
-
-.user-profile:hover {
-  background: white;
-  border-color: #3b251d;
-  box-shadow: 0 2px 8px rgba(59, 37, 29, 0.1);
-}
-
-.avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  overflow: hidden;
-  flex-shrink: 0;
-  background: linear-gradient(135deg, #3b251d 0%, #8b6f47 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.avatar-placeholder {
-  color: white;
-  font-weight: 700;
-  font-size: 0.85rem;
-}
-
-.user-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-}
-
-.user-name {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0;
-  line-height: 1;
-}
-
-.user-role {
-  font-size: 0.75rem;
-  color: #6b7280;
-  margin: 0;
-  line-height: 1;
-}
-
-.dropdown-arrow {
-  font-size: 0.65rem;
-  color: #9ca3af;
-  transition: transform 0.2s ease;
-}
-
-.user-profile:hover .dropdown-arrow {
-  color: #3b251d;
-}
-
-/* User Dropdown */
-.user-dropdown {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  right: 0;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  min-width: 240px;
-  overflow: hidden;
-  z-index: 1000;
-}
-
-.dropdown-header {
-  padding: 1rem 1.25rem;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.dropdown-user-name {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 0.25rem;
-}
-
-.dropdown-user-email {
-  font-size: 0.8rem;
-  color: #6b7280;
-  margin: 0;
-}
-
-.dropdown-divider {
-  height: 1px;
-  background: #e5e7eb;
-}
-
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1.25rem;
-  text-decoration: none;
-  color: #374151;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.dropdown-item:hover {
-  background: #f9fafb;
-  color: #3b251d;
-}
-
-.dropdown-item.danger {
-  color: #ef4444;
-}
-
-.dropdown-item.danger:hover {
-  background: #fef2f2;
-  color: #dc2626;
-}
-
-.dropdown-icon {
-  font-size: 1.1rem;
-  width: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+@keyframes spin { to { transform: rotate(360deg); } }
+.logout-veil p { color: var(--header-text-primary); font-weight: 700; font-size: 1rem; }
 
 /* Transitions */
-.dropdown-enter-active,
-.dropdown-leave-active {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.dropdown-enter-from,
-.dropdown-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
-}
+.pop-enter-active, .pop-leave-active { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+.pop-enter-from, .pop-leave-to { opacity: 0; transform: translateY(-8px) scale(0.96); }
 
 /* Responsive */
 @media (max-width: 1024px) {
-  .admin-navbar {
-    left: 0;
-  }
-
-  .menu-toggle {
-    display: flex;
-  }
-
-  .search-container {
-    width: 200px;
-  }
-
-  .user-info {
-    display: none;
-  }
+  .admin-header { left: 0; }
+  .hamburger-btn { display: flex; }
+  .header-search { width: 180px; }
+  .user-meta { display: none; }
 }
-
 @media (max-width: 768px) {
-  .navbar-content {
-    padding: 0 1rem;
-  }
-
-  .breadcrumb {
-    display: none;
-  }
-
-  .search-container {
-    width: auto;
-    flex: 1;
-  }
-
-  .search-kbd {
-    display: none;
-  }
+  .header-inner { padding: 0 1rem; }
+  .breadcrumb-nav { display: none; }
+  .header-search { flex: 1; width: auto; }
 }
 </style>

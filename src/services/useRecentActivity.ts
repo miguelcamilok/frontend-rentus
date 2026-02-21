@@ -20,14 +20,14 @@ export function useRecentActivity(limit: number = 5, autoRefresh: boolean = true
     if (!silent) {
       loading.value = true;
     }
-    
+
     try {
       error.value = '';
-      
-      const response = await api.get('/dashboard/recent-activity', {
+
+      const response = await api.get('/admin/dashboard/activity', {
         params: { limit }
       });
-      
+
       if (response.data.success) {
         activities.value = response.data.data;
         lastUpdate.value = new Date(response.data.meta.timestamp);
@@ -37,7 +37,7 @@ export function useRecentActivity(limit: number = 5, autoRefresh: boolean = true
     } catch (err: any) {
       console.error('Error cargando actividades:', err);
       error.value = err.response?.data?.message || err.message || 'Error al cargar actividades';
-      
+
       // Si falla, intentar mostrar datos en caché o vacío
       if (!silent) {
         activities.value = [];
@@ -70,42 +70,42 @@ export function useRecentActivity(limit: number = 5, autoRefresh: boolean = true
   const formatTimeAgo = (dateInput: any): string => {
     try {
       if (!dateInput) return "Hace un momento";
-      
+
       let date: Date;
-      
+
       // Si ya es un objeto Date
       if (dateInput instanceof Date) {
         date = dateInput;
-      } 
+      }
       // Si es un string
       else if (typeof dateInput === 'string') {
         // Intentar parsear como fecha ISO
         date = new Date(dateInput);
-        
+
         // Si falla, intentar con formato MySQL
         if (isNaN(date.getTime())) {
           date = new Date(dateInput.replace(' ', 'T') + 'Z');
         }
-        
+
         // Si aún falla, intentar sin timezone
         if (isNaN(date.getTime())) {
           date = new Date(dateInput.replace(' ', 'T'));
         }
-      } 
+      }
       // Si es un número (timestamp)
       else if (typeof dateInput === 'number') {
         date = new Date(dateInput);
-      } 
+      }
       // Si no se puede determinar
       else {
         console.warn('Formato de fecha no reconocido:', dateInput);
         return "Recientemente";
       }
-      
+
       if (isNaN(date.getTime())) {
         return "Recientemente";
       }
-      
+
       const now = new Date();
       const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
@@ -114,7 +114,7 @@ export function useRecentActivity(limit: number = 5, autoRefresh: boolean = true
       if (seconds < 86400) return `Hace ${Math.floor(seconds / 3600)} horas`;
       if (seconds < 2592000) return `Hace ${Math.floor(seconds / 86400)} días`;
       if (seconds < 31536000) return `Hace ${Math.floor(seconds / 2592000)} meses`;
-      
+
       return date.toLocaleDateString("es-ES", {
         day: "numeric",
         month: "short",
