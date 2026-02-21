@@ -408,7 +408,7 @@ import { useRouter } from 'vue-router'
 import api from '../../services/api'
 import { useAlerts } from '../../composables/useAlerts'
 import { useI18n } from 'vue-i18n'
-import PropertyLocationModal from '../../admin/components/Properties/PropertyLocationModa.vue'
+import PropertyLocationModal from '../../admin/components/Properties/PropertyLocationModal.vue'
 
 // ==================== INTERFACES ====================
 interface PropertyImage {
