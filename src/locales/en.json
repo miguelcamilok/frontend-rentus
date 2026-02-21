@@ -89,6 +89,10 @@
       "floatingCards": {
         "verified": "Verified Properties",
         "rated": "Top Rated"
+      },
+      "map": {
+        "login": "Log in to explore the map",
+        "explore": "Explore on map"
       }
     },
     "search": {
@@ -271,7 +275,8 @@
       "apartamento": "Apartment",
       "local": "Commercial Space",
       "finca": "Farm",
-      "propiedad": "Property"
+      "propiedad": "Property",
+      "otro": "Other"
     },
     "featured": "Featured",
     "new": "New",

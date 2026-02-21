@@ -12,6 +12,7 @@ const Payments = () => import('../pages/Payments.vue');
 const Maintenances = () => import('../pages/Maintenances.vue');
 const Visits = () => import('../pages/Visits.vue');
 const Reports = () => import('../pages/Reports.vue');
+const Notifications = () => import('../pages/Notifications.vue');
 
 /**
  * Rutas del Admin Panel
@@ -102,6 +103,15 @@ export const adminRoutes: RouteRecordRaw[] = [
         meta: {
           title: 'Reportes',
           icon: '📈',
+        },
+      },
+      {
+        path: 'notifications',
+        name: 'admin-notifications',
+        component: Notifications,
+        meta: {
+          title: 'Notificaciones',
+          icon: '🔔',
         },
       },
     ],

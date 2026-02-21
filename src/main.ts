@@ -1,67 +1,114 @@
 // src/main.ts
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
+import { createHead } from '@unhead/vue/client';
 import App from './App.vue';
 import router from './router';
 import { i18n } from './i18n';
+import logger from '@/utils/logger';
 
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+// ── FontAwesome (tree-shakeable individual icon imports) ──────────────────
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
-import { faFacebookF, faInstagram, faTwitter, faLinkedinIn } from '@fortawesome/free-brands-svg-icons'
-import { faAlignLeft, faArrowLeft, faBan, faBell, faCar, faCheckSquare, faChevronDown, faChevronUp, faCircle, faCity, faClipboardList, faCloudUploadAlt, faCog, faExclamationTriangle, faHeading, faHeart as faHeartSolid, faImage, faInfoCircle, faLightbulb, faLink, faLock, faPalette, faPeopleGroup, faRoad, faSave, faSignInAlt, faSignOutAlt, faSlidersH, faSort, faSortDown, faSortUp, faThList, faTicket, faToggleOn, faUpload, faUser, faUsers, faWrench } from '@fortawesome/free-solid-svg-icons'
-import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons'
-
+// Solid icons
 import {
-  faCamera, faCheckCircle, faMapMarkerAlt, faPlusCircle,
-  faPen, faEdit, faCheck, faTimes, faHome, faStar,
-  faComments, faEnvelope, faPhone, faCalendar, faPlus,
-  faBed, faBath, faRulerCombined, faArrowRight, faTrash,
-  faDownload, faEye, faTimesCircle, faBuilding, faStore,
-  faTree, faSearch, faDollarSign, faChevronLeft, faChevronRight,
-  faSpinner, faImages, faListCheck, faFileAlt, faMap, faCalendarCheck,
-  faShareAlt, faClock, faHashtag, faShieldAlt,
-} from '@fortawesome/free-solid-svg-icons'
+  faAdjust, faAlignLeft, faArrowLeft, faArrowRight, faBan, faBath, faBed, faBell,
+  faBolt, faBuilding, faBuildingColumns, faCar, faCalendar, faCalendarAlt,
+  faCalendarCheck, faCalendarTimes,
+  faCamera, faCheck, faCheckCircle, faCheckDouble, faCheckSquare, faChartArea,
+  faChevronDown, faChevronLeft, faChevronRight, faChevronUp, faCircle, faCity,
+  faClipboardCheck, faClipboardList, faClock, faCloudUploadAlt, faCog, faCoins,
+  faComments, faCreditCard, faCrosshairs, faCrown,
+  faDollarSign, faDownload, faEdit, faEllipsisV, faEnvelope,
+  faExclamationTriangle,
+  faEye, faFileAlt, faFlag, faHashtag, faHandshake, faHeading, faHeart as faHeartSolid,
+  faHelmetSafety, faHome,
+  faImage, faImages, faInfoCircle,
+  faLightbulb, faLink, faListCheck, faLocationDot, faLock, faLockOpen,
+  faMap, faMapMarkerAlt, faMapPin, faBars, faBellSlash, faMoon, faMousePointer,
+  faPalette, faPaw, faPen, faPeopleGroup, faPhone,
+  faPlus, faPlusCircle, faRedo, faRoad, faRobot, faRuler, faRulerCombined,
+  faSave, faSearch, faSearchLocation,
+  faShareAlt, faShieldAlt, faSignInAlt, faSignOutAlt, faSlidersH, faSort,
+  faSortDown, faSortUp, faStar, faStickyNote, faSun, faSpinner, faStore, faSyncAlt,
+  faThList, faTicket,
+  faTimes, faTimesCircle, faToggleOn, faToolbox, faTrash, faTrashAlt, faTrashCan,
+  faTree, faUpload, faUser, faUserCheck, faUserClock, faUserLock, faUsers,
+  faUserTie, faWallet, faWrench,
+  faMoneyBillWave, faChartLine, faChartPie, faReceipt, faTools, faExclamationCircle,
+  faHammer, faArrowUp, faArrowDown, faMinus, faFileContract, faChartBar,
+  faFire, faArrowTrendUp, faUserShield, faFolderOpen, faQuestion,
+  faInbox, faFileExport, faHandsClapping, faUserPlus, faUserEdit, faUserMinus,
+  faUserCog, faExchangeAlt, faFileSignature, faThumbtack
+} from '@fortawesome/free-solid-svg-icons';
+
+// Regular icons
+import {
+  faCircle as faCircleRegular,
+  faHeart as faHeartRegular,
+} from '@fortawesome/free-regular-svg-icons';
+
+// Brand icons
+import {
+  faFacebookF, faInstagram, faLinkedinIn, faTwitter,
+} from '@fortawesome/free-brands-svg-icons';
 
 library.add(
-  faCamera, faCheckCircle, faMapMarkerAlt, faPlusCircle,
-  faPen, faEdit, faCheck, faTimes, faHome, faStar,
-  faComments, faEnvelope, faPhone, faCalendar, faPlus,
-  faBed, faBath, faRulerCombined, faArrowRight, faTrash,
-  faFacebookF, faInstagram, faTwitter, faLinkedinIn, faDownload, faEye, faTimesCircle,
-  faBuilding, faStore, faTree, faSearch, faDollarSign, faChevronLeft, faChevronRight,
-  faSpinner, faImages, faListCheck, faFileAlt, faMap, faCalendarCheck, faShareAlt,
-  faClock, faHashtag, faShieldAlt, faHeartSolid, faHeartRegular, faUser, faBell, faWrench,
-  faSignOutAlt, faClipboardList, faCog, faLock, faPalette, faPeopleGroup, faBan, faUsers, faTicket,
-  faChevronDown, faChevronUp, faSort, faSortUp, faSortDown, faCircle, faInfoCircle, faAlignLeft, faThList,
-  faHeading, faCity, faToggleOn, faImage, faSave, faUpload, faCloudUploadAlt, faArrowLeft, faExclamationTriangle,
-  faRoad, faCar, faLink, faSlidersH, faSignInAlt, faLightbulb, faCheckSquare
-)
+  // Solid
+  faAdjust, faAlignLeft, faArrowLeft, faArrowRight, faBan, faBars, faBath, faBed, faBell, faBellSlash,
+  faBolt, faBuilding, faBuildingColumns, faCar, faCalendar, faCalendarAlt,
+  faCalendarCheck, faCalendarTimes,
+  faCamera, faCheck, faCheckCircle, faCheckDouble, faCheckSquare, faChartArea,
+  faChevronDown, faChevronLeft, faChevronRight, faChevronUp, faCircle, faCity,
+  faClipboardCheck, faClipboardList, faClock, faCloudUploadAlt, faCog, faCoins,
+  faComments, faCreditCard, faCrosshairs, faCrown, faDollarSign, faDownload, faEdit,
+  faEllipsisV, faEnvelope,
+  faExclamationTriangle, faEye, faFileAlt, faFlag, faHandshake, faHashtag, faHeading,
+  faHeartSolid, faHelmetSafety, faHome, faImage, faImages, faInfoCircle,
+  faLightbulb, faLink, faListCheck, faLocationDot, faLock, faLockOpen,
+  faMap, faMapMarkerAlt, faMapPin, faMoon, faMousePointer, faPalette, faPaw, faPen,
+  faPeopleGroup, faPhone, faPlus, faPlusCircle, faRedo, faRoad, faRobot, faRuler,
+  faRulerCombined, faSave, faSearch, faSearchLocation, faShareAlt, faShieldAlt,
+  faSignInAlt, faSignOutAlt, faSlidersH, faSort, faSortDown, faSortUp, faStar,
+  faStickyNote, faSun, faSpinner, faStore, faSyncAlt,
+  faThList, faTicket, faTimes, faTimesCircle, faToggleOn, faToolbox,
+  faTrash, faTrashAlt, faTrashCan, faTree, faUpload, faUser, faUserCheck, faUserClock,
+  faUserLock, faUsers, faUserTie, faWallet, faWrench,
+  faMoneyBillWave, faChartLine, faChartPie, faReceipt, faTools, faExclamationCircle,
+  faHammer, faArrowUp, faArrowDown, faMinus, faFileContract, faChartBar,
+  faFire, faArrowTrendUp, faUserShield, faFolderOpen, faQuestion,
+  faInbox, faFileExport, faHandsClapping, faUserPlus, faUserEdit, faUserMinus,
+  faUserCog, faExchangeAlt, faFileSignature, faThumbtack,
+  // Regular
+  faCircleRegular, faHeartRegular,
+  // Brand
+  faFacebookF, faInstagram, faLinkedinIn, faTwitter,
+);
 
-const app = createApp(App)
+// ── Application bootstrap ─────────────────────────────────────────────────
+const app = createApp(App);
+const head = createHead();
+
+app.use(head);
 app.use(i18n);
-
-const pinia = createPinia();
-app.use(pinia);
+app.use(createPinia());
 app.use(router);
-app.component('font-awesome-icon', FontAwesomeIcon)
+app.component('font-awesome-icon', FontAwesomeIcon);
 app.mount('#app');
 
+// ── Adaptive favicon (dark/light mode) ───────────────────────────────────
 function setFavicon() {
   const link = document.querySelector<HTMLLinkElement>("link[rel='icon']");
   if (!link) return;
-
-  const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   link.href = isDark ? '/favicon-light.png' : '/favicon-dark.png';
 }
 
 setFavicon();
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setFavicon);
 
-window
-  .matchMedia("(prefers-color-scheme: dark)")
-  .addEventListener('change', setFavicon);
-
-
-router.afterEach((to) => {
-  document.title = `RentUs - ${to.meta.title || ''}`;
+// ── DEV navigation tracing ───────────────────────────────────────────────
+router.afterEach((to, from) => {
+  logger.log(`Navigation: ${from.path} → ${to.path}`);
 });

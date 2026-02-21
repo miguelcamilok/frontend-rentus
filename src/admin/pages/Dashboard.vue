@@ -1,576 +1,419 @@
 <template>
-  <div class="dashboard">
-    <!-- Welcome Header -->
-    <div class="dashboard-header">
-      <div class="header-content">
-        <div class="header-text">
-          <h1 class="dashboard-title">
-            👋 Bienvenido de nuevo, <span class="highlight">{{ userName }}</span>
-          </h1>
-          <p class="dashboard-subtitle">
-            Aquí está un resumen de lo que está pasando en tu plataforma hoy.
-          </p>
-        </div>
-        <div class="header-actions">
-          <button class="action-btn secondary" @click="exportReport">
-            <span class="btn-icon">📊</span>
-            <span>Exportar Reporte</span>
-          </button>
-          <button class="action-btn primary" @click="goToNewProperty">
-            <span class="btn-icon">➕</span>
-            <span>Nueva Propiedad</span>
-          </button>
-        </div>
+  <div class="modern-dashboard">
+    <!-- Header -->
+    <header class="dash-header">
+      <div class="greeting">
+        <h1 class="title">Hola, {{ userName }} 👋</h1>
+        <p class="subtitle">Aquí tienes el resumen de tu negocio hoy, {{ currentDate }}.</p>
       </div>
-    </div>
+      <div class="header-actions">
+        <button class="btn-outline" @click="goToProperties">
+          <font-awesome-icon :icon="['fas', 'building']" /> Ver Propiedades
+        </button>
+        <button class="btn-primary" @click="goToNewProperty">
+          <font-awesome-icon :icon="['fas', 'plus']" /> Nueva Propiedad
+        </button>
+      </div>
+    </header>
 
-    <!-- Loading State -->
-    <div v-if="isLoading" class="loading-container">
+    <div v-if="isLoading" class="loader-container">
       <div class="spinner"></div>
-      <p>Cargando estadísticas...</p>
+      <p>Cargando métricas...</p>
     </div>
 
-    <!-- Error State -->
     <div v-else-if="loadError" class="error-container">
-      <p>❌ Error al cargar datos: {{ loadError }}</p>
-      <button @click="loadDashboardData" class="retry-btn">Reintentar</button>
+      <font-awesome-icon :icon="['fas', 'exclamation-circle']" class="error-icon" />
+      <p>{{ loadError }}</p>
+      <button class="btn-primary" @click="loadDashboardData">Reintentar</button>
     </div>
 
-    <!-- Dashboard Content -->
-    <template v-else>
-      <!-- Stats Grid -->
-      <div class="stats-section">
-        <h2 class="section-title">Métricas Principales</h2>
-        <div class="stats-grid">
-          <StatCard v-for="stat in mainStats" :key="stat.label" v-bind="stat" />
-        </div>
-      </div>
+    <main v-else class="dash-content">
+      <!-- Metric Cards -->
+      <section class="metrics-grid">
+        <article class="metric-card">
+          <div class="card-header">
+            <div class="icon-box blue">
+              <font-awesome-icon :icon="['fas', 'users']" />
+            </div>
+            <span class="trend" :class="getTrendClass(stats?.users.growth)">
+              <font-awesome-icon :icon="['fas', getTrendIcon(stats?.users.growth)]" /> 
+              {{ formatGrowth(stats?.users.growth) }}
+            </span>
+          </div>
+          <div class="card-body">
+            <h3>Usuarios Totales</h3>
+            <p class="value">{{ stats?.users.total || 0 }}</p>
+            <p class="comparison">vs mes anterior</p>
+          </div>
+        </article>
 
-      <!-- Secondary Stats -->
-      <div class="secondary-stats">
-        <div class="stats-row">
-          <StatCard v-for="stat in secondaryStats" :key="stat.label" v-bind="stat" />
-        </div>
-      </div>
+        <article class="metric-card">
+          <div class="card-header">
+            <div class="icon-box green">
+              <font-awesome-icon :icon="['fas', 'home']" />
+            </div>
+            <span class="trend" :class="getTrendClass(stats?.properties.growth)">
+              <font-awesome-icon :icon="['fas', getTrendIcon(stats?.properties.growth)]" /> 
+              {{ formatGrowth(stats?.properties.growth) }}
+            </span>
+          </div>
+          <div class="card-body">
+            <h3>Propiedades Activas</h3>
+            <p class="value">{{ stats?.properties.available || 0 }}</p>
+            <p class="comparison">vs mes anterior</p>
+          </div>
+        </article>
 
-      <!-- Charts and Activity -->
-      <div class="content-grid">
-        <!-- Revenue Chart -->
-        <div class="chart-card">
+        <article class="metric-card">
+          <div class="card-header">
+            <div class="icon-box purple">
+              <font-awesome-icon :icon="['fas', 'file-contract']" />
+            </div>
+            <span class="trend" :class="getTrendClass(stats?.contracts.growth)">
+              <font-awesome-icon :icon="['fas', getTrendIcon(stats?.contracts.growth)]" /> 
+              {{ formatGrowth(stats?.contracts.growth) }}
+            </span>
+          </div>
+          <div class="card-body">
+            <h3>Contratos Activos</h3>
+            <p class="value">{{ stats?.contracts.active || 0 }}</p>
+            <p class="comparison">vs mes anterior</p>
+          </div>
+        </article>
+
+        <article class="metric-card">
+          <div class="card-header">
+            <div class="icon-box orange">
+              <font-awesome-icon :icon="['fas', 'wallet']" />
+            </div>
+            <span class="trend" :class="getTrendClass(stats?.payments.growth)">
+              <font-awesome-icon :icon="['fas', getTrendIcon(stats?.payments.growth)]" /> 
+              {{ formatGrowth(stats?.payments.growth) }}
+            </span>
+          </div>
+          <div class="card-body">
+            <h3>Ingresos del Mes</h3>
+            <p class="value">{{ formatCurrency(stats?.payments.revenue || 0) }}</p>
+            <p class="comparison">vs mes anterior</p>
+          </div>
+        </article>
+      </section>
+
+      <!-- Charts Section -->
+      <section class="charts-section">
+        <div class="chart-container main-chart">
           <div class="chart-header">
             <div>
-              <h3 class="chart-title">Ingresos Mensuales</h3>
-              <p class="chart-subtitle">Total acumulado</p>
+              <h3>Evolución de Ingresos</h3>
+              <p>Últimos 6 meses</p>
             </div>
-            <select class="chart-filter">
-              <option>Últimos 6 meses</option>
-              <option>Último año</option>
-              <option>Todo el tiempo</option>
-            </select>
           </div>
-          <div class="chart-placeholder">
-            <div class="placeholder-content">
-              <span class="placeholder-icon">💰</span>
-              <p>Ingresos Totales</p>
-              <h2 class="revenue-amount">{{ formatCurrency(totalRevenue) }}</h2>
-              <small>{{ stats?.payments.paid || 0 }} pagos completados</small>
-            </div>
+          <div class="chart-wrapper">
+            <Line :data="revenueChartData" :options="chartOptions" v-if="chartReady" />
           </div>
         </div>
 
-        <!-- Recent Activity -->
-        <div class="activity-card">
-          <div class="activity-header">
-            <h3 class="activity-title">Actividad Reciente</h3>
-            <div class="activity-actions">
-              <span class="last-update" v-if="lastActivityUpdate">
-                Actualizado: {{ formatTimeAgo(lastActivityUpdate.toISOString()) }}
-              </span>
-              <button class="refresh-btn" @click="loadActivities" :disabled="loadingActivity">
-                <span :class="{ 'spinning': loadingActivity }">🔄</span>
-              </button>
+        <div class="chart-container side-chart">
+          <div class="chart-header">
+            <h3>Distribución de Propiedades</h3>
+          </div>
+          <div class="doughnut-wrapper">
+            <Doughnut :data="propertiesChartData" :options="doughnutOptions" v-if="chartReady" />
+          </div>
+          <div class="custom-legend">
+            <div class="legend-item" v-for="(item, index) in propertiesChartData.labels" :key="index">
+              <span class="dot" :style="{ backgroundColor: (propertiesChartData.datasets[0].backgroundColor as string[])[index] }"></span>
+              <span class="label">{{ item }}</span>
+              <span class="val">{{ propertiesChartData.datasets[0].data[index] }}</span>
             </div>
           </div>
+        </div>
+      </section>
+
+      <!-- Bottom Layout -->
+      <section class="bottom-grid">
+        <div class="activity-section card-box">
+          <div class="section-top">
+            <h3>Actividad Reciente</h3>
+            <button class="btn-icon" @click="loadActivities" :disabled="loadingActivity">
+              <font-awesome-icon :icon="['fas', 'sync-alt']" :class="{ 'spin-anim': loadingActivity }" />
+            </button>
+          </div>
           
-          <div v-if="loadingActivity && activities.length === 0" class="activity-loading">
-            <div class="mini-spinner"></div>
-            <p>Cargando actividades...</p>
-          </div>
-
-          <div v-else-if="activityError" class="activity-error">
-            <p>❌ {{ activityError }}</p>
-            <button @click="loadActivities" class="retry-btn small">Reintentar</button>
-          </div>
-
-          <div v-else-if="activities.length > 0" class="activity-list">
-            <div v-for="activity in activities" :key="activity.id" class="activity-item">
-              <div class="activity-icon" :style="{ background: getActivityColor(activity.type) }">
-                {{ getActivityIcon(activity.type) }}
+          <div class="timeline" v-if="activities.length">
+            <div class="timeline-item" v-for="act in activities.slice(0, 6)" :key="act.id">
+              <div class="tl-icon" :style="{ backgroundColor: getSoftColor(act.type), color: getHardColor(act.type) }">
+                <font-awesome-icon :icon="['fas', getActivityIcon(act.type)]" />
               </div>
-              <div class="activity-content">
-                <p class="activity-text">{{ getActivityText(activity) }}</p>
-                <span class="activity-time">{{ formatTimeAgo(activity.created_at) }}</span>
+              <div class="tl-content">
+                <p class="tl-text">{{ getActivityText(act) }}</p>
+                <span class="tl-time">{{ formatTimeAgo(act.created_at) }}</span>
               </div>
             </div>
           </div>
+          <div class="empty-state" v-else>
+            <font-awesome-icon :icon="['fas', 'inbox']" />
+            <p>No hay actividad registrada aún.</p>
+          </div>
+        </div>
+
+        <div class="actions-section card-box">
+          <h3>Atención Requerida</h3>
+          <p class="sub-text">Tareas pendientes que necesitan tu revisión</p>
           
-          <div v-else class="activity-empty">
-            <p>📭 No hay actividad reciente</p>
-            <p class="activity-empty-sub">Las nuevas actividades aparecerán aquí automáticamente</p>
-          </div>
-        </div>
-      </div>
+          <div class="action-list">
+            <div class="action-card" @click="router.push('/admin/properties')">
+              <div class="ac-icon bg-orange"><font-awesome-icon :icon="['fas', 'home']" /></div>
+              <div class="ac-info">
+                <h4>{{ stats?.properties.pending_approval || 0 }} Propiedades</h4>
+                <p>Pendientes de aprobación</p>
+              </div>
+              <font-awesome-icon :icon="['fas', 'chevron-right']" class="ac-arrow" />
+            </div>
 
-      <!-- Properties Overview -->
-      <div class="properties-overview">
-        <div class="overview-header">
-          <div>
-            <h2 class="overview-title">Propiedades por Estado</h2>
-            <p class="overview-subtitle">Distribución actual del inventario</p>
-          </div>
-          <button class="overview-btn" @click="goToProperties">
-            Ver todas las propiedades →
-          </button>
-        </div>
-        <div class="properties-grid">
-          <div v-for="property in propertiesStatus" :key="property.status" class="property-status-card"
-            :style="{ borderColor: property.color }">
-            <div class="status-header">
-              <span class="status-dot" :style="{ background: property.color }"></span>
-              <h4 class="status-name">{{ property.status }}</h4>
+            <div class="action-card" @click="router.push('/admin/contracts')">
+              <div class="ac-icon bg-red"><font-awesome-icon :icon="['fas', 'file-signature']" /></div>
+              <div class="ac-info">
+                <h4>{{ stats?.contracts.pending || 0 }} Contratos</h4>
+                <p>Pendientes de validación o firma</p>
+              </div>
+              <font-awesome-icon :icon="['fas', 'chevron-right']" class="ac-arrow" />
             </div>
-            <div class="status-count">{{ property.count }}</div>
-            <div class="status-footer">
-              <span class="status-percentage" :style="{ color: property.color }">
-                {{ property.percentage }}%
-              </span>
-              <span class="status-label">del total</span>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Quick Actions -->
-      <div class="quick-actions">
-        <h2 class="section-title">Acciones Rápidas</h2>
-        <div class="actions-grid">
-          <a v-for="action in quickActions" :key="action.label" :href="action.link" class="quick-action-card">
-            <div class="action-icon" :style="{ background: action.iconBg }">
-              {{ action.icon }}
+            <div class="action-card" @click="router.push('/admin/maintenances')">
+              <div class="ac-icon bg-purple"><font-awesome-icon :icon="['fas', 'tools']" /></div>
+              <div class="ac-info">
+                <h4>{{ stats?.maintenances.pending || 0 }} Mantenimientos</h4>
+                <p>Solicitudes nuevas sin revisar</p>
+              </div>
+              <font-awesome-icon :icon="['fas', 'chevron-right']" class="ac-arrow" />
             </div>
-            <div class="action-content">
-              <h4 class="action-title">{{ action.label }}</h4>
-              <p class="action-description">{{ action.description }}</p>
+            
+            <div class="action-card" @click="router.push('/admin/reports')">
+              <div class="ac-icon bg-blue"><font-awesome-icon :icon="['fas', 'clipboard-list']" /></div>
+              <div class="ac-info">
+                <h4>{{ pendingReportsCount }} Reportes</h4>
+                <p>Casos generados por usuarios</p>
+              </div>
+              <font-awesome-icon :icon="['fas', 'chevron-right']" class="ac-arrow" />
             </div>
-            <span class="action-arrow">→</span>
-          </a>
+          </div>
         </div>
-      </div>
-    </template>
+      </section>
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-import StatCard from '../components/StatCard.vue';
-import { useAdminAuth } from '../composables/useAdminAuth';
-import { adminService, type AdminStats } from '../../services/adminService';
-import { eventBus, EVENTS } from '../../events/eventBus';
-import { useAlerts } from '../../composables/useAlerts';
-import api from '../../services/api';
+import { adminService, type AdminStats } from '@/services/adminService';
+import { useUserStore } from '@/stores/useUserStore';
+import { eventBus, EVENTS } from '@/events/eventBus';
+import api from '@/services/api';
+
+// Chart.js imports
+import { Line, Doughnut } from 'vue-chartjs';
+import {
+  Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler,
+  ArcElement
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler,
+  ArcElement
+);
 
 const router = useRouter();
-const { user } = useAdminAuth();
-const { error: showError } = useAlerts();
+const userStore = useUserStore();
 
-// Estado
+// State
 const stats = ref<AdminStats | null>(null);
 const isLoading = ref(true);
 const loadError = ref<string | null>(null);
+const pendingReportsCount = ref(0);
 
-// Actividad reciente
+// Activities
 const activities = ref<any[]>([]);
 const loadingActivity = ref(false);
-const activityError = ref('');
-const lastActivityUpdate = ref<Date | null>(null);
 let activityInterval: number | null = null;
 
-// Nombre del usuario
-const userName = computed(() => user.value?.name || 'Admin');
-
-// Total revenue
-const totalRevenue = computed(() => stats.value?.payments.revenue || 0);
-
-// ==================== ESTADÍSTICAS PRINCIPALES ====================
-const mainStats = computed(() => {
-  if (!stats.value) return [];
-
-  const usersChange = stats.value.users.active > 0
-    ? ((stats.value.users.active / stats.value.users.total) * 100) - 100
-    : 0;
-
-  const propertiesChange = stats.value.properties.active > 0
-    ? ((stats.value.properties.active / stats.value.properties.total) * 100) - 100
-    : 0;
-
-  return [
-    {
-      label: 'Total Usuarios',
-      value: stats.value.users.total,
-      icon: ['fas', 'users'] satisfies [string, string],
-      iconBg: 'linear-gradient(135deg, #3b86f7 0%, #1e40af 100%)',
-      change: usersChange,
-      subtitle: `${stats.value.users.active} activos`,
-      variant: 'primary' as const,
-    },
-    {
-      label: 'Propiedades Activas',
-      value: stats.value.properties.active,
-      icon: ['fas', 'home'] satisfies [string, string],
-      iconBg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-      change: propertiesChange,
-      subtitle: `${stats.value.properties.total} totales`,
-      variant: 'success' as const,
-    },
-    {
-      label: 'Contratos Activos',
-      value: stats.value.contracts.active,
-      icon: ['fas', 'file-alt'] satisfies [string, string],
-      iconBg: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-      change: stats.value.contracts.pending > 0 ? -3.1 : 0,
-      subtitle: `${stats.value.contracts.pending} pendientes`,
-      variant: 'warning' as const,
-    },
-    {
-      label: 'Ingresos del Mes',
-      value: formatCurrency(stats.value.payments.revenue),
-      icon: ['fas', 'dollar-sign'] satisfies [string, string],
-      iconBg: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
-      change: 15.7,
-      subtitle: `${stats.value.payments.paid} pagos recibidos`,
-      variant: 'info' as const,
-    },
-  ];
+// Derived Data
+const userName = computed(() => userStore.displayName);
+const currentDate = computed(() => {
+  return new Intl.DateTimeFormat('es-ES', { dateStyle: 'long' }).format(new Date());
 });
 
-// ==================== ESTADÍSTICAS SECUNDARIAS ====================
-const secondaryStats = computed(() => {
-  if (!stats.value) return [];
+// ==================== CHARTS DATA & STYLING ====================
+const chartReady = ref(false);
 
-  const requestsProgress = stats.value.requests.total > 0
-    ? (stats.value.requests.pending / stats.value.requests.total) * 100
-    : 0;
-
-  const maintenanceProgress = stats.value.maintenances.pending > 0
-    ? ((stats.value.maintenances.in_progress + stats.value.maintenances.pending) /
-      (stats.value.maintenances.in_progress + stats.value.maintenances.pending)) * 100
-    : 0;
-
-  return [
+const revenueChartData = ref({
+  labels: ['Ago', 'Sep', 'Oct', 'Nov', 'Dic', 'Ene'],
+  datasets: [
     {
-      label: 'Solicitudes de Arriendo',
-      value: stats.value.requests.pending,
-      icon: ['fas', 'clipboard-list'] satisfies [string, string],
-      iconBg: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
-      progress: requestsProgress,
-      subtitle: `${stats.value.requests.total} totales`,
-      variant: 'info' as const,
-    },
-    {
-      label: 'Contratos Pendientes',
-      value: stats.value.contracts.pending,
-      icon: ['fas', 'ticket'] satisfies [string, string],
-      iconBg: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-      progress: stats.value.contracts.total > 0
-        ? (stats.value.contracts.pending / stats.value.contracts.total) * 100
-        : 0,
-      subtitle: `${stats.value.contracts.total} totales`,
-      variant: 'danger' as const,
-    },
-    {
-      label: 'Mantenimientos',
-      value: stats.value.maintenances.pending + stats.value.maintenances.in_progress,
-      icon: ['fas', 'wrench'] satisfies [string, string],
-      iconBg: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-      progress: maintenanceProgress,
-      subtitle: `${stats.value.maintenances.in_progress} en progreso`,
-      variant: 'warning' as const,
-    },
-  ];
-});
-
-// ==================== ACTIVIDAD RECIENTE ====================
-const loadActivities = async () => {
-  try {
-    loadingActivity.value = true;
-    activityError.value = '';
-    
-    console.log('🔄 Cargando actividades recientes...');
-    
-    const response = await api.get('/dashboard/recent-activity', {
-      params: { limit: 10 }
-    });
-    
-    console.log('📥 Respuesta recibida:', response.data);
-    
-    // Verificar la respuesta
-    if (response.data && response.data.success !== false) {
-      // El backend ahora devuelve data dentro de response.data
-      activities.value = response.data.data || [];
-      lastActivityUpdate.value = new Date();
-      
-      console.log('✅ Actividades cargadas:', {
-        total: activities.value.length,
-        actividades: activities.value
-      });
-      
-      // Debug: mostrar actividades en consola
-      activities.value.forEach((activity, index) => {
-        console.log(`🎯 Actividad ${index + 1}:`, {
-          type: activity.type,
-          data: activity.data,
-          created_at: activity.created_at
-        });
-      });
-      
-      // Mostrar debug info si viene del backend
-      if (response.data.debug) {
-        console.log('🐛 Debug backend:', response.data.debug);
-      }
-    } else {
-      throw new Error(response.data?.message || 'Error en la respuesta del servidor');
+      label: 'Ingresos Mensuales',
+      data: [12000000, 15000000, 14500000, 18000000, 22000000, 25000000],
+      borderColor: '#8b5cf6',
+      backgroundColor: 'rgba(139, 92, 246, 0.1)',
+      borderWidth: 3,
+      pointBackgroundColor: '#ffffff',
+      pointBorderColor: '#8b5cf6',
+      pointBorderWidth: 2,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+      fill: true,
+      tension: 0.4 // Smooth curves
     }
-  } catch (err: any) {
-    console.error('❌ Error cargando actividades:', err);
-    activityError.value = err.response?.data?.message || err.message || 'Error al cargar actividades';
-    activities.value = []; // Limpiar en caso de error
-  } finally {
-    loadingActivity.value = false;
-  }
-};
-
-const getActivityIcon = (type: string): string => {
-  const icons: Record<string, string> = {
-    user_registered: '👤',
-    user_updated: '✏️',
-    user_deleted: '🗑️',
-    user_status_changed: '🔄',
-    user_role_changed: '👑',
-    property_created: '🏠',
-    property_updated: '✏️',
-    property_deleted: '🗑️',
-    property_status_changed: '🔄',
-    contract_signed: '📝',
-    contract_updated: '✏️',
-    contract_deleted: '🗑️',
-    payment_received: '💰',
-    payment_updated: '✏️',
-    maintenance_requested: '🔧',
-    maintenance_updated: '✏️',
-    rental_request: '📋',
-    rental_request_updated: '✏️',
-  };
-  return icons[type] || '📌';
-};
-
-const getActivityColor = (type: string): string => {
-  const colors: Record<string, string> = {
-    user_registered: 'linear-gradient(135deg, #3b86f7 0%, #1e40af 100%)',
-    user_updated: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-    user_deleted: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-    user_status_changed: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
-    user_role_changed: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
-    property_created: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-    property_updated: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-    property_deleted: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-    property_status_changed: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
-    contract_signed: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-    contract_updated: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-    contract_deleted: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-    payment_received: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
-    payment_updated: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-    maintenance_requested: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-    maintenance_updated: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-    rental_request: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
-    rental_request_updated: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-  };
-  return colors[type] || 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
-};
-
-const getActivityText = (activity: any): string => {
-  const texts: Record<string, (data: any) => string> = {
-    // Usuarios
-    user_registered: (data) => `Nuevo usuario registrado: ${data.user_name} ${data.created_by ? `(por ${data.created_by})` : ''}`,
-    user_updated: (data) => data.description || `Usuario actualizado: ${data.user_name}`,
-    user_deleted: (data) => `Usuario eliminado ${data.deleted_by ? `por ${data.deleted_by}` : ''}: ${data.user_name}`,
-    user_status_changed: (data) => `Usuario ${data.user_name} cambió estado de '${data.old_status}' a '${data.new_status}' ${data.changed_by ? `(por ${data.changed_by})` : ''}`,
-    user_role_changed: (data) => `Usuario ${data.user_name} cambió rol de '${data.old_role}' a '${data.new_role}' ${data.changed_by ? `(por ${data.changed_by})` : ''}`,
-    
-    // Propiedades
-    property_created: (data) => `Nueva propiedad creada ${data.created_by ? `por ${data.created_by}` : ''}: "${data.property_title}"`,
-    property_updated: (data) => data.description || `Propiedad actualizada: "${data.property_title}"`,
-    property_deleted: (data) => `Propiedad eliminada ${data.deleted_by ? `por ${data.deleted_by}` : ''}: "${data.property_title}"`,
-    property_status_changed: (data) => `Propiedad "${data.property_title}" cambió estado de '${data.old_status}' a '${data.new_status}'`,
-    
-    // Contratos
-    contract_signed: (data) => `Contrato #${data.contract_id} firmado para "${data.property_title}"`,
-    contract_updated: (data) => `Contrato #${data.contract_id} actualizado`,
-    contract_deleted: (data) => `Contrato #${data.contract_id} eliminado`,
-    
-    // Pagos
-    payment_received: (data) => `Pago de $${data.amount} recibido`,
-    payment_updated: (data) => `Pago #${data.payment_id} actualizado`,
-    
-    // Mantenimientos
-    maintenance_requested: (data) => `Mantenimiento solicitado para "${data.property_title}"`,
-    maintenance_updated: (data) => `Mantenimiento #${data.maintenance_id} actualizado`,
-    
-    // Solicitudes de arriendo
-    rental_request: (data) => `Solicitud de arriendo de ${data.requested_by} para "${data.property_title}"`,
-    rental_request_updated: (data) => `Solicitud de arriendo #${data.request_id} actualizada`,
-  };
-  
-  const textFn = texts[activity.type];
-  return textFn ? textFn(activity.data) : activity.data?.description || 'Actividad desconocida';
-};
-
-const formatTimeAgo = (dateString: string): string => {
-  try {
-    if (!dateString) return "Hace un momento";
-    
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "Recientemente";
-    
-    const now = new Date();
-    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-    if (seconds < 60) return "Hace unos segundos";
-    if (seconds < 3600) return `Hace ${Math.floor(seconds / 60)} minutos`;
-    if (seconds < 86400) return `Hace ${Math.floor(seconds / 3600)} horas`;
-    if (seconds < 2592000) return `Hace ${Math.floor(seconds / 86400)} días`;
-    
-    return date.toLocaleDateString("es-ES", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  } catch (error) {
-    return "Recientemente";
-  }
-};
-
-const startActivityPolling = () => {
-  // Refrescar cada 30 segundos
-  if (!activityInterval) {
-    activityInterval = window.setInterval(() => {
-      console.log('🔄 Polling: Actualizando actividades...');
-      loadActivities();
-    }, 30000); // 30 segundos
-  }
-};
-
-const stopActivityPolling = () => {
-  if (activityInterval) {
-    clearInterval(activityInterval);
-    activityInterval = null;
-  }
-};
-
-// ==================== ESTADO DE PROPIEDADES ====================
-const propertiesStatus = computed(() => {
-  if (!stats.value) return [];
-
-  const total = stats.value.properties.total || 1;
-
-  return [
-    {
-      status: 'Disponibles',
-      count: stats.value.properties.active,
-      percentage: Math.round((stats.value.properties.active / total) * 100),
-      color: '#10b981',
-    },
-    {
-      status: 'Pendientes',
-      count: stats.value.properties.pending,
-      percentage: Math.round((stats.value.properties.pending / total) * 100),
-      color: '#f59e0b',
-    },
-    {
-      status: 'Inactivas',
-      count: total - stats.value.properties.active - stats.value.properties.pending,
-      percentage: Math.round(((total - stats.value.properties.active - stats.value.properties.pending) / total) * 100),
-      color: '#6b7280',
-    },
-  ];
+  ]
 });
 
-// ==================== ACCIONES RÁPIDAS ====================
-const quickActions = ref([
-  {
-    icon: '➕',
-    iconBg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-    label: 'Agregar Propiedad',
-    description: 'Publicar una nueva propiedad en la plataforma',
-    link: '/admin/properties/new',
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: '#1f2937',
+      padding: 12,
+      titleFont: { size: 13, family: 'sans-serif' },
+      bodyFont: { size: 14, family: 'sans-serif', weight: 'bold' as const },
+      callbacks: {
+        label: function(context: any) {
+          let label = context.dataset.label || '';
+          if (label) { label += ': '; }
+          if (context.parsed.y !== null) {
+            label += new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(context.parsed.y);
+          }
+          return label;
+        }
+      }
+    }
   },
-  {
-    icon: '👥',
-    iconBg: 'linear-gradient(135deg, #3b86f7 0%, #1e40af 100%)',
-    label: 'Gestionar Usuarios',
-    description: 'Ver y administrar todos los usuarios',
-    link: '/admin/users',
+  scales: {
+    y: {
+      beginAtZero: true,
+      grid: { color: '#f1f5f9' },
+      border: { display: false },
+      ticks: {
+        color: '#64748b',
+        font: { family: 'sans-serif', size: 11 },
+        callback: function(value: any) {
+          return '$' + (value / 1000000) + 'M'; // Format as millions
+        }
+      }
+    },
+    x: {
+      grid: { display: false },
+      border: { display: false },
+      ticks: { color: '#64748b', font: { family: 'sans-serif', size: 12 } }
+    }
   },
-  {
-    icon: '📊',
-    iconBg: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
-    label: 'Ver Reportes',
-    description: 'Generar reportes y análisis detallados',
-    link: '/admin/reports',
-  },
-  {
-    icon: '⚙️',
-    iconBg: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
-    label: 'Configuración',
-    description: 'Ajustes generales del sistema',
-    link: '/admin/settings',
-  },
-]);
+  interaction: { intersect: false, mode: 'index' as const }
+};
 
-// ==================== MÉTODOS ====================
+const propertiesChartData = ref({
+  labels: ['Disponibles', 'Rentadas', 'Mantenimiento', 'Inactivas'],
+  datasets: [{
+    data: [0, 0, 0, 0],
+    backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#94a3b8'],
+    borderWidth: 0,
+    hoverOffset: 4
+  }]
+});
+
+const doughnutOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  cutout: '75%',
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: '#1f2937',
+      bodyFont: { family: 'sans-serif', size: 13 },
+      padding: 10,
+      callbacks: {
+        label: function(context: any) {
+          return ` ${context.label}: ${context.raw}`;
+        }
+      }
+    }
+  }
+};
+
+// ==================== METHODS ====================
+const getTrendClass = (growth?: number) => {
+  if (growth === undefined || growth === 0) return 'neutral';
+  return growth > 0 ? 'positive' : 'negative';
+};
+
+const getTrendIcon = (growth?: number) => {
+  if (growth === undefined || growth === 0) return 'minus';
+  return growth > 0 ? 'arrow-trend-up' : 'arrow-trend-down';
+};
+
+const formatGrowth = (growth?: number) => {
+  if (growth === undefined) return '0%';
+  if (growth === 0) return 'Sin cambios';
+  const prefix = growth > 0 ? '+' : '';
+  return `${prefix}${growth}%`;
+};
 
 const loadDashboardData = async () => {
   isLoading.value = true;
   loadError.value = null;
 
   try {
-    console.log('🔄 Cargando datos del dashboard...');
-
-    // Cargar en paralelo
-    const [statsData] = await Promise.all([
+    const [statsData, reportsRes] = await Promise.all([
       adminService.getDashboardStats(),
-      loadActivities(), // Cargar actividades también
+      api.get('/admin/reports/stats').catch(() => ({ data: { data: { pending_reports: 0 } } }))
     ]);
 
     stats.value = statsData;
-    console.log('✅ Datos del dashboard cargados:', statsData);
+    pendingReportsCount.value = reportsRes.data?.data?.pending_reports || 0;
+    
+    // Update Revenue Chart
+    if (statsData.charts?.revenue) {
+       revenueChartData.value.labels = statsData.charts.revenue.labels;
+       revenueChartData.value.datasets[0].data = statsData.charts.revenue.data;
+    } else {
+       revenueChartData.value.datasets[0].data = [0,0,0,0,0,0];
+    }
+    
+    // Update Doughnut Chart
+    propertiesChartData.value.datasets[0].data = [
+      statsData.properties.available || 0,
+      statsData.properties.rented || 0,
+      statsData.properties.maintenance || 0,
+      (statsData.properties.total || 0) - (statsData.properties.available || 0) - (statsData.properties.rented || 0) - (statsData.properties.maintenance || 0)
+    ];
 
+    await loadActivities();
+    
+    // Render charts
+    if (typeof window !== 'undefined') {
+      nextTick(() => {
+        chartReady.value = true;
+      });
+    }
   } catch (error: any) {
-    console.error('❌ Error cargando dashboard:', error);
-    loadError.value = error.response?.data?.message || 'Error al cargar datos';
-    showError('Error al cargar datos del dashboard');
+    console.error('Error cargando dashboard:', error);
+    loadError.value = 'Ocurrió un error al cargar las métricas. Por favor intenta de nuevo.';
   } finally {
     isLoading.value = false;
   }
 };
 
-const refreshStats = async () => {
+const loadActivities = async () => {
+  loadingActivity.value = true;
   try {
-    const newStats = await adminService.getDashboardStats();
-    stats.value = newStats;
-    console.log('✅ Estadísticas actualizadas');
-  } catch (error) {
-    console.error('❌ Error actualizando estadísticas:', error);
+    const response = await api.get('/admin/dashboard/activity', { params: { limit: 10 } });
+    if (response.data && response.data.success !== false) {
+      activities.value = response.data.data || [];
+    }
+  } catch (err) {
+    console.error(err);
+  } finally {
+    loadingActivity.value = false;
   }
 };
 
@@ -582,280 +425,331 @@ const formatCurrency = (amount: number): string => {
   }).format(amount);
 };
 
-const goToNewProperty = () => {
-  router.push('/admin/properties/new');
+const formatTimeAgo = (dateString: string): string => {
+  try {
+    if (!dateString) return "Hace un momento";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "Recientemente";
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+
+    if (seconds < 60) return "Hace unos seg";
+    if (seconds < 3600) return `Hace ${Math.floor(seconds / 60)} min`;
+    if (seconds < 86400) return `Hace ${Math.floor(seconds / 3600)} h`;
+    if (seconds < 2592000) return `Hace ${Math.floor(seconds / 86400)} d`;
+    
+    return date.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+  } catch (e) {
+    return "Recientemente";
+  }
 };
 
-const goToProperties = () => {
-  router.push('/admin/properties');
+// Activity mappings
+const getActivityIcon = (type: string): string => {
+  const icons: Record<string, string> = {
+    user_registered: 'user-plus', user_updated: 'user-edit', user_deleted: 'user-minus',
+    property_created: 'building', property_updated: 'edit', property_deleted: 'trash-alt',
+    contract_signed: 'file-signature', payment_received: 'money-bill-wave',
+    maintenance_requested: 'wrench', rental_request: 'clipboard-list'
+  };
+  return icons[type] || 'circle';
 };
 
-const exportReport = () => {
-  console.log('📊 Exportando reporte...');
+const getSoftColor = (type: string): string => {
+  if (type.includes('user')) return '#dbeafe'; // Blue 100
+  if (type.includes('property')) return '#dcfce7'; // Green 100
+  if (type.includes('contract')) return '#fef3c7'; // Amber 100
+  if (type.includes('payment')) return '#f3e8ff'; // Purple 100
+  if (type.includes('maintenance')) return '#fee2e2'; // Red 100
+  return '#f1f5f9'; // Slate 100
 };
 
-// ==================== LIFECYCLE ====================
+const getHardColor = (type: string): string => {
+  if (type.includes('user')) return '#2563eb'; // Blue 600
+  if (type.includes('property')) return '#16a34a'; // Green 600
+  if (type.includes('contract')) return '#d97706'; // Amber 600
+  if (type.includes('payment')) return '#9333ea'; // Purple 600
+  if (type.includes('maintenance')) return '#dc2626'; // Red 600
+  return '#475569'; // Slate 600
+};
 
+const getActivityText = (activity: any): string => {
+  // Si ya tiene description explícita (del fallback de AdminDashboardController), usarla
+  if (activity.data?.description) return activity.data.description;
+
+  const d = activity.data || {};
+  const type = activity.type || '';
+
+  switch (type) {
+    case 'user_registered':
+      return `${d.user_name || 'Un usuario'} se registró en la plataforma.`;
+    case 'user_deleted':
+      return `${d.deleted_by || 'Sistema'} eliminó al usuario ${d.user_name || ''}.`;
+    case 'user_status_changed':
+      return `El estado de ${d.user_name || 'un usuario'} cambió de ${d.old_status || '?'} a ${d.new_status || '?'}.`;
+    case 'user_role_changed':
+      return `${d.changed_by || 'Sistema'} cambió el rol de ${d.user_name || 'un usuario'} a ${d.new_role || '?'}.`;
+    case 'user_updated':
+      return `${d.updated_by || 'Sistema'} actualizó los datos de ${d.user_name || 'un usuario'}.`;
+    case 'property_created':
+      return `${d.created_by || 'Un usuario'} publicó la propiedad "${d.property_title || ''}".`;
+    case 'property_deleted':
+      return `${d.deleted_by || 'Sistema'} eliminó la propiedad "${d.property_title || ''}".`;
+    case 'property_updated':
+      return `${d.updated_by || 'Sistema'} actualizó la propiedad "${d.property_title || ''}".`;
+    case 'property_status_changed':
+      return `El estado de "${d.property_title || 'una propiedad'}" cambió a ${d.new_status || '?'}.`;
+    case 'contract_created':
+    case 'contract_signed':
+      return `${d.created_by || 'Un usuario'} creó un contrato para "${d.property_title || 'una propiedad'}".`;
+    case 'payment_received':
+      const amount = d.amount ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(d.amount) : '';
+      return `${d.received_by || 'Un usuario'} realizó un pago${amount ? ' de ' + amount : ''}.`;
+    case 'maintenance_requested':
+      return `${d.requested_by || 'Un usuario'} solicitó mantenimiento para "${d.property_title || 'una propiedad'}".`;
+    case 'rental_request':
+      return `${d.requested_by || 'Un usuario'} solicitó arriendo para "${d.property_title || 'una propiedad'}".`;
+    default:
+      return activity.title || 'Actividad registrada';
+  }
+};
+
+const goToNewProperty = () => router.push('/admin/properties/new');
+const goToProperties = () => router.push('/admin/properties');
+
+// Lifecycle
 onMounted(async () => {
   await loadDashboardData();
-  startActivityPolling();
-
-  // Escuchar eventos (si los tienes configurados)
-  eventBus.on(EVENTS.NOTIFICATION_RECEIVED, () => {
-    console.log('📢 Evento recibido, actualizando...');
-    refreshStats();
-    loadActivities();
-  });
-
-  console.log('✅ Dashboard montado y polling iniciado');
+  activityInterval = window.setInterval(loadActivities, 60000);
+  eventBus.on(EVENTS.NOTIFICATION_RECEIVED, loadDashboardData);
 });
 
 onUnmounted(() => {
-  stopActivityPolling();
-  eventBus.off(EVENTS.NOTIFICATION_RECEIVED, refreshStats);
-  console.log('🧹 Dashboard desmontado, polling detenido');
+  if (activityInterval) clearInterval(activityInterval);
+  eventBus.off(EVENTS.NOTIFICATION_RECEIVED, loadDashboardData);
 });
 </script>
 
 <style scoped>
-/* Añade estos estilos */
-.activity-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+/* 
+  🎨 RENTUS MODERN DASHBOARD V2 
+  SaaS Inspired, Clear Hierarchy, Custom Space
+*/
 
-.last-update {
-  font-size: 0.8rem;
-  color: #6b7280;
-}
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-.retry-btn.small {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.8rem;
-  margin-top: 0.5rem;
-}
-
-.activity-empty-sub {
-  font-size: 0.8rem;
-  color: #9ca3af;
-  margin-top: 0.25rem;
-}
-
-.spinning {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-</style>
-
-<style scoped>
-.dashboard {
+.modern-dashboard {
+  --font-main: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --bg-color: #f8fafc;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  
+  --c-blue: #3b82f6; --c-blue-soft: #eff6ff;
+  --c-green: #10b981; --c-green-soft: #ecfdf5;
+  --c-purple: #8b5cf6; --c-purple-soft: #f5f3ff;
+  --c-orange: #f59e0b; --c-orange-soft: #fffbeb;
+  --c-red: #ef4444; --c-red-soft: #fef2f2;
+  
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.02);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.02);
+  
+  font-family: var(--font-main);;
+  min-height: 100vh;
+  padding: 1.5rem 2rem;
+  color: var(--text-main);
   max-width: 1600px;
   margin: 0 auto;
 }
 
-/* Loading State */
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  gap: 1rem;
-}
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.spin-anim { animation: spin 1s linear infinite; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
 
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid #f3f4f6;
-  border-top: 4px solid #3b251d;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.loading-container p {
-  color: #6b7280;
-  font-weight: 600;
-}
-
-/* Error State */
-.error-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  gap: 1rem;
-}
-
-.error-container p {
-  color: #ef4444;
-  font-weight: 600;
-}
-
-.retry-btn {
-  background: #3b251d;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.retry-btn:hover {
-  background: #8b6f47;
-  transform: translateY(-2px);
-}
-
-/* Header */
-.dashboard-header {
-  margin-bottom: 2rem;
-  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
-  border-radius: 20px;
-  border: 1px solid #e5e7eb;
-  padding: 2rem;
-}
-
-.header-content {
+/* HEADER */
+.dash-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 2rem;
-  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  animation: fadeIn 0.4s ease-out;
 }
 
-.header-text {
-  flex: 1;
+.greeting .title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 0 0 0.25rem 0;
+  letter-spacing: -0.02em;
 }
 
-.dashboard-title {
-  font-size: 2rem;
-  font-weight: 900;
-  color: #1f2937;
-  margin: 0 0 0.5rem;
-  letter-spacing: -0.5px;
-}
-
-.highlight {
-  background: linear-gradient(135deg, #3b251d 0%, #8b6f47 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.dashboard-subtitle {
-  font-size: 1rem;
-  color: #6b7280;
+.greeting .subtitle {
+  color: var(--text-muted);
+  font-size: 0.95rem;
   margin: 0;
   font-weight: 500;
 }
 
 .header-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
-.action-btn {
+button {
+  font-family: var(--font-main);
+  cursor: pointer;
+  outline: none;
+}
+
+.btn-primary {
+  background: var(--text-main); /* Dark sleek button */
+  color: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
-  white-space: nowrap;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
 }
-
-.action-btn.primary {
-  background: linear-gradient(135deg, #3b251d 0%, #8b6f47 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(59, 37, 29, 0.2);
-}
-
-.action-btn.primary:hover {
+.btn-primary:hover {
+  background: #1e293b;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 37, 29, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
-.action-btn.secondary {
+.btn-outline {
   background: white;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+.btn-outline:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
 }
 
-.action-btn.secondary:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
+/* STATES */
+.loader-container, .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  gap: 1rem;
+}
+.spinner {
+  width: 40px; height: 40px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--c-blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.error-icon { font-size: 3rem; color: var(--c-red); }
+
+/* MAIN CONTENT */
+.dash-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-.btn-icon {
-  font-size: 1.1rem;
+/* 1. METRICS GRID */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  animation: fadeIn 0.5s ease-out 0.1s both;
 }
 
-/* Stats Section */
-.stats-section {
-  margin-bottom: 2rem;
+.metric-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+.metric-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+  border-color: #cbd5e1;
 }
 
-.section-title {
-  font-size: 1.5rem;
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.icon-box {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+}
+.icon-box.blue { background: var(--c-blue-soft); color: var(--c-blue); }
+.icon-box.green { background: var(--c-green-soft); color: var(--c-green); }
+.icon-box.purple { background: var(--c-purple-soft); color: var(--c-purple); }
+.icon-box.orange { background: var(--c-orange-soft); color: var(--c-orange); }
+
+.trend {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  display: flex; align-items: center; gap: 0.25rem;
+}
+.trend.positive { background: var(--c-green-soft); color: var(--c-green); }
+.trend.negative { background: var(--c-red-soft); color: var(--c-red); }
+.trend.neutral { background: #f1f5f9; color: #64748b; }
+
+.card-body h3 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: 0 0 0.25rem 0;
+}
+.card-body .value {
+  font-size: 1.75rem;
   font-weight: 800;
-  color: #1f2937;
-  margin: 0 0 1.25rem;
-  letter-spacing: -0.5px;
+  color: var(--text-main);
+  margin: 0 0 0.25rem 0;
+  letter-spacing: -0.03em;
+}
+.card-body .comparison {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin: 0;
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.25rem;
-}
-
-/* Secondary Stats */
-.secondary-stats {
-  margin-bottom: 2rem;
-}
-
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.25rem;
-}
-
-/* Content Grid */
-.content-grid {
+/* 2. CHARTS SECTION */
+.charts-section {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 1.25rem;
-  margin-bottom: 2rem;
+  animation: fadeIn 0.6s ease-out 0.2s both;
 }
 
-/* Chart Card */
-.chart-card {
+.chart-container {
   background: white;
+  border: 1px solid var(--border-color);
   border-radius: 16px;
-  border: 1px solid #e5e7eb;
   padding: 1.5rem;
-  transition: all 0.3s ease;
-}
-
-.chart-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
 }
 
 .chart-header {
@@ -864,403 +758,178 @@ onUnmounted(() => {
   align-items: center;
   margin-bottom: 1.5rem;
 }
+.chart-header h3 { font-size: 1.1rem; font-weight: 700; margin: 0; }
+.chart-header p { font-size: 0.85rem; color: var(--text-muted); margin: 0.25rem 0 0 0; }
 
-.chart-title {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #1f2937;
-  margin: 0 0 0.25rem;
-}
-
-.chart-subtitle {
-  font-size: 0.85rem;
-  color: #6b7280;
-  margin: 0;
-  font-weight: 500;
-}
-
-.chart-filter {
-  padding: 0.5rem 1rem;
-  border: 1px solid #e5e7eb;
+.chart-select {
+  padding: 0.4rem 0.75rem;
   border-radius: 8px;
-  background: white;
-  font-size: 0.9rem;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-main);
+  font-size: 0.85rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-main);
+  background: #f8fafc;
   cursor: pointer;
-  transition: all 0.2s ease;
+  outline: none;
 }
+.chart-select:focus { border-color: var(--c-blue); }
 
-.chart-filter:hover {
-  border-color: #3b251d;
-}
-
-.chart-placeholder {
-  height: 300px;
-  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.placeholder-content {
-  text-align: center;
-}
-
-.placeholder-icon {
-  font-size: 3rem;
-  display: block;
-  margin-bottom: 0.75rem;
-}
-
-.placeholder-content p {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #374151;
-  margin: 0 0 0.5rem;
-}
-
-.revenue-amount {
-  font-size: 2rem;
-  font-weight: 900;
-  color: #1f2937;
-  margin: 0.5rem 0;
-}
-
-.placeholder-content small {
-  font-size: 0.85rem;
-  color: #9ca3af;
-}
-
-/* Activity Card */
-.activity-card {
-  background: white;
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
-  padding: 1.5rem;
-  transition: all 0.3s ease;
-}
-
-.activity-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-}
-
-.activity-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.25rem;
-}
-
-.activity-title {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #1f2937;
-  margin: 0;
-}
-
-.refresh-btn {
-  background: none;
-  border: none;
-  font-size: 1.25rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-
-.refresh-btn:hover {
-  background: #f9fafb;
-  transform: rotate(180deg);
-}
-
-.activity-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.activity-item {
-  display: flex;
-  gap: 0.75rem;
-  padding: 0.75rem;
-  border-radius: 10px;
-  transition: background 0.2s ease;
-}
-
-.activity-item:hover {
-  background: #f9fafb;
-}
-
-.activity-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-  flex-shrink: 0;
-}
-
-.activity-content {
+.chart-wrapper {
   flex: 1;
+  min-height: 280px;
+  width: 100%;
+  position: relative;
+}
+
+.doughnut-wrapper {
+  height: 200px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.custom-legend {
+  margin-top: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.75rem;
 }
-
-.activity-text {
+.legend-item {
+  display: flex;
+  align-items: center;
   font-size: 0.9rem;
-  font-weight: 600;
-  color: #374151;
-  margin: 0;
-  line-height: 1.4;
 }
-
-.activity-time {
-  font-size: 0.8rem;
-  color: #9ca3af;
+.legend-item .dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  margin-right: 0.75rem;
+}
+.legend-item .label {
+  color: var(--text-muted);
+  flex: 1;
   font-weight: 500;
 }
-
-.activity-empty {
-  text-align: center;
-  padding: 2rem;
-  color: #9ca3af;
+.legend-item .val {
+  font-weight: 700;
+  color: var(--text-main);
 }
 
-/* Properties Overview */
-.properties-overview {
-  margin-bottom: 2rem;
+/* 3. BOTTOM GRID */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  animation: fadeIn 0.7s ease-out 0.3s both;
+}
+
+.card-box {
   background: white;
+  border: 1px solid var(--border-color);
   border-radius: 16px;
-  border: 1px solid #e5e7eb;
   padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
 }
+.card-box h3 { font-size: 1.1rem; font-weight: 700; margin: 0 0 0.25rem 0; }
+.card-box .sub-text { font-size: 0.85rem; color: var(--text-muted); margin: 0 0 1.5rem 0; }
 
-.overview-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.section-top {
+  display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 1.5rem;
 }
-
-.overview-title {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: #1f2937;
-  margin: 0 0 0.25rem;
+.btn-icon {
+  background: transparent; border: none; font-size: 1.1rem; color: var(--text-muted); transition: color 0.2s;
 }
+.btn-icon:hover { color: var(--text-main); }
 
-.overview-subtitle {
-  font-size: 0.9rem;
-  color: #6b7280;
-  margin: 0;
-}
-
-.overview-btn {
-  background: none;
-  border: 1px solid #e5e7eb;
-  padding: 0.75rem 1.5rem;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: #374151;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.overview-btn:hover {
-  background: #f9fafb;
-  border-color: #3b251d;
-  color: #3b251d;
-}
-
-.properties-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.property-status-card {
-  background: #f9fafb;
-  border: 2px solid;
-  border-radius: 12px;
-  padding: 1.25rem;
-  transition: all 0.2s ease;
-}
-
-.property-status-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-}
-
-.status-header {
+/* Timeline */
+.timeline {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: relative;
 }
-
-.status-dot {
-  width: 10px;
-  height: 10px;
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 17px; top: 10px; bottom: 10px;
+  width: 2px;
+  background: #f1f5f9;
+  z-index: 0;
+}
+.timeline-item {
+  display: flex;
+  gap: 1rem;
+  position: relative;
+  z-index: 1;
+}
+.tl-icon {
+  width: 36px; height: 36px;
   border-radius: 50%;
-}
-
-.status-name {
+  display: flex; align-items: center; justify-content: center;
   font-size: 0.9rem;
-  font-weight: 700;
-  color: #374151;
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.status-count {
-  font-size: 2.5rem;
-  font-weight: 900;
-  color: #1f2937;
-  margin-bottom: 0.5rem;
-  line-height: 1;
-}
-
-.status-footer {
-  display: flex;
-  gap: 0.5rem;
-  align-items: baseline;
-}
-
-.status-percentage {
-  font-size: 1rem;
-  font-weight: 800;
-}
-
-.status-label {
-  font-size: 0.85rem;
-  color: #9ca3af;
-  font-weight: 500;
-}
-
-/* Quick Actions */
-.quick-actions {
-  margin-bottom: 2rem;
-}
-
-.actions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1rem;
-}
-
-.quick-action-card {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  padding: 1.25rem;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-.quick-action-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  border-color: #3b251d;
-}
-
-.action-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
   flex-shrink: 0;
+  box-shadow: 0 0 0 4px white;
 }
-
-.action-content {
-  flex: 1;
+.tl-content {
+  display: flex; flex-direction: column; justify-content: center; gap: 0.2rem;
 }
+.tl-text { margin: 0; font-size: 0.9rem; font-weight: 600; color: #334155; }
+.tl-time { font-size: 0.75rem; color: #94a3b8; font-weight: 500; }
 
-.action-title {
-  font-size: 1rem;
-  font-weight: 800;
-  color: #1f2937;
-  margin: 0 0 0.25rem;
+.empty-state {
+  text-align: center; color: #94a3b8; padding: 2rem 0;
 }
+.empty-state svg { font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5; }
 
-.action-description {
-  font-size: 0.85rem;
-  color: #6b7280;
-  margin: 0;
-  font-weight: 500;
+/* Actions */
+.action-list {
+  display: flex; flex-direction: column; gap: 0.75rem;
 }
-
-.action-arrow {
-  font-size: 1.25rem;
-  color: #9ca3af;
-  transition: all 0.2s ease;
+.action-card {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
 }
-
-.quick-action-card:hover .action-arrow {
-  color: #3b251d;
+.action-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: var(--shadow-sm);
+  background: #f8fafc;
+}
+.action-card:hover .ac-arrow {
   transform: translateX(4px);
+  color: var(--text-main);
 }
+.ac-icon {
+  width: 42px; height: 42px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; color: white;
+}
+.bg-orange { background: var(--c-orange); }
+.bg-red { background: var(--c-red); }
+.bg-purple { background: var(--c-purple); }
+.bg-blue { background: var(--c-blue); }
 
-/* Responsive */
-@media (max-width: 1200px) {
-  .content-grid {
+.ac-info { flex: 1; }
+.ac-info h4 { margin: 0 0 0.15rem 0; font-size: 0.95rem; font-weight: 700; color: var(--text-main); }
+.ac-info p { margin: 0; font-size: 0.8rem; color: var(--text-muted); font-weight: 500;}
+.ac-arrow { color: #cbd5e1; transition: all 0.2s; font-size: 1rem; }
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+  .charts-section, .bottom-grid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
-  .dashboard-header {
-    padding: 1.5rem;
-  }
-
-  .header-content {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .dashboard-title {
-    font-size: 1.5rem;
-  }
-
-  .header-actions {
-    flex-direction: column;
-  }
-
-  .action-btn {
-    justify-content: center;
-  }
-
-  .stats-grid,
-  .stats-row,
-  .properties-grid,
-  .actions-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .overview-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
-  }
-
-  .overview-btn {
-    width: 100%;
-  }
-
-  .chart-placeholder {
-    height: 200px;
-  }
+  .modern-dashboard { padding: 1rem; }
+  .dash-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .header-actions { width: 100%; }
+  .btn-primary, .btn-outline { flex: 1; justify-content: center; }
+  .chart-wrapper { height: 240px; }
 }
 </style>

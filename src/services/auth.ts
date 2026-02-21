@@ -1,15 +1,21 @@
 // services/auth.ts
-import api from "./api";
+import api, { getToken, saveToken, clearStorage } from "./api";
 import { AxiosError } from "axios";
+import logger from "@/utils/logger";
 
-export type UserRole = 'user' | 'admin' | 'support';
+/** Roles available in the application */
+export type UserRole = "user" | "admin" | "support";
 
+/**
+ * Represents an authenticated user.
+ */
 export interface User {
   id: number;
   name: string;
   email: string;
   phone: string;
   address: string;
+  /** National ID document number */
   id_documento: string;
   status: string;
   role: UserRole;
@@ -20,6 +26,9 @@ export interface User {
   city?: string;
 }
 
+/**
+ * Payload required to register a new user.
+ */
 export interface RegisterData {
   name: string;
   phone: string;
@@ -30,12 +39,18 @@ export interface RegisterData {
   status?: string;
 }
 
+/**
+ * Payload required for the login endpoint.
+ */
 export interface LoginData {
   email: string;
   password: string;
   remember?: boolean;
 }
 
+/**
+ * Shape of the response returned by /auth/login and /auth/register.
+ */
 export interface AuthResponse {
   success: boolean;
   user?: User;
@@ -49,13 +64,13 @@ export interface AuthResponse {
     verification_required?: boolean;
     verification_token?: string;
     email?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
-// Interfaz para errores de validación de Laravel
+/** Laravel validation error map  */
 interface ValidationErrors {
-  [key: string]: string[];
+  [field: string]: string[];
 }
 
 interface ErrorResponse {
@@ -64,327 +79,267 @@ interface ErrorResponse {
   errors?: ValidationErrors;
 }
 
-class AuthService {
-  private token: string | null = null;
+// ── Field-name translations for error messages ───────────────────────────
+const FIELD_TRANSLATIONS: Record<string, string> = {
+  name: "Nombre",
+  email: "Correo electrónico",
+  phone: "Teléfono",
+  password: "Contraseña",
+  address: "Dirección",
+  id_documento: "Documento de identidad",
+  status: "Estado",
+};
 
+class AuthService {
   constructor() {
-    // Buscar token en localStorage o sessionStorage
-    this.token = this.getToken();
-    if (this.token) {
-      this.setAuthHeader(this.token);
-    }
+    // Restore token header at startup
+    const token = getToken();
+    if (token) this._setAuthHeader(token);
   }
 
-  private setAuthHeader(token: string) {
+  // ── Private helpers ──────────────────────────────────────────────────────
+
+  private _setAuthHeader(token: string) {
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   }
 
-  private removeAuthHeader() {
+  private _removeAuthHeader() {
     delete api.defaults.headers.common["Authorization"];
   }
 
+  private _translateField(field: string): string {
+    return FIELD_TRANSLATIONS[field] ?? field;
+  }
+
+  // ── Public token API (delegates to api.ts helpers) ───────────────────────
+
   /**
-   * Obtener token del storage correcto
+   * Returns the current auth token from storage, or null.
    */
   getToken(): string | null {
-    return localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token");
+    return getToken();
   }
 
   /**
-   * Guardar token según preferencia de "Recordarme"
+   * Persists the token and updates the Axios default header.
    */
-  public saveToken(token: string, remember: boolean = false) {
-    this.token = token;
-    if (remember) {
-      localStorage.setItem("auth_token", token);
-      sessionStorage.removeItem("auth_token");
-    } else {
-      sessionStorage.setItem("auth_token", token);
-      localStorage.removeItem("auth_token");
-    }
-    this.setAuthHeader(token);
+  public saveToken(token: string, remember = false): void {
+    saveToken(token, remember);
+    this._setAuthHeader(token);
   }
 
   /**
-   * Guardar usuario en storage
+   * Persists the user object in the appropriate storage.
    */
-  public saveUser(user: User, remember: boolean = false) {
+  public saveUser(user: User, remember = false): void {
     const storage = remember ? localStorage : sessionStorage;
     storage.setItem("user", JSON.stringify(user));
   }
 
   /**
-   * Obtener usuario del storage
+   * Reads the cached user from storage.
    */
   getUser(): User | null {
-    const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
-    return userStr ? JSON.parse(userStr) : null;
+    const raw =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as User;
+    } catch {
+      return null;
+    }
   }
 
   /**
-   * Limpiar todo el storage
+   * Clears all auth data from storage and removes the Axios header.
    */
-  private clearStorage() {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("pending_email");
-    sessionStorage.removeItem("auth_token");
-    sessionStorage.removeItem("user");
-    this.token = null;
-    this.removeAuthHeader();
+  private _clearAll(): void {
+    clearStorage();
+    this._removeAuthHeader();
   }
 
+  // ── Auth endpoints ───────────────────────────────────────────────────────
+
   /**
-   * Registrar nuevo usuario
+   * Registers a new user.
+   * @throws {Error} With a translated validation message on 422, or a generic message otherwise.
    */
   async register(userData: RegisterData): Promise<AuthResponse> {
     try {
-      console.log('📤 Enviando registro:', userData);
-      
       const response = await api.post<AuthResponse>("/auth/register", {
         ...userData,
         email: userData.email.trim().toLowerCase(),
-        status: userData.status || 'active'
+        status: userData.status ?? "active",
       });
 
-      console.log('📥 Respuesta del registro:', response.data);
-
-      // CASO 1: Registro exitoso PERO requiere verificación (el backend NO devuelve token)
+      // Case 1: registration OK but verification required
       if (response.data.success && !response.data.token) {
-        console.log('✅ Registro exitoso, verificación de correo requerida');
-        
-        // Guardar email pendiente para verificación
-        localStorage.setItem("pending_email", userData.email.trim().toLowerCase());
-        
-        // Devolver la respuesta completa incluyendo data
+        localStorage.setItem(
+          "pending_email",
+          userData.email.trim().toLowerCase()
+        );
         return {
           ...response.data,
-          data: response.data.data || {
+          data: response.data.data ?? {
             verification_required: true,
-            email: userData.email.trim().toLowerCase()
-          }
+            email: userData.email.trim().toLowerCase(),
+          },
         };
       }
 
-      // CASO 2: registro exitoso CON token (login automático) - NO debería pasar con verificación
+      // Case 2: registration + auto-login (unusual with email verification)
       if (response.data.success && response.data.token && response.data.user) {
-        console.warn('⚠️ El backend devolvió token en el registro (inusual con verificación)');
         this.saveToken(response.data.token, false);
         this.saveUser(response.data.user, false);
-        console.log('✅ Registro y login automático:', response.data.user);
         return response.data;
       }
 
-      // CASO 3: error real
-      throw new Error(response.data.message || "Error en el registro");
-      
+      throw new Error(response.data.message ?? "Error en el registro");
     } catch (error: unknown) {
-      console.error('❌ Error en registro:', error);
-      
       if (error instanceof AxiosError) {
-        const responseData = error.response?.data as ErrorResponse;
-        
-        // Manejar errores de validación 422
-        if (error.response?.status === 422 && responseData?.errors) {
-          const validationErrors = responseData.errors;
-          const errorMessages = Object.entries(validationErrors)
-            .map(([field, messages]) => {
-              const fieldName = this.translateFieldName(field);
-              return `${fieldName}: ${messages.join(', ')}`;
-            })
-            .join('\n');
-          
-          throw new Error(`Errores de validación:\n${errorMessages}`);
+        const data = error.response?.data as ErrorResponse | undefined;
+
+        if (error.response?.status === 422 && data?.errors) {
+          const messages = Object.entries(data.errors)
+            .map(
+              ([field, msgs]) =>
+                `${this._translateField(field)}: ${msgs.join(", ")}`
+            )
+            .join("\n");
+          throw new Error(`Errores de validación:\n${messages}`);
         }
-        
-        // Otros errores del backend
-        throw new Error(
-          responseData?.message || "Error en el registro"
-        );
+
+        throw new Error(data?.message ?? "Error en el registro");
       }
-      
       throw new Error("Error desconocido en el registro");
     }
   }
 
   /**
-   * Iniciar sesión
+   * Authenticates an existing user.
+   * @throws {Error} With a localized message on failure.
    */
   async login(credentials: LoginData): Promise<AuthResponse> {
     try {
-      console.log('📤 Intentando login...');
-      
       const response = await api.post<AuthResponse>("/auth/login", {
         email: credentials.email.trim().toLowerCase(),
         password: credentials.password,
-        remember: credentials.remember || false
+        remember: credentials.remember ?? false,
       });
 
       if (response.data.success && response.data.token) {
-        const remember = credentials.remember || false;
+        const remember = credentials.remember ?? false;
         this.saveToken(response.data.token, remember);
-        
-        // Si el backend devuelve el usuario directamente
-        if (response.data.user) {
-          this.saveUser(response.data.user, remember);
-          console.log('✅ Login exitoso:', response.data.user);
-          console.log('👤 Rol del usuario:', response.data.user.role);
-          return response.data;
-        }
-        
-        // Si no, obtener el usuario con el token
-        const user = await this.getMe();
+
+        const user = response.data.user ?? (await this.getMe());
         this.saveUser(user, remember);
-        
-        console.log('✅ Login exitoso:', user);
-        console.log('👤 Rol del usuario:', user.role);
         return { ...response.data, user };
       }
 
-      throw new Error(response.data.message || "Error en el login");
-      
+      throw new Error(response.data.message ?? "Error en el login");
     } catch (error: unknown) {
-      console.error('❌ Error en login:', error);
-      
       if (error instanceof AxiosError) {
-        const responseData = error.response?.data as ErrorResponse;
-        
-        // Manejar error 401 (credenciales inválidas)
-        if (error.response?.status === 401) {
-          throw new Error(responseData?.message || "Correo o contraseña incorrectos");
+        const data = error.response?.data as ErrorResponse | undefined;
+        const status = error.response?.status;
+
+        if (status === 401) {
+          throw new Error(data?.message ?? "Correo o contraseña incorrectos");
         }
-        
-        // Manejar error 403 (cuenta inactiva)
-        if (error.response?.status === 403) {
-          throw new Error(responseData?.message || "Tu cuenta está inactiva");
+        if (status === 403) {
+          throw new Error(data?.message ?? "Tu cuenta está inactiva");
         }
-        
-        throw new Error(responseData?.message || "Error en el login");
+        throw new Error(data?.message ?? "Error en el login");
       }
-      
       throw new Error("Error de conexión. Verifica tu internet");
     }
   }
 
   /**
-   * Obtener usuario autenticado
+   * Fetches the currently authenticated user from the API.
    */
   async getMe(): Promise<User> {
     try {
-      const response = await api.get<{ success: boolean; user: User }>("/auth/me");
-      
+      const response = await api.get<{ success: boolean; user: User }>(
+        "/auth/me"
+      );
+
       if (response.data.success && response.data.user) {
-        console.log('👤 Usuario obtenido con rol:', response.data.user.role);
         return response.data.user;
       }
-      
+
       throw new Error("No se pudo obtener la información del usuario");
-      
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
-        const responseData = error.response?.data as ErrorResponse;
-        
-        // Si el token es inválido, limpiar storage
-        if (error.response?.status === 401) {
-          this.clearStorage();
-        }
-        
-        throw new Error(
-          responseData?.message || "Error al obtener usuario"
-        );
+        if (error.response?.status === 401) this._clearAll();
+        const data = error.response?.data as ErrorResponse | undefined;
+        throw new Error(data?.message ?? "Error al obtener usuario");
       }
       throw error;
     }
   }
 
   /**
-   * Cerrar sesión
+   * Logs the user out: calls the API, then clears local state.
    */
   async logout(): Promise<void> {
     try {
       await api.post("/auth/logout");
-      console.log('✅ Logout exitoso');
-    } catch (error) {
-      console.warn("Error al hacer logout en el servidor:", error);
+    } catch (error: unknown) {
+      logger.warn("Logout server call failed:", error);
     } finally {
-      this.clearStorage();
+      this._clearAll();
     }
   }
 
   /**
-   * Refrescar token (llamado automáticamente por el interceptor)
+   * Manually refreshes the JWT token.
    */
   async refreshToken(): Promise<string> {
     try {
-      const response = await api.post<{ success: boolean; token: string }>("/auth/refresh");
-      
+      const response = await api.post<{ success: boolean; token: string }>(
+        "/auth/refresh"
+      );
+
       if (response.data.success && response.data.token) {
         const isRemembered = !!localStorage.getItem("auth_token");
         this.saveToken(response.data.token, isRemembered);
-        console.log('✅ Token refrescado');
         return response.data.token;
       }
-      
+
       throw new Error("No se pudo refrescar el token");
-      
     } catch (error: unknown) {
-      console.error('❌ Error al refrescar token:', error);
+      logger.error("Token refresh failed:", error);
       await this.logout();
       throw new Error("Sesión expirada");
     }
   }
 
-  /**
-   * Verificar si el usuario está autenticado
-   */
+  // ── Role helpers ────────────────────────────────────────────────────────
+
+  /** Returns true if the user has a valid auth token. */
   isAuthenticated(): boolean {
     return !!this.getToken();
   }
 
-  /**
-   * Verificar si el usuario tiene un rol específico
-   */
+  /** Returns true if the cached user has a specific role. */
   hasRole(role: UserRole): boolean {
-    const user = this.getUser();
-    return user?.role === role;
+    return this.getUser()?.role === role;
   }
 
-  /**
-   * Verificar si el usuario tiene alguno de los roles especificados
-   */
+  /** Returns true if the cached user has any of the provided roles. */
   hasAnyRole(roles: UserRole[]): boolean {
     const user = this.getUser();
     return user ? roles.includes(user.role) : false;
   }
 
-  /**
-   * Verificar si el usuario es admin
-   */
+  /** Returns true if the user is an admin. */
   isAdmin(): boolean {
-    return this.hasRole('admin');
+    return this.hasRole("admin");
   }
 
-  /**
-   * Verificar si el usuario es admin o support
-   */
+  /** Returns true if the user is admin or support. */
   hasAdminAccess(): boolean {
-    return this.hasAnyRole(['admin', 'support']);
-  }
-
-  /**
-   * Traducir nombres de campos para mensajes de error
-   */
-  private translateFieldName(field: string): string {
-    const translations: { [key: string]: string } = {
-      name: "Nombre",
-      email: "Correo electrónico",
-      phone: "Teléfono",
-      password: "Contraseña",
-      address: "Dirección",
-      id_documento: "Documento de identidad",
-      status: "Estado"
-    };
-    return translations[field] || field;
+    return this.hasAnyRole(["admin", "support"]);
   }
 }
 

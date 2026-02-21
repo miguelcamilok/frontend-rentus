@@ -586,7 +586,7 @@ const acceptContract = async () => {
     await contractService.acceptContract(selectedContract.value.id);
     alert("✅ Contrato aceptado exitosamente. Ahora está activo.");
     closeAcceptModal();
-    await Promise.all([loadContracts(), loadContractStats()]);
+    await loadContracts();
   } catch (error: any) {
     console.error("Error aceptando contrato:", error);
     alert(error.response?.data?.message || "Error al aceptar el contrato");
@@ -609,7 +609,7 @@ const rejectContract = async () => {
     await contractService.rejectContract(selectedContract.value.id);
     alert("❌ Contrato rechazado.");
     closeAcceptModal();
-    await Promise.all([loadContracts(), loadContractStats()]);
+    await loadContracts();
   } catch (error: any) {
     console.error("Error rechazando contrato:", error);
     alert(error.response?.data?.message || "Error al rechazar el contrato");
@@ -662,13 +662,14 @@ const getStatusInfo = (status: string) => {
     expired: { key: "contracts.statusExpired", color: "red" },
     pending: { key: "contracts.statusPending", color: "orange" },
     rejected:{ key: "contracts.statusRejected", color: "red" },
+    cancelled:{ key: "contracts.statusRejected", color: "red" },
   };
 
   const item = map[status];
 
   return item
     ? { text: t(item.key), color: item.color }
-    : { text: t("contracts.statusUnknown"), color: "black" };
+    : { text: status.charAt(0).toUpperCase() + status.slice(1), color: "black" };
 };
 
 
@@ -695,24 +696,23 @@ const getContractDuration = (contract: ContractCardUI) => {
 };
 
 // Cargar estadísticas optimizado
-const loadContractStats = async () => {
-  try {
-    const response = await contractService.getContractStats();
-    contractStats.value = response;
-  } catch (error) {
-    console.error("Error cargando estadísticas:", error);
-  }
+const loadContractStats = () => {
+  contractStats.value = {
+    total: contracts.value.length,
+    active: contracts.value.filter(c => c.status === 'active').length,
+    pending: contracts.value.filter(c => c.status === 'pending').length
+  };
 };
 
 // ✅ ARREGLADO: Cargar contratos con mejor parsing y validación
 const loadContracts = async () => {
   try {
     loading.value = true;
-    const response = await contractService.getContracts();
+    const response = await contractService.getUserContracts();
 
     console.log('📦 Contratos recibidos del backend:', response);
 
-    contracts.value = response.map((c: any) => {
+    contracts.value = (response.data || response).map((c: any) => {
       let parsedTerms: any = {};
       if (c.document_path) {
         try {
@@ -764,6 +764,7 @@ const loadContracts = async () => {
     });
 
     console.log(`✅ ${contracts.value.length} contratos procesados`);
+    loadContractStats(); // Calculate stats after loading
   } catch (error) {
     console.error("Error cargando contratos:", error);
   } finally {
@@ -774,7 +775,7 @@ const loadContracts = async () => {
 // Montaje optimizado
 onMounted(async () => {
   loadCurrentUser();
-  await Promise.all([loadContracts(), loadContractStats()]);
+  await loadContracts();
 });
 </script>
 

@@ -54,7 +54,7 @@
 
                 <!-- Icon -->
                 <div class="notification-icon" :class="getNotificationType(notification.type)">
-                  <span class="icon-emoji">{{ getNotificationIcon(notification.type) }}</span>
+                  <font-awesome-icon :icon="['fas', getNotificationIcon(notification.type)]" class="notif-fa-icon" />
                 </div>
 
                 <!-- Content -->
@@ -64,15 +64,6 @@
                     {{ formatTimeAgo(notification.created_at) }}
                   </span>
                 </div>
-
-                <!-- Actions -->
-                <button
-                  class="delete-btn"
-                  @click.stop="deleteNotification(notification.id)"
-                  title="Eliminar"
-                >
-                  ×
-                </button>
               </div>
             </transition-group>
           </div>
@@ -97,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted} from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { notificationService, type NotificationItem } from '../../services/notificationService';
 import { eventBus, EVENTS } from '../../events/eventBus';
@@ -111,76 +102,150 @@ const isOpen = ref(false);
 const loading = ref(false);
 const notifications = ref<NotificationItem[]>([]);
 const dropdownRef = ref<HTMLElement | null>(null);
+let pollInterval: ReturnType<typeof setInterval> | null = null;
+let knownIds = new Set<number>();
+let isFirstLoad = true;
+let audioCtx: AudioContext | null = null;
 
 // Computed
-const unreadCount = computed(() => 
+const unreadCount = computed(() =>
   notifications.value.filter(n => !n.read).length
 );
 
-const displayNotifications = computed(() => 
-  notifications.value.slice(0, 5) // Mostrar solo las 5 más recientes
+const displayNotifications = computed(() =>
+  notifications.value.slice(0, 5)
 );
 
-// Methods
-const toggleDropdown = () => {
-  isOpen.value = !isOpen.value;
-  if (isOpen.value && notifications.value.length === 0) {
-    loadNotifications();
+// ==================== NOTIFICATION SOUND ====================
+const playNotificationSound = () => {
+  try {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+
+    const now = audioCtx.currentTime;
+
+    // First tone — A5 (880 Hz)
+    const osc1 = audioCtx.createOscillator();
+    const gain1 = audioCtx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(880, now);
+    gain1.gain.setValueAtTime(0.15, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+    osc1.connect(gain1);
+    gain1.connect(audioCtx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.15);
+
+    // Second tone — D6 (1175 Hz), slight delay for a pleasant chime
+    const osc2 = audioCtx.createOscillator();
+    const gain2 = audioCtx.createGain();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(1175, now + 0.1);
+    gain2.gain.setValueAtTime(0.12, now + 0.1);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+    osc2.connect(gain2);
+    gain2.connect(audioCtx.destination);
+    osc2.start(now + 0.1);
+    osc2.stop(now + 0.3);
+  } catch {
+    // Silently fail — sound is a nice-to-have
   }
 };
 
-const loadNotifications = async () => {
-  loading.value = true;
+// ==================== SMART POLLING ====================
+const pollNotifications = async () => {
   try {
-    const response = await notificationService.getNotifications();
-    notifications.value = response;
-  } catch (err) {
-    console.error('Error cargando notificaciones:', err);
-    showError('Error al cargar notificaciones');
-  } finally {
-    loading.value = false;
+    const result = await notificationService.getNotifications();
+    const fetched = result.notifications;
+
+    if (isFirstLoad) {
+      // First load: populate without sound
+      notifications.value = fetched;
+      knownIds = new Set(fetched.map(n => n.id));
+      isFirstLoad = false;
+      loading.value = false;
+      return;
+    }
+
+    // Detect truly new notifications
+    const newNotifications: NotificationItem[] = [];
+    for (const n of fetched) {
+      if (!knownIds.has(n.id)) {
+        newNotifications.push(n);
+        knownIds.add(n.id);
+      }
+    }
+
+    // Update full list
+    notifications.value = fetched;
+
+    // React to new notifications
+    if (newNotifications.length > 0) {
+      playNotificationSound();
+
+      for (const n of newNotifications) {
+        eventBus.emit(EVENTS.NOTIFICATION_RECEIVED, n);
+      }
+    }
+  } catch {
+    // Silent
+  }
+};
+
+// ==================== METHODS ====================
+const toggleDropdown = () => {
+  isOpen.value = !isOpen.value;
+  // Initialize AudioContext on user interaction (browser autoplay policy)
+  if (!audioCtx) {
+    try {
+      audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    } catch { /* silent */ }
   }
 };
 
 const handleNotificationClick = async (notification: NotificationItem) => {
-  // Marcar como leída
   if (!notification.read) {
     await markAsRead(notification.id);
   }
-
-  // Cerrar dropdown
   isOpen.value = false;
 
-  // Navegar según el tipo
-  const data = notification.data ? JSON.parse(notification.data) : {};
+  const data = typeof notification.data === 'string' ? JSON.parse(notification.data) : (notification.data ?? {});
 
   switch (notification.type) {
     case 'rental_request':
-      router.push('/admin/requests');
-      break;
-    
     case 'counter_proposal':
       router.push('/admin/requests');
       break;
-    
     case 'contract_sent':
       router.push('/admin/contracts');
       break;
-    
     case 'visit_reminder':
       if (data.property_id) {
         router.push(`/admin/properties/${data.property_id}`);
       }
       break;
-
     case 'payment_reminder':
       router.push('/admin/payments');
       break;
-
     case 'maintenance':
       router.push('/admin/maintenances');
       break;
-
+    case 'system':
+      if (data.activity_type) {
+        if (data.activity_type.includes('property')) router.push('/admin/properties');
+        else if (data.activity_type.includes('contract')) router.push('/admin/contracts');
+        else if (data.activity_type.includes('payment')) router.push('/admin/payments');
+        else if (data.activity_type.includes('maintenance')) router.push('/admin/maintenances');
+        else if (data.activity_type.includes('user')) router.push('/admin/users');
+        else router.push('/admin/dashboard');
+      } else {
+        router.push('/admin/dashboard');
+      }
+      break;
     default:
       router.push('/admin/dashboard');
       break;
@@ -195,8 +260,8 @@ const markAsRead = async (notificationId: number) => {
       notif.read = true;
     }
     eventBus.emit(EVENTS.NOTIFICATION_READ, notificationId);
-  } catch (err) {
-    console.error('Error marcando como leída:', err);
+  } catch {
+    // Silent
   }
 };
 
@@ -206,26 +271,13 @@ const markAllAsRead = async () => {
     notifications.value.forEach(n => n.read = true);
     success('Todas las notificaciones marcadas como leídas');
     eventBus.emit(EVENTS.NOTIFICATION_READ, 'all');
-  } catch (err) {
-    console.error('Error marcando todas como leídas:', err);
+  } catch {
     showError('Error al marcar todas como leídas');
-  }
-};
-
-const deleteNotification = async (notificationId: number) => {
-  try {
-    await notificationService.deleteNotification(notificationId);
-    notifications.value = notifications.value.filter(n => n.id !== notificationId);
-    success('Notificación eliminada');
-  } catch (err) {
-    console.error('Error eliminando notificación:', err);
-    showError('Error al eliminar notificación');
   }
 };
 
 const viewAllNotifications = () => {
   isOpen.value = false;
-  // TODO: Crear página de notificaciones completa
   router.push('/admin/notifications');
 };
 
@@ -238,7 +290,7 @@ const formatTimeAgo = (dateString: string): string => {
   if (seconds < 3600) return `Hace ${Math.floor(seconds / 60)}m`;
   if (seconds < 86400) return `Hace ${Math.floor(seconds / 3600)}h`;
   if (seconds < 604800) return `Hace ${Math.floor(seconds / 86400)}d`;
-  
+
   return date.toLocaleDateString('es-ES', {
     day: 'numeric',
     month: 'short',
@@ -261,16 +313,16 @@ const getNotificationType = (type: string): string => {
 
 const getNotificationIcon = (type: string): string => {
   const icons: Record<string, string> = {
-    rental_request: '🏠',
-    counter_proposal: '📅',
-    contract_sent: '📄',
-    contract_accepted: '✅',
-    visit_reminder: '⏰',
-    payment_reminder: '💰',
-    maintenance: '🔧',
-    system: '🔔',
+    rental_request: 'home',
+    counter_proposal: 'calendar-alt',
+    contract_sent: 'file-contract',
+    contract_accepted: 'check-circle',
+    visit_reminder: 'clock',
+    payment_reminder: 'money-bill-wave',
+    maintenance: 'wrench',
+    system: 'bell',
   };
-  return icons[type] || '📌';
+  return icons[type] || 'info-circle';
 };
 
 // Click outside to close
@@ -280,36 +332,24 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 };
 
-// Listen for new notifications
-const handleNewNotification = (notification: NotificationItem) => {
-  // Agregar al inicio de la lista
-  notifications.value.unshift(notification);
-  
-  // Si el dropdown está cerrado, mostrar un alert
-  if (!isOpen.value) {
-    success('Nueva notificación recibida', notification.message.substring(0, 50) + '...');
-  }
-};
-
-// Lifecycle
+// ==================== LIFECYCLE ====================
 onMounted(() => {
   document.addEventListener('click', handleClickOutside);
-  eventBus.on(EVENTS.NOTIFICATION_RECEIVED, handleNewNotification);
-  
-  // Cargar notificaciones iniciales
-  loadNotifications();
-  
-  // Actualizar cada 2 minutos (sin recargar la página)
-  const interval = setInterval(loadNotifications, 120000);
-  (window as any).notificationInterval = interval;
+
+  // Initial load with loading state
+  loading.value = true;
+  pollNotifications();
+
+  // Poll every 15 seconds
+  pollInterval = setInterval(pollNotifications, 15000);
 });
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
-  eventBus.off(EVENTS.NOTIFICATION_RECEIVED, handleNewNotification);
-  
-  if ((window as any).notificationInterval) {
-    clearInterval((window as any).notificationInterval);
+
+  if (pollInterval) {
+    clearInterval(pollInterval);
+    pollInterval = null;
   }
 });
 </script>
@@ -332,10 +372,12 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  color: var(--header-text-secondary, #475569);
 }
 
 .icon-btn:hover {
-  background: #f9fafb;
+  background: var(--header-btn-hover, rgba(0,0,0,0.05));
+  color: var(--accent, #6366f1);
 }
 
 .icon {
@@ -355,6 +397,12 @@ onUnmounted(() => {
   min-width: 18px;
   text-align: center;
   box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+  animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
 /* Dropdown Panel */
@@ -364,8 +412,8 @@ onUnmounted(() => {
   right: -100px;
   width: 420px;
   max-height: 600px;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--dropdown-bg, #ffffff);
+  border: 1px solid var(--header-border, #e5e7eb);
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
   z-index: 1000;
@@ -377,11 +425,11 @@ onUnmounted(() => {
 /* Header */
 .dropdown-header {
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--header-border, #e5e7eb);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+  background: var(--dropdown-header-bg, #fafafa);
 }
 
 .header-left {
@@ -393,7 +441,7 @@ onUnmounted(() => {
 .dropdown-title {
   font-size: 1.1rem;
   font-weight: 800;
-  color: #1f2937;
+  color: var(--header-text-primary, #1f2937);
   margin: 0;
 }
 
@@ -413,7 +461,7 @@ onUnmounted(() => {
 
 .mark-all-btn {
   background: none;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--header-border, #e5e7eb);
   width: 32px;
   height: 32px;
   border-radius: 8px;
@@ -422,14 +470,14 @@ onUnmounted(() => {
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #6b7280;
+  color: var(--header-text-secondary, #6b7280);
   font-size: 1rem;
 }
 
 .mark-all-btn:hover {
-  background: #f9fafb;
-  border-color: #3b251d;
-  color: #3b251d;
+  background: var(--header-btn-hover, #f9fafb);
+  border-color: var(--header-text-primary, #3b251d);
+  color: var(--header-text-primary, #3b251d);
 }
 
 /* Content */
@@ -472,7 +520,7 @@ onUnmounted(() => {
 }
 
 .loading-state p {
-  color: #6b7280;
+  color: var(--header-text-secondary, #6b7280);
   font-size: 0.9rem;
 }
 
@@ -493,7 +541,7 @@ onUnmounted(() => {
 }
 
 .notification-item:hover {
-  background: #f9fafb;
+  background: var(--header-btn-hover, #f9fafb);
 }
 
 .notification-item.unread {
@@ -521,27 +569,35 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 1.25rem;
+  font-size: 1rem;
+}
+.notif-fa-icon {
+  font-size: 1rem;
 }
 
 .notification-icon.primary {
   background: linear-gradient(135deg, rgba(59, 134, 247, 0.1) 0%, rgba(30, 64, 175, 0.1) 100%);
+  color: #3b86f7;
 }
 
 .notification-icon.success {
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
+  color: #10b981;
 }
 
 .notification-icon.warning {
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.1) 100%);
+  color: #f59e0b;
 }
 
 .notification-icon.danger {
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
+  color: #ef4444;
 }
 
 .notification-icon.info {
   background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(8, 145, 178, 0.1) 100%);
+  color: #06b6d4;
 }
 
 .notification-content {
@@ -554,40 +610,15 @@ onUnmounted(() => {
 .notification-text {
   font-size: 0.9rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--header-text-primary, #374151);
   margin: 0;
   line-height: 1.4;
 }
 
 .notification-time {
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: var(--header-text-muted, #9ca3af);
   font-weight: 500;
-}
-
-.delete-btn {
-  background: none;
-  border: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 1.25rem;
-  color: #9ca3af;
-  opacity: 0;
-  transition: all 0.2s ease;
-}
-
-.notification-item:hover .delete-btn {
-  opacity: 1;
-}
-
-.delete-btn:hover {
-  background: #fef2f2;
-  color: #ef4444;
 }
 
 /* Empty State */
@@ -609,21 +640,21 @@ onUnmounted(() => {
 .empty-title {
   font-size: 1rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--header-text-primary, #1f2937);
   margin: 0 0 0.5rem;
 }
 
 .empty-description {
   font-size: 0.85rem;
-  color: #9ca3af;
+  color: var(--header-text-muted, #9ca3af);
   margin: 0;
 }
 
 /* Footer */
 .dropdown-footer {
   padding: 1rem 1.5rem;
-  border-top: 1px solid #e5e7eb;
-  background: #fafafa;
+  border-top: 1px solid var(--header-border, #e5e7eb);
+  background: var(--dropdown-header-bg, #fafafa);
 }
 
 .view-all-btn {
@@ -634,13 +665,13 @@ onUnmounted(() => {
   border-radius: 8px;
   font-weight: 700;
   font-size: 0.9rem;
-  color: #3b251d;
+  color: var(--header-text-primary, #3b251d);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .view-all-btn:hover {
-  background: white;
+  background: var(--header-btn-hover, white);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 

@@ -555,7 +555,12 @@ onMounted(async () => {
 
     try {
       const propertiesResponse = await api.get('/properties')
-      userProperties.value = propertiesResponse.data.filter((p: any) => p.user_id === userData.id)
+      const propsData = propertiesResponse.data?.data ?? propertiesResponse.data;
+      if (Array.isArray(propsData)) {
+        userProperties.value = propsData.filter((p: any) => p.user_id === userData.id)
+      } else {
+        userProperties.value = [];
+      }
     } catch (propError) {
       console.warn('No se pudieron cargar propiedades:', propError)
       userProperties.value = []

@@ -179,9 +179,10 @@ watch(() => props.open, async (isOpen) => {
 const loadNotifications = async () => {
   loading.value = true;
   try {
-    notifications.value = await notificationService.getNotifications();
+    const result = await notificationService.getNotifications();
+    notifications.value = result.notifications;
   } catch (error) {
-    console.error("Error cargando notificaciones:", error);
+    notifications.value = [];
   } finally {
     loading.value = false;
   }
@@ -192,7 +193,7 @@ const handleNotificationClick = async (notif: NotificationItem) => {
     await markAsRead(notif.id);
   }
 
-  const data = notif.data ? JSON.parse(notif.data) : {};
+  const data = typeof notif.data === 'string' ? JSON.parse(notif.data) : (notif.data ?? {});
 
   switch (notif.type) {
     case "rental_request":

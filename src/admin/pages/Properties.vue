@@ -1,398 +1,271 @@
 <template>
-  <!-- AlertsContainer -->
-  <AlertsContainer />
-
-  <div class="properties-page">
-    <!-- ==================== HEADER ==================== -->
-    <div class="page-header">
-      <div class="header-content">
-        <div class="header-left">
-          <div class="icon-wrapper">
-            <font-awesome-icon :icon="['fas', 'home']" />
-          </div>
-          <div>
-            <h1 class="page-title">Gestión de Propiedades</h1>
-            <p class="page-subtitle">
-              Administra y supervisa todas las propiedades publicadas en la plataforma
-            </p>
-          </div>
+  <div class="rx-properties">
+    <!-- ═══════ TOP BAR ═══════ -->
+    <header class="rx-topbar">
+      <div class="rx-topbar__left">
+        <div class="rx-topbar__icon">
+          <font-awesome-icon :icon="['fas', 'city']" />
         </div>
-        <button class="btn-primary" @click="openCreateModal">
-          <font-awesome-icon :icon="['fas', 'plus']" />
-          <span>Nueva Propiedad</span>
+        <div>
+          <h1 class="rx-topbar__title">Propiedades</h1>
+          <p class="rx-topbar__sub">Gestión integral del portafolio inmobiliario</p>
+        </div>
+      </div>
+      <button class="rx-btn rx-btn--accent" @click="openCreateModal">
+        <font-awesome-icon :icon="['fas', 'plus']" />
+        Nueva Propiedad
+      </button>
+    </header>
+
+    <!-- ═══════ KPI STRIP ═══════ -->
+    <section class="rx-kpi-strip" v-if="stats && !loadingStats">
+      <div class="rx-kpi" style="--kpi-hue: 230">
+        <div class="rx-kpi__icon"><font-awesome-icon :icon="['fas', 'building']" /></div>
+        <div class="rx-kpi__body">
+          <span class="rx-kpi__val">{{ stats.total }}</span>
+          <span class="rx-kpi__label">Total</span>
+        </div>
+      </div>
+      <div class="rx-kpi" style="--kpi-hue: 155">
+        <div class="rx-kpi__icon"><font-awesome-icon :icon="['fas', 'check-circle']" /></div>
+        <div class="rx-kpi__body">
+          <span class="rx-kpi__val">{{ stats.available }}</span>
+          <span class="rx-kpi__label">Disponibles</span>
+        </div>
+        <span class="rx-kpi__pct">{{ pctOf(stats.available, stats.total) }}%</span>
+      </div>
+      <div class="rx-kpi" style="--kpi-hue: 35">
+        <div class="rx-kpi__icon"><font-awesome-icon :icon="['fas', 'clock']" /></div>
+        <div class="rx-kpi__body">
+          <span class="rx-kpi__val">{{ stats.pending_approval }}</span>
+          <span class="rx-kpi__label">Pendientes</span>
+        </div>
+        <span class="rx-kpi__pct">{{ pctOf(stats.pending_approval, stats.total) }}%</span>
+      </div>
+      <div class="rx-kpi" style="--kpi-hue: 270">
+        <div class="rx-kpi__icon"><font-awesome-icon :icon="['fas', 'dollar-sign']" /></div>
+        <div class="rx-kpi__body">
+          <span class="rx-kpi__val price">{{ formatPrice(stats.average_price) }}</span>
+          <span class="rx-kpi__label">Precio Promedio</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════ VISUAL PANELS ═══════ -->
+    <section class="rx-panels" v-if="stats && !loadingStats">
+      <!-- Distribution donut -->
+      <div class="rx-panel rx-panel--chart">
+        <h3 class="rx-panel__title">
+          <font-awesome-icon :icon="['fas', 'chart-pie']" class="rx-panel__icon" />
+          Distribución
+        </h3>
+        <div class="rx-donut-wrap">
+          <Doughnut :data="donutData" :options="donutOpts" v-if="chartReady" />
+        </div>
+        <div class="rx-legend">
+          <span v-for="(item, i) in donutData.labels" :key="i" class="rx-legend__item">
+            <i class="rx-legend__dot" :style="{ background: (donutData.datasets[0].backgroundColor as string[])[i] }"></i>
+            {{ item }} <strong>{{ donutData.datasets[0].data[i] }}</strong>
+          </span>
+        </div>
+      </div>
+
+      <!-- Quick actions / insights panel -->
+      <div class="rx-panel rx-panel--insights">
+        <h3 class="rx-panel__title">
+          <font-awesome-icon :icon="['fas', 'bolt']" class="rx-panel__icon" />
+          Acciones Rápidas
+        </h3>
+        <div class="rx-quick-actions">
+          <button class="rx-qa" @click="filterByPending" v-if="stats.pending_approval > 0">
+            <span class="rx-qa__badge warn">{{ stats.pending_approval }}</span>
+            <span class="rx-qa__text">Aprobar pendientes</span>
+            <font-awesome-icon :icon="['fas', 'chevron-right']" class="rx-qa__arrow" />
+          </button>
+          <button class="rx-qa" @click="openCreateModal">
+            <span class="rx-qa__badge accent"><font-awesome-icon :icon="['fas', 'plus']" /></span>
+            <span class="rx-qa__text">Agregar propiedad</span>
+            <font-awesome-icon :icon="['fas', 'chevron-right']" class="rx-qa__arrow" />
+          </button>
+          <button class="rx-qa" @click="clearFilters">
+            <span class="rx-qa__badge neutral"><font-awesome-icon :icon="['fas', 'redo']" /></span>
+            <span class="rx-qa__text">Resetear filtros</span>
+            <font-awesome-icon :icon="['fas', 'chevron-right']" class="rx-qa__arrow" />
+          </button>
+        </div>
+        <!-- Mini occupancy gauge -->
+        <div class="rx-gauge-section">
+          <h4 class="rx-gauge__title">Tasa de Ocupación</h4>
+          <div class="rx-gauge-bar">
+            <div class="rx-gauge-bar__fill" :style="{ width: occupancyRate + '%' }"></div>
+          </div>
+          <span class="rx-gauge__val">{{ occupancyRate }}%</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════ FILTERS TOOLBAR ═══════ -->
+    <section class="rx-toolbar">
+      <div class="rx-search">
+        <font-awesome-icon :icon="['fas', 'search']" class="rx-search__ico" />
+        <input
+          type="text"
+          class="rx-search__input"
+          placeholder="Buscar por título, ciudad o propietario…"
+          v-model="searchQuery"
+          @input="handleSearchInput"
+        />
+        <button v-if="searchQuery" class="rx-search__clear" @click="clearSearch">
+          <font-awesome-icon :icon="['fas', 'times']" />
         </button>
       </div>
-    </div>
-
-    <!-- ==================== ESTADÍSTICAS ==================== -->
-    <div class="stats-section" v-if="stats && !loadingStats">
-      <div class="stats-grid">
-        <!-- Total de Propiedades -->
-        <div class="stat-card" :style="{ '--accent-color': '#2563eb' }">
-          <div class="stat-header">
-            <span class="stat-icon">
-              <font-awesome-icon :icon="['fas', 'building']" />
-            </span>
-            <div class="stat-content">
-              <div class="stat-label">Total Propiedades</div>
-              <div class="stat-value">{{ stats.total }}</div>
-            </div>
-          </div>
-          <div class="stat-chart">
-            <div class="stat-bar" :style="{ width: '100%' }"></div>
-          </div>
-        </div>
-
-        <!-- Disponibles -->
-        <div class="stat-card" :style="{ '--accent-color': '#059669' }">
-          <div class="stat-header">
-            <span class="stat-icon success">
-              <font-awesome-icon :icon="['fas', 'check-circle']" />
-            </span>
-            <div class="stat-content">
-              <div class="stat-label">Disponibles</div>
-              <div class="stat-value">{{ stats.available }}</div>
-            </div>
-          </div>
-          <div class="stat-chart">
-            <div
-              class="stat-bar"
-              :style="{
-                width: `${stats.total > 0 ? (stats.available / stats.total) * 100 : 0}%`,
-              }"
-            ></div>
-          </div>
-        </div>
-
-        <!-- Pendientes de Aprobación -->
-        <div class="stat-card" :style="{ '--accent-color': '#f59e0b' }">
-          <div class="stat-header">
-            <span class="stat-icon warning">
-              <font-awesome-icon :icon="['fas', 'clock']" />
-            </span>
-            <div class="stat-content">
-              <div class="stat-label">Pendientes</div>
-              <div class="stat-value">{{ stats.pending_approval }}</div>
-            </div>
-          </div>
-          <div class="stat-chart">
-            <div
-              class="stat-bar"
-              :style="{
-                width: `${stats.total > 0 ? (stats.pending_approval / stats.total) * 100 : 0}%`,
-              }"
-            ></div>
-          </div>
-        </div>
-
-        <!-- Precio Promedio -->
-        <div class="stat-card" :style="{ '--accent-color': '#8b5cf6' }">
-          <div class="stat-header">
-            <span class="stat-icon purple">
-              <font-awesome-icon :icon="['fas', 'dollar-sign']" />
-            </span>
-            <div class="stat-content">
-              <div class="stat-label">Precio Promedio</div>
-              <div class="stat-value price">{{ formatPrice(stats.average_price) }}</div>
-            </div>
-          </div>
-          <div class="stat-chart">
-            <div class="stat-bar" :style="{ width: '75%' }"></div>
-          </div>
-        </div>
+      <div class="rx-filters">
+        <select class="rx-select" v-model="filterStatus" @change="applyFilters">
+          <option value="">Estado: Todos</option>
+          <option value="available">Disponible</option>
+          <option value="rented">Rentada</option>
+          <option value="maintenance">Mantenimiento</option>
+        </select>
+        <select class="rx-select" v-model="filterApproval" @change="applyFilters">
+          <option value="">Aprobación: Todas</option>
+          <option value="pending">Pendiente</option>
+          <option value="approved">Aprobada</option>
+          <option value="rejected">Rechazada</option>
+        </select>
+        <select class="rx-select" v-model="filterVisibility" @change="applyFilters">
+          <option value="">Visibilidad: Todas</option>
+          <option value="published">Publicada</option>
+          <option value="hidden">Oculta</option>
+        </select>
+        <button v-if="hasActiveFilters" class="rx-btn rx-btn--ghost" @click="clearFilters">
+          <font-awesome-icon :icon="['fas', 'times-circle']" />
+          Limpiar
+        </button>
       </div>
-    </div>
+    </section>
 
-    <!-- ==================== FILTROS ==================== -->
-    <div class="filters-section">
-      <div class="filters-container">
-        <!-- Buscador -->
-        <div class="search-box">
-          <font-awesome-icon :icon="['fas', 'search']" class="search-icon" />
-          <input
-            type="text"
-            class="search-input"
-            placeholder="Buscar por título, ciudad o propietario..."
-            v-model="searchQuery"
-            @input="handleSearchInput"
-          />
-          <button v-if="searchQuery" class="clear-btn" @click="clearSearch">
-            <font-awesome-icon :icon="['fas', 'times']" />
-          </button>
-        </div>
-
-        <!-- Controles de Filtro -->
-        <div class="filter-controls">
-          <!-- Filtro por Estado de Disponibilidad -->
-          <div class="filter-group">
-            <label class="filter-label">Estado</label>
-            <select class="filter-select" v-model="filterStatus" @change="applyFilters">
-              <option value="">Todos</option>
-              <option value="available">Disponible</option>
-              <option value="rented">Rentada</option>
-              <option value="maintenance">Mantenimiento</option>
-            </select>
-          </div>
-
-          <!-- Filtro por Aprobación -->
-          <div class="filter-group">
-            <label class="filter-label">Aprobación</label>
-            <select class="filter-select" v-model="filterApproval" @change="applyFilters">
-              <option value="">Todas</option>
-              <option value="pending">Pendiente</option>
-              <option value="approved">Aprobada</option>
-              <option value="rejected">Rechazada</option>
-            </select>
-          </div>
-
-          <!-- Filtro por Visibilidad -->
-          <div class="filter-group">
-            <label class="filter-label">Visibilidad</label>
-            <select class="filter-select" v-model="filterVisibility" @change="applyFilters">
-              <option value="">Todas</option>
-              <option value="published">Publicada</option>
-              <option value="hidden">Oculta</option>
-            </select>
-          </div>
-
-          <!-- Botón Limpiar Filtros -->
-          <button
-            v-if="hasActiveFilters"
-            class="btn-clear-filters"
-            @click="clearFilters"
-          >
-            <font-awesome-icon :icon="['fas', 'times-circle']" />
-            Limpiar Filtros
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================== TABLA DE PROPIEDADES ==================== -->
-    <div class="table-section">
-      <!-- LOADING STATE -->
-      <div v-if="loading && properties.length === 0" class="loading-state">
-        <font-awesome-icon :icon="['fas', 'spinner']" spin class="spinner-icon" />
-        <p>Cargando propiedades...</p>
+    <!-- ═══════ DATA GRID ═══════ -->
+    <section class="rx-datagrid">
+      <!-- Loading -->
+      <div v-if="loading && properties.length === 0" class="rx-state rx-state--loading">
+        <div class="rx-spinner"></div>
+        <p>Cargando propiedades…</p>
       </div>
 
-      <!-- ERROR STATE -->
-      <div v-else-if="error && properties.length === 0" class="error-state">
-        <font-awesome-icon :icon="['fas', 'times-circle']" class="error-icon" />
-        <h3>Error al cargar propiedades</h3>
+      <!-- Error -->
+      <div v-else-if="error && properties.length === 0" class="rx-state rx-state--error">
+        <font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="rx-state__icon" />
+        <h3>Error al cargar</h3>
         <p>{{ error }}</p>
-        <button class="btn-retry" @click="loadProperties">
-          Reintentar
-        </button>
+        <button class="rx-btn rx-btn--accent" @click="loadProperties">Reintentar</button>
       </div>
 
-      <!-- EMPTY STATE -->
-      <div v-else-if="properties.length === 0" class="empty-state">
-        <font-awesome-icon :icon="['fas', 'home']" class="empty-icon" />
-        <h3 class="empty-title">No se encontraron propiedades</h3>
-        <p class="empty-description">
-          {{ hasActiveFilters ? 'Intenta ajustar los filtros de búsqueda' : 'Aún no hay propiedades registradas en el sistema' }}
-        </p>
+      <!-- Empty -->
+      <div v-else-if="properties.length === 0" class="rx-state rx-state--empty">
+        <font-awesome-icon :icon="['fas', 'building']" class="rx-state__icon" />
+        <h3>Sin propiedades</h3>
+        <p>{{ hasActiveFilters ? 'Ajusta los filtros de búsqueda' : 'Aún no hay propiedades registradas' }}</p>
       </div>
 
-      <!-- TABLA CON DATOS -->
-      <div v-else class="table-container">
-        <table class="properties-table">
+      <!-- Table -->
+      <div v-else class="rx-table-wrap">
+        <table class="rx-table">
           <thead>
             <tr>
-              <th @click="toggleSort('id')" class="sortable">
-                <div class="th-content">
-                  <span>ID</span>
-                  <font-awesome-icon 
-                    :icon="['fas', getSortIcon('id')]" 
-                    class="sort-icon"
-                    :class="{ active: sortField === 'id' }"
-                  />
-                </div>
+              <th @click="toggleSort('id')" class="rx-th--sortable">
+                ID
+                <font-awesome-icon :icon="['fas', getSortIcon('id')]" class="rx-sort" :class="{ active: sortField === 'id' }" />
               </th>
-              <th @click="toggleSort('title')" class="sortable">
-                <div class="th-content">
-                  <span>Propiedad</span>
-                  <font-awesome-icon 
-                    :icon="['fas', getSortIcon('title')]" 
-                    class="sort-icon"
-                    :class="{ active: sortField === 'title' }"
-                  />
-                </div>
+              <th @click="toggleSort('title')" class="rx-th--sortable">
+                Propiedad
+                <font-awesome-icon :icon="['fas', getSortIcon('title')]" class="rx-sort" :class="{ active: sortField === 'title' }" />
               </th>
               <th>Ubicación</th>
-              <th @click="toggleSort('monthly_price')" class="sortable">
-                <div class="th-content">
-                  <span>Precio</span>
-                  <font-awesome-icon 
-                    :icon="['fas', getSortIcon('monthly_price')]" 
-                    class="sort-icon"
-                    :class="{ active: sortField === 'monthly_price' }"
-                  />
-                </div>
+              <th @click="toggleSort('monthly_price')" class="rx-th--sortable">
+                Precio
+                <font-awesome-icon :icon="['fas', getSortIcon('monthly_price')]" class="rx-sort" :class="{ active: sortField === 'monthly_price' }" />
               </th>
               <th>Estado</th>
               <th>Aprobación</th>
-              <th @click="toggleSort('views')" class="sortable">
-                <div class="th-content">
-                  <span>Vistas</span>
-                  <font-awesome-icon 
-                    :icon="['fas', getSortIcon('views')]" 
-                    class="sort-icon"
-                    :class="{ active: sortField === 'views' }"
-                  />
-                </div>
+              <th @click="toggleSort('views')" class="rx-th--sortable">
+                Vistas
+                <font-awesome-icon :icon="['fas', getSortIcon('views')]" class="rx-sort" :class="{ active: sortField === 'views' }" />
               </th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr
-              v-for="property in properties"
-              :key="property.id"
-              class="property-row"
-            >
-              <!-- ID -->
+            <tr v-for="property in properties" :key="property.id" class="rx-row">
+              <td><span class="rx-id">#{{ property.id }}</span></td>
               <td>
-                <span class="id-badge">#{{ property.id }}</span>
-              </td>
-
-              <!-- Propiedad (Imagen + Info) -->
-              <td>
-                <div class="property-cell">
-                  <div class="property-avatar">
-                    <img
-                      v-if="property.image_url"
-                      :src="property.image_url"
-                      :alt="property.title"
-                      class="avatar-img"
-                      @error="handleImageError"
-                    />
-                    <div v-else class="avatar-placeholder">
+                <div class="rx-cell-prop">
+                  <div class="rx-cell-prop__img">
+                    <img v-if="property.image_url" :src="property.image_url" :alt="property.title" @error="handleImageError" />
+                    <div v-else class="rx-cell-prop__placeholder">
                       <font-awesome-icon :icon="['fas', 'home']" />
                     </div>
                   </div>
-                  <div class="property-info">
-                    <div class="property-name">{{ truncate(property.title, 30) }}</div>
-                    <div class="property-specs">
-                      <span>
-                        <font-awesome-icon :icon="['fas', 'bed']" />
-                        {{ property.num_bedrooms }}
-                      </span>
-                      <span>
-                        <font-awesome-icon :icon="['fas', 'bath']" />
-                        {{ property.num_bathrooms }}
-                      </span>
-                      <span>
-                        <font-awesome-icon :icon="['fas', 'ruler-combined']" />
-                        {{ property.area_m2 }}m²
-                      </span>
-                    </div>
+                  <div class="rx-cell-prop__info">
+                    <span class="rx-cell-prop__name">{{ truncate(property.title, 28) }}</span>
+                    <span class="rx-cell-prop__specs">
+                      <font-awesome-icon :icon="['fas', 'bed']" /> {{ property.num_bedrooms }}
+                      <font-awesome-icon :icon="['fas', 'bath']" /> {{ property.num_bathrooms }}
+                      <font-awesome-icon :icon="['fas', 'ruler-combined']" /> {{ property.area_m2 }}m²
+                    </span>
                   </div>
                 </div>
               </td>
-
-              <!-- Ubicación -->
               <td>
-                <div class="location-info">
-                  <div class="city">
-                    <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
-                    {{ property.city }}
-                  </div>
-                  <div class="address">{{ truncate(property.address, 25) }}</div>
+                <div class="rx-cell-loc">
+                  <span class="rx-cell-loc__city"><font-awesome-icon :icon="['fas', 'map-marker-alt']" /> {{ property.city }}</span>
+                  <span class="rx-cell-loc__addr">{{ truncate(property.address, 22) }}</span>
                 </div>
               </td>
-
-              <!-- Precio -->
               <td>
-                <div class="price-info">
-                  <div class="price-amount">{{ formatPrice(property.monthly_price) }}</div>
-                  <div class="price-period">/mes</div>
-                </div>
+                <span class="rx-price">{{ formatPrice(property.monthly_price) }}<small>/mes</small></span>
               </td>
-
-              <!-- Estado de Disponibilidad -->
               <td>
-                <span 
-                  class="badge status-badge"
-                  :style="{
-                    color: getStatusConfig(property.status).color,
-                    background: getStatusConfig(property.status).bg
-                  }"
-                >
+                <span class="rx-badge" :class="'rx-badge--' + property.status">
                   <font-awesome-icon :icon="['fas', getStatusConfig(property.status).icon]" />
                   {{ getStatusConfig(property.status).label }}
                 </span>
               </td>
-
-              <!-- Estado de Aprobación -->
               <td>
-                <span 
-                  class="badge approval-badge"
-                  :style="{
-                    color: getApprovalConfig(property.approval_status).color,
-                    background: getApprovalConfig(property.approval_status).bg
-                  }"
-                >
+                <span class="rx-badge" :class="'rx-badge--' + (property.approval_status || 'pending')">
                   <font-awesome-icon :icon="['fas', getApprovalConfig(property.approval_status).icon]" />
                   {{ getApprovalConfig(property.approval_status).label }}
                 </span>
               </td>
-
-              <!-- Vistas - AHORA CLICKEABLE -->
               <td>
-                <div class="views-count clickable" @click="openDetailsModal(property)" title="Ver detalles">
-                  <font-awesome-icon :icon="['fas', 'eye']" class="views-icon" />
-                  <span class="views-number">{{ property.views || 0 }}</span>
-                </div>
+                <button class="rx-views" @click="openDetailsModal(property)" title="Ver detalles">
+                  <font-awesome-icon :icon="['fas', 'eye']" />
+                  {{ property.views || 0 }}
+                </button>
               </td>
-
-              <!-- Acciones -->
               <td>
-                <div class="action-buttons">
-                  <!-- Aprobar (solo si está pendiente) -->
+                <div class="rx-actions">
                   <button
                     v-if="property.approval_status === 'pending'"
-                    class="btn-action btn-approve"
+                    class="rx-act rx-act--approve"
                     @click="approveProperty(property)"
-                    title="Aprobar propiedad"
+                    title="Aprobar"
                     :disabled="statusUpdateLoading[property.id]"
                   >
-                    <font-awesome-icon 
-                      :icon="['fas', statusUpdateLoading[property.id] ? 'spinner' : 'check']" 
-                      :spin="statusUpdateLoading[property.id]"
-                    />
+                    <font-awesome-icon :icon="['fas', statusUpdateLoading[property.id] ? 'spinner' : 'check']" :spin="statusUpdateLoading[property.id]" />
                   </button>
-
-                  <!-- Rechazar (solo si está pendiente o aprobada) -->
                   <button
                     v-if="property.approval_status !== 'rejected'"
-                    class="btn-action btn-reject"
+                    class="rx-act rx-act--reject"
                     @click="rejectProperty(property)"
-                    title="Rechazar propiedad"
+                    title="Rechazar"
                     :disabled="statusUpdateLoading[property.id]"
                   >
-                    <font-awesome-icon 
-                      :icon="['fas', statusUpdateLoading[property.id] ? 'spinner' : 'ban']" 
-                      :spin="statusUpdateLoading[property.id]"
-                    />
+                    <font-awesome-icon :icon="['fas', statusUpdateLoading[property.id] ? 'spinner' : 'ban']" :spin="statusUpdateLoading[property.id]" />
                   </button>
-
-                  <!-- Editar -->
-                  <button
-                    class="btn-action btn-edit"
-                    @click="openEditModal(property)"
-                    title="Editar propiedad"
-                  >
+                  <button class="rx-act rx-act--edit" @click="openEditModal(property)" title="Editar">
                     <font-awesome-icon :icon="['fas', 'pen']" />
                   </button>
-
-                  <!-- Eliminar -->
-                  <button
-                    class="btn-action btn-delete"
-                    @click="confirmDeleteProperty(property)"
-                    title="Eliminar propiedad"
-                  >
+                  <button class="rx-act rx-act--delete" @click="confirmDeleteProperty(property)" title="Eliminar">
                     <font-awesome-icon :icon="['fas', 'trash']" />
                   </button>
                 </div>
@@ -401,57 +274,39 @@
           </tbody>
         </table>
 
-        <!-- ==================== PAGINACIÓN ==================== -->
-        <div v-if="pagination.lastPage > 1" class="pagination">
-          <button 
-            class="pagination-btn"
-            :disabled="pagination.currentPage === 1 || paginationLoading"
-            @click="changePage(pagination.currentPage - 1)"
-          >
-            <font-awesome-icon :icon="['fas', 'chevron-left']" />
-            Anterior
+        <!-- Pagination -->
+        <div v-if="pagination.lastPage > 1" class="rx-pagination">
+          <button class="rx-pg-btn" :disabled="pagination.currentPage === 1 || paginationLoading" @click="changePage(pagination.currentPage - 1)">
+            <font-awesome-icon :icon="['fas', 'chevron-left']" /> Anterior
           </button>
-          
-          <div class="pagination-pages">
+          <div class="rx-pg-pages">
             <button
               v-for="page in visiblePages"
               :key="page"
-              class="pagination-page"
+              class="rx-pg-page"
               :class="{ active: page === pagination.currentPage }"
               @click="changePage(page)"
               :disabled="page === '...' || paginationLoading"
-            >
-              {{ page }}
-            </button>
+            >{{ page }}</button>
           </div>
-          
-          <div class="pagination-info">
-            Página {{ pagination.currentPage }} de {{ pagination.lastPage }}
-            <span class="separator">|</span>
-            {{ pagination.total }} propiedades
-          </div>
-          
-          <button 
-            class="pagination-btn"
-            :disabled="pagination.currentPage === pagination.lastPage || paginationLoading"
-            @click="changePage(pagination.currentPage + 1)"
-          >
-            Siguiente
-            <font-awesome-icon :icon="['fas', 'chevron-right']" />
+          <span class="rx-pg-info">
+            Pág. {{ pagination.currentPage }}/{{ pagination.lastPage }} · {{ pagination.total }} propiedades
+          </span>
+          <button class="rx-pg-btn" :disabled="pagination.currentPage === pagination.lastPage || paginationLoading" @click="changePage(pagination.currentPage + 1)">
+            Siguiente <font-awesome-icon :icon="['fas', 'chevron-right']" />
           </button>
         </div>
       </div>
-    </div>
+    </section>
   </div>
 
-  <!-- MODALES -->
+  <!-- MODALS -->
   <PropertyDetailsModal
     :show="detailsModalOpen"
     :property-id="selectedPropertyId"
     @close="closeDetailsModal"
     @edit="handleEditFromDetails"
   />
-
   <PropertyEditModal
     :show="editModalOpen"
     :property="selectedProperty"
@@ -461,11 +316,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { propertyManagementService, type Property, type PropertyStats } from '../../services/propertyManagementService';
 import { eventBus } from '../../events/eventBus';
 import { useAlerts } from '../../composables/useAlerts';
-import AlertsContainer from '../../components/AlertsContainer.vue';
 import PropertyDetailsModal from '../components/Properties/PropertyDetailsModal.vue';
 import PropertyEditModal from '../components/Properties/PropertyEditModal.vue';
 import type {
@@ -474,10 +328,16 @@ import type {
   PropertyVisibility,
 } from '../../types/property';
 
+import { Doughnut } from 'vue-chartjs';
+import {
+  Chart as ChartJS, ArcElement, Tooltip, Legend
+} from 'chart.js';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 const { success, error: showError, confirm } = useAlerts();
 
-// Estado
+// State
 const properties = ref<Property[]>([]);
 const stats = ref<PropertyStats | null>(null);
 const loading = ref(true);
@@ -486,13 +346,13 @@ const error = ref('');
 const statusUpdateLoading = ref<Record<number, boolean>>({});
 const paginationLoading = ref(false);
 
-// Modales
+// Modals
 const detailsModalOpen = ref(false);
 const editModalOpen = ref(false);
 const selectedPropertyId = ref<number | null>(null);
 const selectedProperty = ref<Property | null>(null);
 
-// Filtros individuales
+// Filters
 const filterStatus = ref<PropertyAvailabilityStatus | ''>('');
 const filterApproval = ref<PropertyApprovalStatus | ''>('');
 const filterVisibility = ref<PropertyVisibility | ''>('');
@@ -500,21 +360,47 @@ const searchQuery = ref('');
 const sortField = ref<'created_at' | string>('created_at');
 const sortOrder = ref<'asc' | 'desc'>('desc');
 
-// Paginación
-const pagination = ref({
-  currentPage: 1,
-  lastPage: 1,
-  perPage: 10,
-  total: 0,
+// Pagination
+const pagination = ref({ currentPage: 1, lastPage: 1, perPage: 10, total: 0 });
+
+// Chart
+const chartReady = ref(false);
+const donutData = ref({
+  labels: ['Disponibles', 'Rentadas', 'Mantenimiento'],
+  datasets: [{
+    data: [0, 0, 0],
+    backgroundColor: ['#10b981', '#6366f1', '#f59e0b'],
+    borderWidth: 0,
+    hoverOffset: 6,
+  }]
 });
+const donutOpts = {
+  responsive: true,
+  maintainAspectRatio: false,
+  cutout: '74%',
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: '#18181b',
+      bodyFont: { family: 'Inter', size: 13 },
+      padding: 10,
+    }
+  }
+};
 
 // Computed
-const hasActiveFilters = computed(() => 
-  searchQuery.value !== '' || 
-  filterStatus.value !== '' || 
-  filterApproval.value !== '' || 
+const hasActiveFilters = computed(() =>
+  searchQuery.value !== '' ||
+  filterStatus.value !== '' ||
+  filterApproval.value !== '' ||
   filterVisibility.value !== ''
 );
+
+const occupancyRate = computed(() => {
+  if (!stats.value || stats.value.total === 0) return 0;
+  const rented = stats.value.total - stats.value.available - (stats.value.pending_approval || 0);
+  return Math.round(Math.max(0, rented) / stats.value.total * 100);
+});
 
 const visiblePages = computed(() => {
   const current = pagination.value.currentPage;
@@ -522,71 +408,42 @@ const visiblePages = computed(() => {
   const delta = 2;
   const range: number[] = [];
   const rangeWithDots: (number | string)[] = [];
-  
   for (let i = 1; i <= last; i++) {
     if (i === 1 || i === last || (i >= current - delta && i <= current + delta)) {
       range.push(i);
     }
   }
-  
   let prev = 0;
   for (const i of range) {
     if (prev) {
-      if (i - prev === 2) {
-        rangeWithDots.push(prev + 1);
-      } else if (i - prev !== 1) {
-        rangeWithDots.push('...');
-      }
+      if (i - prev === 2) rangeWithDots.push(prev + 1);
+      else if (i - prev !== 1) rangeWithDots.push('...');
     }
     rangeWithDots.push(i);
     prev = i;
   }
-  
   return rangeWithDots;
 });
 
-// Métodos de Modales
-const openDetailsModal = (property: Property) => {
-  selectedPropertyId.value = property.id;
-  detailsModalOpen.value = true;
-};
+// Utils
+const pctOf = (part: number, total: number) => total > 0 ? Math.round((part / total) * 100) : 0;
+const truncate = (text: string, max: number) => (!text ? '' : text.length > max ? text.substring(0, max) + '…' : text);
+const formatPrice = (price: number) => propertyManagementService.formatPrice(price);
 
-const closeDetailsModal = () => {
-  detailsModalOpen.value = false;
-  selectedPropertyId.value = null;
-};
+// Modal methods
+const openDetailsModal = (p: Property) => { selectedPropertyId.value = p.id; detailsModalOpen.value = true; };
+const closeDetailsModal = () => { detailsModalOpen.value = false; selectedPropertyId.value = null; };
+const openCreateModal = () => { selectedProperty.value = null; editModalOpen.value = true; };
+const openEditModal = (p: Property) => { selectedProperty.value = p; editModalOpen.value = true; };
+const handleEditFromDetails = (p: Property) => { closeDetailsModal(); openEditModal(p); };
+const closeEditModal = () => { editModalOpen.value = false; selectedProperty.value = null; };
+const handlePropertySaved = async () => { await loadProperties(); await loadStats(); };
 
-const openCreateModal = () => {
-  selectedProperty.value = null;
-  editModalOpen.value = true;
-};
-
-const openEditModal = (property: Property) => {
-  selectedProperty.value = property;
-  editModalOpen.value = true;
-};
-
-const handleEditFromDetails = (property: Property) => {
-  closeDetailsModal();
-  openEditModal(property);
-};
-
-const closeEditModal = () => {
-  editModalOpen.value = false;
-  selectedProperty.value = null;
-};
-
-const handlePropertySaved = async (_property: Property) => {
-  await loadProperties();
-  await loadStats();
-};
-
-// Métodos de Carga
+// Data loading
 const loadProperties = async () => {
   try {
     loading.value = true;
     error.value = '';
-    
     const filters = {
       search: searchQuery.value,
       status: filterStatus.value,
@@ -597,9 +454,7 @@ const loadProperties = async () => {
       sortBy: sortField.value,
       sortOrder: sortOrder.value,
     };
-    
     const response = await propertyManagementService.getProperties(filters);
-    
     properties.value = response.data;
     pagination.value = {
       currentPage: response.meta.current_page,
@@ -610,7 +465,6 @@ const loadProperties = async () => {
   } catch (err: any) {
     error.value = err.response?.data?.message || 'Error al cargar propiedades';
     showError('Error al cargar propiedades', 'Error');
-    console.error('Error cargando propiedades:', err);
   } finally {
     loading.value = false;
     paginationLoading.value = false;
@@ -621,232 +475,120 @@ const loadStats = async () => {
   try {
     loadingStats.value = true;
     stats.value = await propertyManagementService.getPropertyStats();
+    // Update donut
+    if (stats.value) {
+      const s = stats.value;
+      donutData.value.datasets[0].data = [s.available, s.total - s.available - (s.pending_approval || 0), s.pending_approval || 0];
+      nextTick(() => { chartReady.value = true; });
+    }
   } catch (err: any) {
-    console.error('Error cargando estadísticas:', err);
     showError('Error cargando estadísticas', 'Error');
   } finally {
     loadingStats.value = false;
   }
 };
 
+// Search / Filter
 let searchTimeout: ReturnType<typeof setTimeout>;
-const handleSearchInput = () => {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => {
-    pagination.value.currentPage = 1;
-    loadProperties();
-  }, 500);
-};
+const handleSearchInput = () => { clearTimeout(searchTimeout); searchTimeout = setTimeout(() => { pagination.value.currentPage = 1; loadProperties(); }, 500); };
+const clearSearch = () => { searchQuery.value = ''; pagination.value.currentPage = 1; loadProperties(); };
+const applyFilters = () => { pagination.value.currentPage = 1; loadProperties(); };
+const clearFilters = () => { searchQuery.value = ''; filterStatus.value = ''; filterApproval.value = ''; filterVisibility.value = ''; pagination.value.currentPage = 1; loadProperties(); };
+const filterByPending = () => { filterApproval.value = 'pending'; filterStatus.value = ''; filterVisibility.value = ''; pagination.value.currentPage = 1; loadProperties(); };
 
-const clearSearch = () => {
-  searchQuery.value = '';
-  pagination.value.currentPage = 1;
-  loadProperties();
-};
-
-const applyFilters = () => {
-  pagination.value.currentPage = 1;
-  loadProperties();
-};
-
-const clearFilters = () => {
-  searchQuery.value = '';
-  filterStatus.value = '';
-  filterApproval.value = '';
-  filterVisibility.value = '';
-  pagination.value.currentPage = 1;
-  loadProperties();
-};
-
+// Sort
 const toggleSort = (field: string) => {
-  if (sortField.value !== field) {
-    // Nueva columna → empieza en DESC
-    sortField.value = field;
-    sortOrder.value = 'desc';
-  } else {
-    // Misma columna → toggle
-    sortOrder.value = sortOrder.value === 'desc' ? 'asc' : 'desc';
-  }
-
+  if (sortField.value !== field) { sortField.value = field; sortOrder.value = 'desc'; }
+  else { sortOrder.value = sortOrder.value === 'desc' ? 'asc' : 'desc'; }
   pagination.value.currentPage = 1;
   loadProperties();
 };
-
-
 const getSortIcon = (field: string): string => {
-  if (sortField.value !== field) {
-    return 'sort'; // icono neutro
-  }
-
-  return sortOrder.value === 'asc'
-    ? 'sort-up'
-    : 'sort-down';
+  if (sortField.value !== field) return 'sort';
+  return sortOrder.value === 'asc' ? 'sort-up' : 'sort-down';
 };
 
-
+// Pagination
 const changePage = (page: number | string) => {
   if (typeof page === 'string') return;
-  if (page < 1 || page > pagination.value.lastPage || page === pagination.value.currentPage) {
-    return;
-  }
+  if (page < 1 || page > pagination.value.lastPage || page === pagination.value.currentPage) return;
   paginationLoading.value = true;
   pagination.value.currentPage = page;
   loadProperties();
 };
 
+// Actions
 const approveProperty = async (property: Property) => {
   try {
     statusUpdateLoading.value[property.id] = true;
-    
     await propertyManagementService.approveProperty(property.id);
-    
     success('Propiedad aprobada correctamente', 'Éxito');
-    
-    const propertyIndex = properties.value.findIndex(p => p.id === property.id);
-    if (propertyIndex !== -1) {
-      properties.value[propertyIndex].approval_status = 'approved';
-    }
-    
+    const idx = properties.value.findIndex(p => p.id === property.id);
+    if (idx !== -1) properties.value[idx].approval_status = 'approved';
     await loadStats();
-  } catch (err: any) {
-    const errorMsg = err.response?.data?.message || 'Error al aprobar propiedad';
-    showError(errorMsg, 'Error');
-    console.error('Error aprobando propiedad:', err);
-  } finally {
-    statusUpdateLoading.value[property.id] = false;
-  }
+  } catch (err: any) { showError(err.response?.data?.message || 'Error al aprobar', 'Error'); }
+  finally { statusUpdateLoading.value[property.id] = false; }
 };
 
 const rejectProperty = async (property: Property) => {
   try {
     statusUpdateLoading.value[property.id] = true;
-    
     await propertyManagementService.rejectProperty(property.id);
-    
     success('Propiedad rechazada correctamente', 'Éxito');
-    
-    const propertyIndex = properties.value.findIndex(p => p.id === property.id);
-    if (propertyIndex !== -1) {
-      properties.value[propertyIndex].approval_status = 'rejected';
-    }
-    
+    const idx = properties.value.findIndex(p => p.id === property.id);
+    if (idx !== -1) properties.value[idx].approval_status = 'rejected';
     await loadStats();
-  } catch (err: any) {
-    const errorMsg = err.response?.data?.message || 'Error al rechazar propiedad';
-    showError(errorMsg, 'Error');
-    console.error('Error rechazando propiedad:', err);
-  } finally {
-    statusUpdateLoading.value[property.id] = false;
-  }
+  } catch (err: any) { showError(err.response?.data?.message || 'Error al rechazar', 'Error'); }
+  finally { statusUpdateLoading.value[property.id] = false; }
 };
 
 const confirmDeleteProperty = (property: Property) => {
   confirm(
-    `¿Estás seguro de que deseas eliminar la propiedad "${property.title}"? Esta acción no se puede deshacer.`,
+    `¿Estás seguro de eliminar "${property.title}"? Esta acción no se puede deshacer.`,
     () => deleteProperty(property),
     undefined,
-    {
-      title: 'Confirmar Eliminación',
-      confirmText: 'Eliminar',
-      cancelText: 'Cancelar',
-    }
+    { title: 'Confirmar Eliminación', confirmText: 'Eliminar', cancelText: 'Cancelar' }
   );
 };
-
 const deleteProperty = async (property: Property) => {
   try {
     statusUpdateLoading.value[property.id] = true;
-    
     await propertyManagementService.deleteProperty(property.id);
-    
-    success('Propiedad eliminada correctamente', 'Éxito');
-    
+    success('Propiedad eliminada', 'Éxito');
     properties.value = properties.value.filter(p => p.id !== property.id);
-    
     await loadStats();
-  } catch (err: any) {
-    const errorMsg = err.response?.data?.message || 'Error al eliminar propiedad';
-    showError(errorMsg, 'Error');
-    console.error('Error eliminando propiedad:', err);
-  } finally {
-    statusUpdateLoading.value[property.id] = false;
-  }
+  } catch (err: any) { showError(err.response?.data?.message || 'Error al eliminar', 'Error'); }
+  finally { statusUpdateLoading.value[property.id] = false; }
 };
 
-const handleImageError = (event: Event) => {
-  const img = event.target as HTMLImageElement;
-  img.style.display = 'none';
-  if (img.parentElement) {
-    img.parentElement.innerHTML = '<div class="avatar-placeholder"><font-awesome-icon icon="home" /></div>';
-  }
-};
-
-const truncate = (text: string, maxLength: number): string => {
-  if (!text) return '';
-  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-};
-
-const formatPrice = (price: number) => {
-  return propertyManagementService.formatPrice(price);
-};
+const handleImageError = (e: Event) => { (e.target as HTMLImageElement).style.display = 'none'; };
 
 const getStatusConfig = (status: string) => {
   const config = propertyManagementService.getStatusConfig(status as any);
-  // Mapear iconos a Font Awesome
-  const iconMap: Record<string, string> = {
-    '✓': 'check-circle',
-    '⏸': 'pause-circle',
-    '🔧': 'wrench',
-  };
-  return {
-    ...config,
-    icon: iconMap[config.icon] || 'circle'
-  };
+  const iconMap: Record<string, string> = { '✓': 'check-circle', '⏸': 'pause-circle', '🔧': 'wrench' };
+  return { ...config, icon: iconMap[config.icon] || 'circle' };
 };
-
 const getApprovalConfig = (status?: PropertyApprovalStatus) => {
   const safeStatus: PropertyApprovalStatus = status ?? 'pending';
-
   const config = propertyManagementService.getApprovalConfig(safeStatus);
-
-  const iconMap: Record<string, string> = {
-    '⏳': 'clock',
-    '✓': 'check-circle',
-    '✕': 'times-circle',
-  };
-
-  return {
-    ...config,
-    icon: iconMap[config.icon] || 'circle',
-  };
+  const iconMap: Record<string, string> = { '⏳': 'clock', '✓': 'check-circle', '✕': 'times-circle' };
+  return { ...config, icon: iconMap[config.icon] || 'circle' };
 };
 
-const handlePropertyCreated = () => {
-  loadProperties();
-  loadStats();
-};
-
-const handlePropertyUpdated = () => {
-  loadProperties();
-  loadStats();
-};
-
-const handlePropertyDeleted = () => {
-  loadProperties();
-  loadStats();
-};
+// Events
+const handlePropertyCreated = () => { loadProperties(); loadStats(); };
+const handlePropertyUpdated = () => { loadProperties(); loadStats(); };
+const handlePropertyDeleted = () => { loadProperties(); loadStats(); };
 
 onMounted(() => {
   loadProperties();
   loadStats();
-  
   eventBus.on('property:created', handlePropertyCreated);
   eventBus.on('property:updated', handlePropertyUpdated);
   eventBus.on('property:deleted', handlePropertyDeleted);
   eventBus.on('property:approved', handlePropertyUpdated);
   eventBus.on('property:rejected', handlePropertyUpdated);
 });
-
 onUnmounted(() => {
   eventBus.off('property:created', handlePropertyCreated);
   eventBus.off('property:updated', handlePropertyUpdated);
@@ -857,930 +599,540 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.properties-page {
-  animation: fadeIn 0.3s ease;
-  min-height: 100vh;
-  padding: 2rem;
-  max-width: 1600px;
+/* ═══════════════════════════════════════════════════
+   PROPERTIES — RENTUS ADMIN 2025 · REDESIGN FROM 0
+   ═══════════════════════════════════════════════════ */
+
+.rx-properties {
+  --surface: var(--admin-surface, #fff);
+  --surface-alt: var(--admin-surface-elevated, #f8fafc);
+  --txt: var(--admin-text-primary, #0f172a);
+  --txt2: var(--admin-text-secondary, #475569);
+  --txt3: var(--admin-text-muted, #94a3b8);
+  --brd: var(--admin-border, #e2e8f0);
+  --accent: var(--accent, #6366f1);
+  --radius: 14px;
+  --shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.03);
+
+  padding: 0;
+  max-width: 1560px;
   margin: 0 auto;
+  animation: rxFade .4s ease;
+  color: var(--txt);
 }
+@keyframes rxFade { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Header mejorado */
-.page-header {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 20px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.header-content {
+/* ─── TOP BAR ─── */
+.rx-topbar {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
-  flex-wrap: wrap;
+  padding: 1.25rem 0;
+  margin-bottom: .5rem;
 }
-
-.header-left {
+.rx-topbar__left {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
+}
+.rx-topbar__icon {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 14px rgba(99,102,241,.3);
+}
+.rx-topbar__title {
+  font-size: 1.5rem; font-weight: 800;
+  letter-spacing: -.02em;
+  margin: 0; color: var(--txt);
+}
+.rx-topbar__sub {
+  font-size: .875rem; color: var(--txt3);
+  margin: .15rem 0 0;
 }
 
-.icon-wrapper {
-  width: 64px;
-  height: 64px;
-  background: linear-gradient(135deg, #3b251d 0%, #8b6f47 100%);
-border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.75rem;
-  color: white;
-  flex-shrink: 0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+/* ─── BUTTONS ─── */
+.rx-btn {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .65rem 1.25rem;
+  border-radius: 10px;
+  font-weight: 600; font-size: .875rem;
+  border: none; cursor: pointer;
+  transition: all .2s;
+  font-family: inherit;
 }
-
-.page-title {
-  font-size: 2rem;
-  font-weight: 800;
-  color: #1f2937;
-  margin: 0 0 0.5rem;
-  letter-spacing: -0.5px;
+.rx-btn--accent {
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(99,102,241,.25);
 }
-
-.page-subtitle {
-  font-size: 1rem;
-  color: #64748b;
-  margin: 0;
-  font-weight: 500;
+.rx-btn--accent:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(99,102,241,.35); }
+.rx-btn--ghost {
+  background: var(--surface-alt);
+  color: var(--txt2);
+  border: 1px solid var(--brd);
 }
+.rx-btn--ghost:hover { border-color: var(--accent); color: var(--accent); }
 
-.btn-primary {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  background: linear-gradient(135deg, #3b251d 0%, #8b6f47 100%);
-  color: white;
-  border: none;
-  padding: 1rem 2rem;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  white-space: nowrap;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-.btn-primary:active {
-  transform: translateY(0);
-}
-
-/* Stats mejoradas */
-.stats-section {
-  margin-bottom: 2rem;
-  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s backwards;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.stats-grid {
+/* ─── KPI STRIP ─── */
+.rx-kpi-strip {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
 }
-
-.stat-card {
-  background: #ffffff;
-    border: 1px solid #e5e7eb;
-border-radius: 20px;
-  padding: 1.75rem;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: var(--accent-color);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  border-color: var(--accent-color);
-}
-
-.stat-card:hover::before {
-  opacity: 1;
-}
-
-.stat-header {
+.rx-kpi {
+  background: var(--surface);
+  border: 1px solid var(--brd);
+  border-radius: var(--radius);
+  padding: 1.15rem 1.25rem;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  transition: all .25s;
+  box-shadow: var(--shadow);
+}
+.rx-kpi:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.06); }
+.rx-kpi__icon {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  background: hsl(var(--kpi-hue) 80% 95%);
+  color: hsl(var(--kpi-hue) 70% 50%);
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.rx-kpi__body { display: flex; flex-direction: column; }
+.rx-kpi__val { font-size: 1.4rem; font-weight: 800; letter-spacing: -.02em; color: var(--txt); }
+.rx-kpi__val.price { font-size: 1.1rem; }
+.rx-kpi__label { font-size: .78rem; color: var(--txt3); font-weight: 500; }
+.rx-kpi__pct {
+  position: absolute; top: .75rem; right: 1rem;
+  font-size: .7rem; font-weight: 700;
+  color: hsl(var(--kpi-hue) 70% 50%);
+  background: hsl(var(--kpi-hue) 80% 95%);
+  padding: .15rem .45rem;
+  border-radius: 6px;
+}
+
+/* ─── PANELS ─── */
+.rx-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1.25rem;
   margin-bottom: 1.25rem;
 }
-
-.stat-icon {
-  width: 56px;
-  height: 56px;
-  background: var(--accent-color);
-  color: white;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  flex-shrink: 0;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-.stat-icon.success {
-  background: #059669;
-}
-
-.stat-icon.warning {
-  background: #f59e0b;
-}
-
-.stat-icon.purple {
-  background: #8b5cf6;
-}
-
-.stat-content {
-  flex: 1;
-}
-
-.stat-label {
-  font-size: 0.875rem;
-  color: #64748b;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 0.5rem;
-}
-
-.stat-value {
-  font-size: 2.5rem;
-  font-weight: 900;
-  color: #1f2937;
-  line-height: 1;
-}
-
-.stat-value.price {
-  font-size: 1.75rem;
-}
-
-.stat-chart {
-  height: 6px;
-  background: #f1f5f9;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.stat-bar {
-  height: 100%;
-  background: var(--accent-color);
-  border-radius: 3px;
-  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Filters mejorados */
-.filters-section {
-  margin-bottom: 2rem;
-  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s backwards;
-}
-
-.filters-container {
-  background: #ffffff;
-    border: 1px solid #e5e7eb;
-border-radius: 20px;
+.rx-panel {
+  background: var(--surface);
+  border: 1px solid var(--brd);
+  border-radius: var(--radius);
   padding: 1.5rem;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow);
 }
-
-.search-box {
-  position: relative;
-  margin-bottom: 1.5rem;
-      border: 1px solid #e5e7eb;
-border-radius: 20px;
+.rx-panel__title {
+  font-size: 1rem; font-weight: 700;
+  margin: 0 0 1rem;
+  display: flex; align-items: center; gap: .5rem;
+  color: var(--txt);
 }
+.rx-panel__icon { color: var(--accent); font-size: .9rem; }
 
-.search-icon {
-  position: absolute;
-  left: 1.25rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #94a3b8;
-  font-size: 1.1rem;
-  pointer-events: none;
+/* Donut */
+.rx-donut-wrap {
+  height: 180px;
+  display: flex; justify-content: center;
+  margin-bottom: .75rem;
 }
-
-.search-input {
-  width: 100%;
-  padding: 1rem 3.5rem 1rem 3.5rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 500;
-  background: #f8fafc;
-  color: #1f2937;
-  transition: all 0.3s ease;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #3b251d;
-  background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(59, 37, 29, 0.1);
-}
-
-.clear-btn {
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  background: #f1f5f9;
-  border: none;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  cursor: pointer;
+.rx-legend {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  color: #64748b;
-}
-
-.clear-btn:hover {
-  background: #dc2626;
-  color: white;
-}
-
-.filter-controls {
-  display: flex;
-  gap: 1rem;
   flex-wrap: wrap;
-  align-items: flex-end;
+  gap: .75rem 1.25rem;
 }
-
-.filter-group {
-  flex: 1;
-  min-width: 180px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.rx-legend__item {
+  display: flex; align-items: center; gap: .35rem;
+  font-size: .8rem; color: var(--txt2);
 }
-
-.filter-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.filter-select {
-  padding: 0.875rem 1rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  background: #f8fafc;
-  color: #1f2937;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.filter-select:hover {
-  border-color: #3b251d;
-}
-
-.filter-select:focus {
-  outline: none;
-  border-color: #3b251d;
-  background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(59, 37, 29, 0.1);
-}
-
-.btn-clear-filters {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.875rem 1.5rem;
-  border: 2px solid #dc2626;
-  border-radius: 12px;
-  background: #ffffff;
-  color: #dc2626;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-}
-
-.btn-clear-filters:hover {
-  background: #dc2626;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-/* Table mejorada */
-.table-section {
-  background: #ffffff;
-    border: 1px solid #e5e7eb;
-border-radius: 20px;
-  overflow: hidden;
-  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.3s backwards;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.loading-state,
-.error-state,
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 5rem 2rem;
-  text-align: center;
-}
-
-.spinner-icon,
-.error-icon,
-.empty-icon {
-  font-size: 4rem;
-  margin-bottom: 1.5rem;
-  color: #94a3b8;
-}
-
-.spinner-icon {
-  color: #3b251d;
-}
-
-.error-icon {
-  color: #dc2626;
-}
-
-.empty-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 0.75rem;
-}
-
-.empty-description {
-  font-size: 1rem;
-  color: #64748b;
-  margin: 0;
-  max-width: 500px;
-}
-
-.btn-retry {
-  margin-top: 2rem;
-  padding: 0.875rem 2rem;
-  background: #3b251d;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.btn-retry:hover {
-  background: #8b6f47;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-.table-container {
-  overflow-x: auto;
-}
-
-.properties-table {
-  width: 100%;
-  min-width: 1000px;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-.properties-table thead {
-  background: #f1f5f9;
-}
-
-.properties-table th {
-  padding: 1.25rem 1.5rem;
-  text-align: left;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 2px solid #e5e7eb;
-  white-space: nowrap;
-}
-
-.properties-table th.sortable {
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.2s ease;
-}
-
-.properties-table th.sortable:hover {
-  background: #e2e8f0;
-  color: #1f2937;
-}
-
-.th-content {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.sort-icon {
-  opacity: 0.4;
-  transition: all 0.2s ease;
-  font-size: 0.875rem;
-}
-
-.sort-icon.active {
-  opacity: 1;
-  color: #3b251d;
-}
-
-.properties-table td {
-  padding: 1.5rem 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-  font-size: 0.95rem;
-  color: #1f2937;
-  background: #ffffff;
-}
-
-.property-row {
-  transition: all 0.2s ease;
-  animation: fadeInRow 0.3s ease backwards;
-}
-
-@keyframes fadeInRow {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.property-row:hover td {
-  background: #f8fafc;
-}
-
-.id-badge {
+.rx-legend__item strong { color: var(--txt); font-weight: 700; }
+.rx-legend__dot {
+  width: 10px; height: 10px;
+  border-radius: 3px;
   display: inline-block;
-  padding: 0.375rem 0.75rem;
-  background: #f1f5f9;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 0.875rem;
-  color: #64748b;
 }
 
-.property-cell {
+/* Quick Actions */
+.rx-quick-actions { display: flex; flex-direction: column; gap: .5rem; margin-bottom: 1.25rem; }
+.rx-qa {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: .75rem;
+  padding: .75rem 1rem;
+  border-radius: 10px;
+  background: var(--surface-alt);
+  border: 1px solid var(--brd);
+  cursor: pointer;
+  transition: all .2s;
+  font-family: inherit;
+  width: 100%;
+  text-align: left;
+}
+.rx-qa:hover { border-color: var(--accent); transform: translateX(3px); }
+.rx-qa__badge {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .8rem; font-weight: 700; flex-shrink: 0;
+}
+.rx-qa__badge.warn { background: #fef3c7; color: #d97706; }
+.rx-qa__badge.accent { background: #ede9fe; color: #6366f1; }
+.rx-qa__badge.neutral { background: #f1f5f9; color: #64748b; }
+.rx-qa__text { flex: 1; font-size: .875rem; font-weight: 600; color: var(--txt); }
+.rx-qa__arrow { color: var(--txt3); font-size: .7rem; }
+
+/* Gauge */
+.rx-gauge-section { margin-top: auto; }
+.rx-gauge__title { font-size: .78rem; font-weight: 600; color: var(--txt3); margin-bottom: .5rem; }
+.rx-gauge-bar {
+  width: 100%; height: 8px;
+  background: var(--surface-alt);
+  border-radius: 99px;
+  overflow: hidden;
+  border: 1px solid var(--brd);
+}
+.rx-gauge-bar__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: 99px;
+  transition: width .6s ease;
+}
+.rx-gauge__val {
+  display: block;
+  text-align: right;
+  font-size: .8rem;
+  font-weight: 700;
+  color: #10b981;
+  margin-top: .25rem;
 }
 
-.property-avatar {
-  flex-shrink: 0;
-}
-
-.avatar-img {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  object-fit: cover;
-  border: 2px solid #e5e7eb;
-}
-
-.avatar-placeholder {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #3b251d 0%, #8b6f47 100%);
+/* ─── TOOLBAR ─── */
+.rx-toolbar {
   display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-bottom: 1.25rem;
+  align-items: center;
+}
+.rx-search {
+  flex: 1;
+  min-width: 260px;
+  position: relative;
+}
+.rx-search__ico {
+  position: absolute;
+  left: 1rem; top: 50%;
+  transform: translateY(-50%);
+  color: var(--txt3);
+  font-size: .85rem;
+}
+.rx-search__input {
+  width: 100%;
+  padding: .7rem 2.5rem .7rem 2.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--brd);
+  background: var(--surface);
+  color: var(--txt);
+  font-size: .875rem;
+  font-family: inherit;
+  transition: border-color .2s;
+}
+.rx-search__input::placeholder { color: var(--txt3); }
+.rx-search__input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,.08); }
+.rx-search__clear {
+  position: absolute; right: .75rem; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  color: var(--txt3); cursor: pointer;
+  font-size: .8rem;
+}
+.rx-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  align-items: center;
+}
+.rx-select {
+  padding: .65rem 2rem .65rem .85rem;
+  border-radius: 10px;
+  border: 1px solid var(--brd);
+  background: var(--surface);
+  color: var(--txt2);
+  font-size: .8rem;
+  font-family: inherit;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right .75rem center;
+}
+.rx-select:focus { outline: none; border-color: var(--accent); }
+
+/* ─── DATA GRID ─── */
+.rx-datagrid {
+  background: var(--surface);
+  border: 1px solid var(--brd);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+/* States */
+.rx-state {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  color: white;
-  border: 2px solid #e5e7eb;
+  padding: 4rem 2rem;
+  text-align: center;
+  gap: .75rem;
 }
-
-.property-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.rx-state__icon { font-size: 2.5rem; color: var(--txt3); }
+.rx-state h3 { font-size: 1.1rem; font-weight: 700; color: var(--txt); margin: 0; }
+.rx-state p { font-size: .875rem; color: var(--txt3); margin: 0; }
+.rx-spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--brd);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: rxSpin .7s linear infinite;
 }
+@keyframes rxSpin { to { transform: rotate(360deg); } }
 
-.property-name {
-  font-weight: 700;
-  color: #1f2937;
-  font-size: 1rem;
+/* Table */
+.rx-table-wrap { overflow-x: auto; }
+.rx-table {
+  width: 100%;
+  border-collapse: collapse;
 }
-
-.property-specs {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.875rem;
-  color: #64748b;
+.rx-table thead {
+  position: sticky; top: 0; z-index: 2;
 }
-
-.property-specs span {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-}
-
-.location-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-}
-
-.city {
+.rx-table th {
+  padding: .85rem 1rem;
+  font-size: .75rem;
   font-weight: 600;
-  color: #1f2937;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--txt3);
+  background: var(--surface-alt);
+  border-bottom: 1px solid var(--brd);
+  text-align: left;
+  white-space: nowrap;
 }
-
-.address {
-  font-size: 0.875rem;
-  color: #64748b;
+.rx-th--sortable { cursor: pointer; user-select: none; }
+.rx-th--sortable:hover { color: var(--txt); }
+.rx-sort {
+  font-size: .65rem;
+  margin-left: .35rem;
+  color: var(--txt3);
+  opacity: .5;
+  transition: opacity .2s;
 }
-
-.price-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+.rx-sort.active { opacity: 1; color: var(--accent); }
+.rx-table td {
+  padding: .85rem 1rem;
+  font-size: .85rem;
+  color: var(--txt);
+  border-bottom: 1px solid var(--brd);
+  vertical-align: middle;
 }
+.rx-row { transition: background .15s; }
+.rx-row:hover td { background: var(--surface-alt); }
+.rx-row:last-child td { border-bottom: none; }
 
-.price-amount {
-  font-weight: 800;
-  color: #3b251d;
-  font-size: 1.25rem;
-}
-
-.price-period {
-  font-size: 0.75rem;
-  color: #94a3b8;
+/* Cell: ID */
+.rx-id {
+  font-size: .75rem;
   font-weight: 600;
+  color: var(--txt3);
+  background: var(--surface-alt);
+  padding: .2rem .55rem;
+  border-radius: 6px;
+  border: 1px solid var(--brd);
 }
 
-.badge {
+/* Cell: Property */
+.rx-cell-prop {
+  display: flex; align-items: center; gap: .75rem;
+}
+.rx-cell-prop__img {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--surface-alt);
+  border: 1px solid var(--brd);
+}
+.rx-cell-prop__img img { width: 100%; height: 100%; object-fit: cover; }
+.rx-cell-prop__placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--txt3); font-size: .9rem;
+}
+.rx-cell-prop__info { display: flex; flex-direction: column; }
+.rx-cell-prop__name { font-weight: 600; color: var(--txt); font-size: .85rem; }
+.rx-cell-prop__specs {
+  font-size: .72rem; color: var(--txt3);
+  display: flex; align-items: center; gap: .5rem;
+  margin-top: .15rem;
+}
+
+/* Cell: Location */
+.rx-cell-loc { display: flex; flex-direction: column; }
+.rx-cell-loc__city { font-weight: 600; font-size: .82rem; color: var(--txt); display: flex; align-items: center; gap: .35rem; }
+.rx-cell-loc__addr { font-size: .72rem; color: var(--txt3); margin-top: .1rem; }
+
+/* Cell: Price */
+.rx-price {
+  font-weight: 700; color: var(--txt);
+  font-size: .88rem;
+}
+.rx-price small {
+  font-weight: 400; color: var(--txt3);
+  font-size: .72rem;
+}
+
+/* Badge */
+.rx-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  white-space: nowrap;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.views-count {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-.views-count.clickable {
-  cursor: pointer;
-  transition: all 0.3s ease;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-}
-
-.views-count.clickable:hover {
-  background: #f1f5f9;
-  color: #3b251d;
-  transform: translateY(-2px);
-}
-
-.views-icon {
-  color: #94a3b8;
-  font-size: 1.1rem;
-  transition: color 0.3s ease;
-}
-
-.views-count.clickable:hover .views-icon {
-  color: #3b251d;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.btn-action {
-  width: 40px;
-  height: 40px;
-  border: 2px solid #e5e7eb;
-  background: #ffffff;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  color: #64748b;
-}
-
-.btn-action:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.btn-action:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-action:disabled:hover {
-  transform: none;
-}
-
-.btn-approve:hover {
-  background: #059669;
-  border-color: #059669;
-  color: white;
-}
-
-.btn-reject:hover {
-  background: #f59e0b;
-  border-color: #f59e0b;
-  color: white;
-}
-
-.btn-edit:hover {
-  background: #2563eb;
-  border-color: #2563eb;
-  color: white;
-}
-
-.btn-delete:hover {
-  background: #dc2626;
-  border-color: #dc2626;
-  color: white;
-}
-
-/* Pagination mejorada */
-.pagination {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  border-top: 2px solid #e5e7eb;
-  background: #f1f5f9;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.pagination-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.875rem 1.5rem;
-  background: #ffffff;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  color: #1f2937;
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background: #3b251d;
-  color: white;
-  border-color: #3b251d;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.pagination-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.pagination-pages {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.pagination-page {
-  min-width: 44px;
-  height: 44px;
-  padding: 0.5rem;
-  background: #ffffff;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  color: #1f2937;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.pagination-page:hover:not(:disabled):not(.active) {
-  background: #f1f5f9;
-  border-color: #3b251d;
-  transform: translateY(-1px);
-}
-
-.pagination-page.active {
-  background: #3b251d;
-  color: white;
-  border-color: #3b251d;
-}
-
-.pagination-page:disabled {
-  cursor: default;
-  opacity: 0.6;
-}
-
-.pagination-info {
-  font-size: 0.95rem;
+  gap: .3rem;
+  padding: .25rem .65rem;
+  border-radius: 7px;
+  font-size: .72rem;
   font-weight: 600;
-  color: #64748b;
   white-space: nowrap;
 }
+.rx-badge--available { background: #ecfdf5; color: #059669; }
+.rx-badge--rented { background: #eef2ff; color: #4f46e5; }
+.rx-badge--maintenance { background: #fffbeb; color: #d97706; }
+.rx-badge--pending { background: #fef3c7; color: #d97706; }
+.rx-badge--approved { background: #ecfdf5; color: #059669; }
+.rx-badge--rejected { background: #fef2f2; color: #dc2626; }
 
-.separator {
-  margin: 0 0.5rem;
-  opacity: 0.5;
+/* Views button */
+.rx-views {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .3rem .65rem;
+  border-radius: 7px;
+  background: var(--surface-alt);
+  border: 1px solid var(--brd);
+  color: var(--txt2);
+  font-size: .78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: inherit;
 }
+.rx-views:hover { border-color: var(--accent); color: var(--accent); }
 
-/* Responsive */
+/* Actions */
+.rx-actions {
+  display: flex;
+  gap: .35rem;
+}
+.rx-act {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--brd);
+  background: var(--surface);
+  color: var(--txt3);
+  cursor: pointer;
+  transition: all .2s;
+  font-size: .75rem;
+}
+.rx-act:hover { color: #fff; transform: scale(1.08); }
+.rx-act--approve:hover { background: #059669; border-color: #059669; }
+.rx-act--reject:hover { background: #dc2626; border-color: #dc2626; }
+.rx-act--edit:hover { background: #6366f1; border-color: #6366f1; }
+.rx-act--delete:hover { background: #ef4444; border-color: #ef4444; }
+.rx-act:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ─── PAGINATION ─── */
+.rx-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
+  padding: 1rem;
+  border-top: 1px solid var(--brd);
+  flex-wrap: wrap;
+}
+.rx-pg-btn {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--brd);
+  background: var(--surface);
+  color: var(--txt2);
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: inherit;
+}
+.rx-pg-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.rx-pg-btn:disabled { opacity: .4; cursor: not-allowed; }
+.rx-pg-pages { display: flex; gap: .25rem; }
+.rx-pg-page {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--txt2);
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: inherit;
+}
+.rx-pg-page:hover { background: var(--surface-alt); }
+.rx-pg-page.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.rx-pg-info { font-size: .78rem; color: var(--txt3); }
+
+/* ─── RESPONSIVE ─── */
 @media (max-width: 1024px) {
-  .properties-page {
-    padding: 1.5rem;
-  }
-
-  .header-content {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .btn-primary {
-    justify-content: center;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  }
+  .rx-panels { grid-template-columns: 1fr; }
+  .rx-detail-grid { grid-template-columns: 1fr; }
 }
-
 @media (max-width: 768px) {
-  .properties-page {
-    padding: 1rem;
-  }
-
-  .page-header {
-    padding: 1.5rem;
-  }
-
-  .page-title {
-    font-size: 1.5rem;
-  }
-
-  .filter-controls {
-    flex-direction: column;
-  }
-
-  .filter-group {
-    min-width: 100%;
-  }
-
-  .properties-table {
-    min-width: 800px;
-  }
-
-  .pagination {
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .pagination-btn,
-  .pagination-pages,
-  .pagination-info {
-    width: 100%;
-  }
-
-  .pagination-pages {
-    justify-content: center;
-  }
-
-  .pagination-info {
-    text-align: center;
-  }
+  .rx-topbar { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .rx-topbar__left, .rx-topbar__right { width: 100%; display: flex; flex-direction: column; align-items: flex-start; }
+  .rx-topbar__right .rx-btn { width: 100%; justify-content: center; margin-top: 0.5rem; }
+  .rx-kpi-strip { grid-template-columns: 1fr 1fr; }
+  .rx-toolbar { flex-direction: column; align-items: stretch; gap: 1rem; }
+  .rx-search { width: 100%; }
+  .rx-search__input { width: 100%; }
+  .rx-filters { width: 100%; flex-direction: column; align-items: stretch; gap: 0.5rem; }
+  .rx-select { width: 100%; }
+  .rx-filters .rx-btn { width: 100%; justify-content: center; }
+  .rx-form__grid { grid-template-columns: 1fr; }
+  .rx-modal__footer { flex-direction: column; gap: 0.5rem; }
+  .rx-modal__footer .rx-btn { width: 100%; margin: 0; }
 }
-
 @media (max-width: 480px) {
-  .properties-table {
-    min-width: 700px;
-  }
-
-  .property-cell {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
-}
-
-.table-container::-webkit-scrollbar {
-  height: 10px;
-}
-
-.table-container::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 5px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-  background: #9ca3af;
-  border-radius: 5px;
-}
-
-.table-container::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  .rx-kpi-strip { grid-template-columns: 1fr; }
+  .rx-topbar__title { font-size: 1.25rem; }
+  .rx-topbar__icon { width: 40px; height: 40px; font-size: 1rem; }
 }
 </style>

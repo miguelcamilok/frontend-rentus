@@ -343,33 +343,19 @@ export const userManagementService = {
    * Obtener configuración de color para el estado
    */
   getStatusConfig(status: string): { color: string; bg: string; label: string; icon: string } {
-    const configs = {
-      active: {
-        color: '#059669',
-        bg: '#f0fdf4',
-        label: 'Activo',
-        icon: '✓',
-      },
-      inactive: {
-        color: '#6b7280',
-        bg: '#f9fafb',
-        label: 'Inactivo',
-        icon: '○',
-      },
-      pending: {
-        color: '#f59e0b',
-        bg: '#fffbeb',
-        label: 'Pendiente',
-        icon: '⏳',
-      },
-      suspended: {
-        color: '#dc2626',
-        bg: '#fef2f2',
-        label: 'Suspendido',
-        icon: '✕',
-      },
+    const s = (status || '').toLowerCase();
+    const configs: Record<string, any> = {
+      active: { color: '#059669', bg: '#f0fdf4', label: 'Activo', icon: '✓' },
+      inactive: { color: '#6b7280', bg: '#f9fafb', label: 'Inactivo', icon: '○' },
+      pending: { color: '#f59e0b', bg: '#fffbeb', label: 'Pendiente', icon: '⏳' },
+      suspended: { color: '#dc2626', bg: '#fef2f2', label: 'Suspendido', icon: '✕' },
+      // Spanish keys
+      activo: { color: '#059669', bg: '#f0fdf4', label: 'Activo', icon: '✓' },
+      inactivo: { color: '#6b7280', bg: '#f9fafb', label: 'Inactivo', icon: '○' },
+      pendiente: { color: '#f59e0b', bg: '#fffbeb', label: 'Pendiente', icon: '⏳' },
+      suspendido: { color: '#dc2626', bg: '#fef2f2', label: 'Suspendido', icon: '✕' },
     };
 
-    return configs[status as keyof typeof configs] || configs.inactive;
+    return configs[s] || configs.inactive;
   },
 };
