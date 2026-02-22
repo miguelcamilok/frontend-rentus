@@ -927,6 +927,7 @@
       "deleteMethodConfirm": "Are you sure you want to delete this card?",
       "deleteMethodSuccess": "Card deleted successfully",
       "deleteMethodError": "Error deleting payment method.",
+      "cardSaved": "Card saved successfully",
       "validation": {
         "holder": "Cardholder name is required",
         "card": "Invalid card number",
@@ -1310,6 +1311,7 @@
     "logout": "Logout",
     "yes": "Yes",
     "no": "No",
-    "validation": "Validation"
+    "validation": "Validation",
+    "success": "Success"
   }
 }

@@ -703,6 +703,7 @@
       "deleteMethodConfirm": "¿Estás seguro de que deseas eliminar esta tarjeta?",
       "deleteMethodSuccess": "Tarjeta eliminada correctamente",
       "deleteMethodError": "Error al eliminar el método de pago.",
+      "cardSaved": "Tarjeta guardada correctamente",
       "validation": {
         "holder": "El nombre del titular es requerido",
         "card": "Número de tarjeta inválido",
@@ -1086,6 +1087,7 @@
     "logout": "Cerrar sesión",
     "yes": "Sí",
     "no": "No",
-    "validation": "Validación"
+    "validation": "Validación",
+    "success": "Éxito"
   }
 }

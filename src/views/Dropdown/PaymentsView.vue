@@ -166,21 +166,21 @@
         <div class="px-modal-card">
           <header class="px-modal-header">
             <div class="header-info">
-              <h3>{{ $t('payments.modals.payment.title') }}</h3>
-              <p v-if="selectedContract">{{ $t('payments.table.contractId') }}{{ selectedContract.id }} - {{ selectedContract.property?.title }}</p>
+              <h3>{{ isAddingCardOnly ? $t('payments.modals.methods.newCard') : $t('payments.modals.payment.title') }}</h3>
+              <p v-if="selectedContract && !isAddingCardOnly">{{ $t('payments.table.contractId') }}{{ selectedContract.id }} - {{ selectedContract.property?.title }}</p>
             </div>
             <button class="btn-close" @click="showPaymentModal = false">&times;</button>
           </header>
 
           <div class="px-modal-body">
-            <!-- Resumen del Pago -->
-            <div class="pay-summary">
+            <!-- Resumen del Pago (Ocultar si solo agregamos tarjeta) -->
+            <div v-if="!isAddingCardOnly" class="pay-summary">
               <span class="summary-label">{{ $t('payments.modals.payment.amountToPay') }}</span>
               <span class="summary-value">{{ formatPrice(selectedContract?.deposit || 0) }}</span>
             </div>
 
-            <!-- Selección de Método -->
-            <div class="pay-methods-grid">
+            <!-- Selección de Método (Ocultar si solo agregamos tarjeta) -->
+            <div v-if="!isAddingCardOnly" class="pay-methods-grid">
               <button 
                 v-if="savedCards.length > 0"
                 :class="['method-tab', { active: selectedMethod === 'saved' }]"
@@ -247,7 +247,10 @@
             <button class="btn-cancel" @click="showPaymentModal = false">{{ $t('payments.modals.payment.cancel') }}</button>
             <button class="btn-submit" :disabled="isProcessing" @click="processPayment">
               <div v-if="isProcessing" class="mini-spinner"></div>
-              <span v-else>{{ $t('payments.modals.payment.confirm', { amount: formatPrice(selectedContract?.deposit || 0) }) }}</span>
+              <template v-else>
+                <span v-if="isAddingCardOnly">{{ $t('common.save') }}</span>
+                <span v-else>{{ $t('payments.modals.payment.confirm', { amount: formatPrice(selectedContract?.deposit || 0) }) }}</span>
+              </template>
             </button>
           </footer>
         </div>
@@ -292,7 +295,7 @@
           </div>
           
           <footer class="px-modal-footer dual">
-            <button class="btn-add-method-modal" @click="showManageMethodsModal = false; showPaymentModal = true; selectedMethod = 'new'">
+            <button class="btn-add-method-modal" @click="openAddCardModal">
               <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
               {{ $t('payments.modals.methods.newCard') }}
             </button>
@@ -410,7 +413,7 @@ import { useI18n } from 'vue-i18n';
 
 const { t, locale } = useI18n();
 
-const { error, success } = useAlerts();
+const { error, success, danger: dangerAlert } = useAlerts();
 
 const payments    = ref<any[]>([]);
 const contracts   = ref<any[]>([]);
@@ -427,6 +430,7 @@ const showSuccessModal       = ref(false);
 const showManageMethodsModal = ref(false);
 const showDetailModal        = ref(false);
 const isProcessing           = ref(false);
+const isAddingCardOnly       = ref(false);
 
 const selectedContract = ref<any>(null);
 const selectedPayment  = ref<any>(null);
@@ -574,10 +578,7 @@ const fetchPaymentMethods = async () => {
   }
 };
 
-const openPaymentModal = (contract: any) => {
-  selectedContract.value = contract;
-  showPaymentModal.value = true;
-  // Reset form
+const resetPaymentForm = () => {
   paymentForm.value = {
     holder_name: '',
     card_number: '',
@@ -585,6 +586,21 @@ const openPaymentModal = (contract: any) => {
     cvv: '',
     save_card: true
   };
+};
+
+const openAddCardModal = () => {
+  resetPaymentForm();
+  isAddingCardOnly.value = true;
+  selectedMethod.value = 'new';
+  showManageMethodsModal.value = false;
+  showPaymentModal.value = true;
+};
+
+const openPaymentModal = (contract: any) => {
+  selectedContract.value = contract;
+  isAddingCardOnly.value = false;
+  showPaymentModal.value = true;
+  resetPaymentForm();
 };
 
 const openDetailModal = (payment: any) => {
@@ -611,7 +627,7 @@ const processPayment = async () => {
       error(t('payments.alerts.validation.expiry'), t('common.validation'));
       return;
     }
-  } else {
+  } else if (!isAddingCardOnly.value) {
     if (!selectedCardId.value) {
       error(t('payments.alerts.validation.savedCard'), t('common.validation'));
       return;
@@ -621,8 +637,26 @@ const processPayment = async () => {
   isProcessing.value = true;
 
   try {
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
+    if (isAddingCardOnly.value) {
+      // SOLO GUARDAR TARJETA
+      const lastFour = paymentForm.value.card_number.replace(/\s/g, '').slice(-4);
+      
+      await api.post('/payment-methods', {
+        holder_name: paymentForm.value.holder_name,
+        last_four: lastFour,
+        expiry_date: paymentForm.value.expiry_date,
+      });
+      
+      await fetchPaymentMethods();
+      success(t('payments.alerts.cardSaved'), t('common.success'));
+      showPaymentModal.value = false;
+      showManageMethodsModal.value = true;
+      return;
+    }
+
+    // FLUJO NORMAL DE PAGO
     const payload: any = {
       contract_id: selectedContract.value.id,
       amount: selectedContract.value.deposit || 0,
@@ -649,6 +683,9 @@ const processPayment = async () => {
 
     const response = await api.post('/payments/simulate', payload);
     if (response.data.success) {
+      // Actualizar estado del contrato en el backend para que sea 'active'
+      await api.patch(`/contracts/${selectedContract.value.id}`, { status: 'active' });
+      
       lastPaymentResult.value = {
         ...response.data.data,
         card_last_four: payload.card_last_four
@@ -662,7 +699,7 @@ const processPayment = async () => {
       fetchContracts();
     }
   } catch (err: any) {
-    error(err.response?.data?.message || 'Error al procesar el pago', 'Error');
+    error(err.response?.data?.message || 'Error en la operación', 'Error');
   } finally {
     isProcessing.value = false;
   }
@@ -750,15 +787,25 @@ const changePage = (page: number) => {
   fetchPayments();
 };
 
-const deletePaymentMethod = async (id: number) => {
-  if (!confirm(t('payments.alerts.deleteMethodConfirm'))) return;
-  try {
-    await api.delete(`/payment-methods/${id}`);
-    success(t('payments.alerts.deleteMethodSuccess'), 'Success');
-    fetchPaymentMethods();
-  } catch (err) {
-    error(t('payments.alerts.deleteMethodError'));
-  }
+const deletePaymentMethod = (id: number) => {
+  dangerAlert(
+    t('payments.alerts.deleteMethodConfirm'),
+    async () => {
+      try {
+        await api.delete(`/payment-methods/${id}`);
+        success(t('payments.alerts.deleteMethodSuccess'), 'Success');
+        fetchPaymentMethods();
+      } catch (err) {
+        error(t('payments.alerts.deleteMethodError'));
+      }
+    },
+    () => {},
+    {
+      title: t('common.confirm'),
+      confirmText: t('common.yes'),
+      cancelText: t('common.no')
+    }
+  );
 };
 
 const formatPrice = (price: number) => {
