@@ -38,7 +38,7 @@
   width: 100%;
   height: 100%;
   background: linear-gradient(135deg, #1a0e0a 0%, #2e1d17 50%, #3b2416 100%);
-  z-index: -2;
+  z-index: -10;
 }
 
 .page-background::before {
@@ -51,7 +51,7 @@
   background: url("https://i.pinimg.com/1200x/e2/d2/b7/e2d2b7877ffb88a68d6b72e5ea0bd965.jpg") center center / cover no-repeat;
   opacity: 0.1;
   filter: blur(4px);
-  z-index: -1;
+  z-index: 0;
 }
 
 /* ==================== LOADING & ERROR ==================== */
