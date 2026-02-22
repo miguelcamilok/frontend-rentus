@@ -613,6 +613,8 @@ const handleLocationConfirm = async (locationData: { lat: number; lng: number; a
   errorMessage.value = ''
   success.value = false
 
+  const requestStartTime = performance.now()
+
   try {
     const formData = new FormData()
 
@@ -662,14 +664,38 @@ const handleLocationConfirm = async (locationData: { lat: number; lng: number; a
     setTimeout(() => router.push('/propiedades'), 1500)
 
   } catch (err: any) {
-    if (err.response?.data?.errors) {
-      const errors = Object.values(err.response.data.errors).flat() as string[]
+    const errorData = err.response?.data
+    
+    // 🔥 DEBUGGING FRONTEND EXTREMO 🔥
+    if (err.response?.status === 500 && errorData && errorData.trace) {
+      console.error(
+        '%c🚨 [RENTUS DEBUG] FATAL 500 ERROR CAUGHT 🚨\n' +
+        `%cTime Taken: ${((performance.now() - requestStartTime) / 1000).toFixed(2)}s\n` +
+        `%cMessage:%c ${errorData.message}\n` +
+        `%cFile:%c ${errorData.file} (Line: ${errorData.line})\n` +
+        `%cInputs Sent:%c\n`,
+        'background: red; color: white; font-size: 16px; font-weight: bold; padding: 4px;',
+        'color: orange; font-weight: bold;',
+        'color: #ff4444; font-weight: bold;', 'color: inherit;',
+        'color: #ff4444; font-weight: bold;', 'color: inherit;',
+        'color: #ff4444; font-weight: bold;', 'color: inherit;'
+      )
+      console.error(errorData.input)
+      console.error('%c[STACK TRACE]:', 'color: red; font-weight: bold;', '\n' + errorData.trace)
+      
+      errorMessage.value = `Error 500 en el servidor. Por favor, revisa la consola (F12) para ver los detalles técnicos y pásaselos al equipo de desarrollo.`
+    } 
+    else if (errorData?.errors) {
+      const errors = Object.values(errorData.errors).flat() as string[]
       errorMessage.value = errors.join(', ')
-    } else if (err.response?.data?.message) {
-      errorMessage.value = err.response.data.message
-    } else {
+    } 
+    else if (errorData?.message) {
+      errorMessage.value = errorData.message
+    } 
+    else {
       errorMessage.value = t('property.create.errorMessage')
     }
+    
     errorAlert(errorMessage.value, t('property.create.errorTitle'))
   } finally {
     loading.value = false
