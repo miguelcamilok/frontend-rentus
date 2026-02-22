@@ -481,6 +481,44 @@
       "privacy": "Política de Privacidad"
     }
   },
+  "faq": {
+    "title": "Preguntas Frecuentes",
+    "subtitle": "Encuentra respuestas rápidas a las dudas más comunes sobre RentUs",
+    "cta": {
+      "text": "¿No encontraste tu respuesta?",
+      "button": "Hablar con soporte"
+    },
+    "empty": {
+      "title": "No hay preguntas disponibles",
+      "description": "Estamos trabajando para agregar contenido aquí pronto."
+    },
+    "questions": {
+      "q1": {
+        "question": "¿Cómo puedo publicar mi propiedad en RentUs?",
+        "answer": "Es muy sencillo. Regístrate como propietario, ve a tu panel y selecciona 'Publicar Propiedad'. Completa los datos básicos, sube fotos de alta calidad y ¡listo! Nuestro equipo revisará la información para activarla."
+      },
+      "q2": {
+        "question": "¿Qué métodos de pago puedo utilizar?",
+        "answer": "Aceptamos tarjetas de crédito y débito (Visa, Mastercard, American Express). También puedes vincular tu cuenta bancaria para pagos recurrentes automáticos a través de nuestra plataforma segura."
+      },
+      "q3": {
+        "question": "¿Cómo funcionan los contratos digitales?",
+        "answer": "Todos nuestros contratos tienen validez legal y se firman electrónicamente. Una vez que ambas partes aceptan los términos, el sistema genera un PDF certificado que puedes descargar en cualquier momento desde tu sección de 'Contratos'."
+      },
+      "q4": {
+        "question": "¿Cómo reporto un problema técnico en la propiedad?",
+        "answer": "Si eres inquilino, dirígete a la sección de 'Mantenimiento' en tu menú de usuario. Allí podrás crear un reporte detallado con fotos, el cual llegará directamente al propietario o administrador para su gestión."
+      },
+      "q5": {
+        "question": "¿Es seguro compartir mis datos personales?",
+        "answer": "Absolutamente. En RentUs utilizamos encriptación de grado bancario (SSL) para proteger toda tu información sensible. Nunca compartimos tus datos con terceros sin tu consentimiento explícito."
+      },
+      "q6": {
+        "question": "¿Puedo cancelar mi contrato antes de tiempo?",
+        "answer": "La cancelación anticipada depende de las cláusulas específicas pactadas en tu contrato digital. Te recomendamos revisar la sección de 'Terminación' en tu contrato actual o contactar directamente al propietario."
+      }
+    }
+  },
   "properties": {
     "hero": {
       "title": {

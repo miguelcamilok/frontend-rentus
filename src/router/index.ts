@@ -28,6 +28,7 @@ const SettingsView = () => import("@/views/Dropdown/SettingsView.vue");
 const MapExplorerView = () => import("@/views/Map/MapExplorerView.vue");
 const MapView = () => import("@/components/modals/Maps/MapView.vue");
 const NotFoundView = () => import("@/views/NotFoundView.vue");
+const FaqView = () => import("@/views/FaqView.vue");
 
 // ── Admin routes ──────────────────────────────────────────────────────────
 import { adminRoutes } from "@/admin/router/admin.routes";
@@ -110,6 +111,12 @@ const routes: RouteRecordRaw[] = [
         name: "SettingsView",
         component: SettingsView,
         meta: { title: "Ajustes de Cuenta", requiresAuth: true },
+      },
+      {
+        path: "/preguntas-frecuentes",
+        name: "FaqView",
+        component: FaqView,
+        meta: { title: "Preguntas Frecuentes" },
       },
     ],
   },
