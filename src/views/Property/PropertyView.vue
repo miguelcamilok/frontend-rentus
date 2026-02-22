@@ -161,8 +161,8 @@
 
               <div class="card-image-section">
                 <div class="image-wrapper">
-                  <img
-                    :src="property.image_url || DEFAULT_PROPERTY_IMAGE"
+                   <img
+                    :src="getPropertyImage(property)"
                     :alt="property.title"
                     class="property-img"
                     @error="handleImageError"
@@ -302,7 +302,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -325,7 +325,7 @@ const status       = ref('loading');
 const errorMessage = ref('');
 
 const authUser     = ref(null);
-const properties   = ref([]);
+const properties   = ref<any[]>([]);
 const currentPage  = ref(1);
 const itemsPerPage = ref(9);
 
@@ -440,6 +440,25 @@ const friendlyStatus = (s) => {
 
 const truncateDescription = (d, max = 120) =>
   !d ? '' : d.length > max ? d.substring(0, max) + "..." : d;
+
+const getPropertyImage = (property: any) => {
+  if (!property) return DEFAULT_PROPERTY_IMAGE;
+  
+  // 1. Prioridad: relación images (nueva tabla)
+  if (property.images && Array.isArray(property.images) && property.images.length > 0) {
+    const main = property.images.find((img: any) => img.is_main) || property.images[0];
+    return main.url || main.image_url || DEFAULT_PROPERTY_IMAGE;
+  }
+  
+  // 2. Fallback: campo image_url antiguo (JSON array)
+  if (property.image_url) {
+    if (Array.isArray(property.image_url) && property.image_url.length > 0) {
+      return property.image_url[0];
+    }
+  }
+  
+  return DEFAULT_PROPERTY_IMAGE;
+};
 
 const clearFilters = () => {
   filters.value = { search: "", city: "", type: "", maxPrice: null };

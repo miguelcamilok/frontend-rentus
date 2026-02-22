@@ -161,7 +161,7 @@
             <!-- Image Section -->
             <div class="card-image-section">
               <div class="image-wrapper">
-                <img :src="property.image_url || DEFAULT_PROPERTY_IMAGE" :alt="property.title" class="property-img"
+                <img :src="getPropertyImage(property)" :alt="property.title" class="property-img"
                   @error="onImgError" />
                 <div class="image-gradient"></div>
               </div>
@@ -339,7 +339,7 @@
           </div>
 
           <div class="modal-gallery">
-            <img :src="selectedProperty.image_url || DEFAULT_PROPERTY_IMAGE" class="modal-main-image"
+            <img :src="getPropertyImage(selectedProperty)" class="modal-main-image"
               :alt="selectedProperty.title" @error="onImgError" />
             <div class="image-badge">
               <font-awesome-icon :icon="['fas', 'camera']" class="badge-icon" />
@@ -754,6 +754,33 @@ function getServicesArray(services: any) {
     return services.split(',').map(s => s.trim()).filter(s => s.length > 0);
   }
   return [];
+}
+
+function getPropertyImage(property: any) {
+  if (!property) return DEFAULT_PROPERTY_IMAGE;
+  
+  // 1. Prioridad: relación images (nueva tabla)
+  if (property.images && Array.isArray(property.images) && property.images.length > 0) {
+    const main = property.images.find((img: any) => img.is_main) || property.images[0];
+    return main.url || main.image_url || DEFAULT_PROPERTY_IMAGE;
+  }
+  
+  // 2. Fallback: campo image_url antiguo
+  if (property.image_url) {
+    if (Array.isArray(property.image_url) && property.image_url.length > 0) {
+      return property.image_url[0];
+    }
+    if (typeof property.image_url === 'string') {
+      try {
+        const parsed = JSON.parse(property.image_url);
+        return Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : property.image_url;
+      } catch {
+        return property.image_url;
+      }
+    }
+  }
+  
+  return DEFAULT_PROPERTY_IMAGE;
 }
 
 function viewPropertyDetails(property: any) {

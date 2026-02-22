@@ -335,7 +335,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import RequestVisitModal from '../../components/modals/ModalRequest/RequestVisitModal.vue'
@@ -348,7 +348,7 @@ const router = useRouter()
 const route = useRoute()
 
 // State
-const property = ref(null)
+const property = ref<any>(null)
 const loading = ref(true)
 const error = ref(null)
 const currentImageIndex = ref(0)
@@ -367,46 +367,40 @@ const isAuthenticated = computed(() => {
 const propertyImages = computed(() => {
   if (!property.value) return [DEFAULT_IMAGE]
 
-  const images = []
+  const images: string[] = []
 
-  let rawImages = property.value.images
-
-  // If the backend returned a JSON-stringified array, parse it first
-  if (typeof rawImages === 'string') {
-    try {
-      rawImages = JSON.parse(rawImages)
-    } catch {
-      // Not valid JSON — might be a single URL or data URI
-      if (rawImages.startsWith('data:') || rawImages.startsWith('http')) {
-        images.push(rawImages)
+  // 1. Prioridad: relación images (nueva tabla con objetos {url, order, is_main...})
+  if (property.value.images && Array.isArray(property.value.images) && property.value.images.length > 0) {
+    // Si ya es un array de objetos desde la relación
+    property.value.images.forEach((img: any) => {
+      const url = img.url || img.image_url
+      if (typeof url === 'string') {
+        images.push(url)
       }
-    }
+    })
   }
 
-  // Array of image objects (hasMany relation) with image_url field
-  if (Array.isArray(rawImages) && rawImages.length > 0) {
-    // Could be an array of objects { image_url, order, ... } OR plain strings (base64 / URLs)
-    for (const img of rawImages) {
-      if (typeof img === 'string') {
-        images.push(img)
-      } else if (img?.image_url) {
-        images.push(img.image_url)
-      }
-    }
-    // Sort by order if objects had that field
-    if (typeof rawImages[0] === 'object' && 'order' in rawImages[0]) {
-      const sorted = [...rawImages].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-      images.length = 0
-      sorted.forEach((img) => {
+  // 2. Fallback: campo image_url antiguo (Legacy array de base64/URLs)
+  if (images.length === 0 && property.value.image_url) {
+    const legacy = property.value.image_url
+    if (Array.isArray(legacy)) {
+      legacy.forEach((img: any) => {
         if (typeof img === 'string') images.push(img)
-        else if (img?.image_url) images.push(img.image_url)
       })
+    } else if (typeof legacy === 'string') {
+      try {
+        const parsed = JSON.parse(legacy)
+        if (Array.isArray(parsed)) {
+          parsed.forEach((img: any) => {
+            if (typeof img === 'string') images.push(img)
+          })
+        } else {
+          images.push(legacy)
+        }
+      } catch {
+        images.push(legacy)
+      }
     }
-  }
-
-  // Fallback: use main image_url if exists
-  if (images.length === 0 && property.value.image_url?.trim()) {
-    images.push(property.value.image_url)
   }
 
   return images.length > 0 ? images : [DEFAULT_IMAGE]

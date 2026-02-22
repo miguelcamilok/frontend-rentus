@@ -4,6 +4,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -15,6 +16,7 @@
     transform: translateY(20px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -387,12 +389,12 @@
   transition: color 0.3s ease;
 }
 
-.service-checkbox input:checked ~ .checkmark {
+.service-checkbox input:checked~.checkmark {
   background: linear-gradient(135deg, #da9c5f, #b8791f);
   border-color: #da9c5f;
 }
 
-.service-checkbox input:checked ~ .checkmark svg {
+.service-checkbox input:checked~.checkmark svg {
   color: white;
 }
 
@@ -525,4 +527,166 @@
     margin-bottom: 2rem;
     padding-bottom: 1.5rem;
   }
+}
+
+/* ==================== GESTIÓN DE IMÁGENES ==================== */
+.existing-images-section,
+.new-images-section {
+  margin-bottom: 2rem;
+}
+
+.existing-images-section h3,
+.new-images-section h3 {
+  font-size: 1.1rem;
+  color: #f0e5db;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.image-card {
+  position: relative;
+  aspect-ratio: 16/9;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(218, 156, 95, 0.2);
+  background: rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.image-card:hover {
+  transform: translateY(-4px);
+  border-color: #da9c5f;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+}
+
+.image-card.is-main {
+  border-color: #da9c5f;
+  box-shadow: 0 0 0 3px rgba(218, 156, 95, 0.3);
+}
+
+/* .image-preview {
+  width: 100%;
+  height: 100%;
+} */
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.main-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: linear-gradient(135deg, #da9c5f, #b8791f);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+}
+
+.image-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 3;
+}
+
+.image-card:hover .image-overlay {
+  opacity: 1;
+}
+
+.btn-overlay {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-overlay.btn-danger {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-overlay:hover {
+  transform: scale(1.1);
+}
+
+/* ==================== UPLOAD DROPZONE ==================== */
+.image-upload-section {
+  margin-bottom: 2rem;
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+.upload-dropzone {
+  border: 2px dashed rgba(218, 156, 95, 0.4);
+  border-radius: 16px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.03);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.upload-dropzone:hover,
+.upload-dropzone.is-dragging {
+  border-color: #da9c5f;
+  background: rgba(218, 156, 95, 0.05);
+}
+
+.dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.upload-icon {
+  font-size: 3rem;
+  color: #da9c5f;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+.upload-dropzone:hover .upload-icon {
+  opacity: 1;
+  transform: translateY(-5px);
+}
+
+.upload-dropzone h4 {
+  color: #f0e5db;
+  font-size: 1.1rem;
+  margin: 0;
+  font-weight: 500;
 }

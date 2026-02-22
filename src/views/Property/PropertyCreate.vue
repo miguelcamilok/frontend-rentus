@@ -415,7 +415,6 @@ interface PropertyImage {
   id: string
   file: File
   preview: string
-  base64: string
   size: number
 }
 
@@ -551,9 +550,8 @@ const processFiles = async (files: File[]) => {
       continue
     }
     try {
-      const base64 = await compressAndConvertToBase64(file)
       const preview = URL.createObjectURL(file)
-      images.value.push({ id: `${Date.now()}-${Math.random()}`, file, preview, base64, size: file.size })
+      images.value.push({ id: `${Date.now()}-${Math.random()}`, file, preview, size: file.size })
       processedFiles++
       uploadProgress.value = Math.round((processedFiles / totalFiles) * 100)
     } catch (error) {
@@ -563,32 +561,7 @@ const processFiles = async (files: File[]) => {
   setTimeout(() => { uploadProgress.value = 0 }, 1000)
 }
 
-const compressAndConvertToBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const img = new Image()
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const ctx = canvas.getContext('2d')
-        if (!ctx) { reject(new Error('No canvas context')); return }
-        const maxDim = 1920
-        let { width, height } = img
-        if (width > height ? width > maxDim : height > maxDim) {
-          if (width > height) { height *= maxDim / width; width = maxDim }
-          else { width *= maxDim / height; height = maxDim }
-        }
-        canvas.width = width; canvas.height = height
-        ctx.drawImage(img, 0, 0, width, height)
-        resolve(canvas.toDataURL('image/jpeg', 0.8))
-      }
-      img.onerror = () => reject(new Error('Error loading image'))
-      img.src = e.target?.result as string
-    }
-    reader.onerror = () => reject(new Error('Error reading file'))
-    reader.readAsDataURL(file)
-  })
-}
+// Eliminada compresión base64 por ser ineficiente
 
 const removeImage = (index: number) => {
   URL.revokeObjectURL(images.value[index].preview)
@@ -641,30 +614,45 @@ const handleLocationConfirm = async (locationData: { lat: number; lng: number; a
   success.value = false
 
   try {
-    const imagesBase64 = images.value.map(img => img.base64)
+    const formData = new FormData()
 
-    const payload = {
-      title: form.value.title,
-      description: form.value.description,
-      address: form.value.address,
-      city: form.value.city || null,
-      status: form.value.status,
-      monthly_price: form.value.monthly_price,
-      area_m2: form.value.area_m2 || null,
-      num_bedrooms: form.value.num_bedrooms || null,
-      num_bathrooms: form.value.num_bathrooms || null,
-      // ← se envía igual que EditProperty: JSON.stringify del array de valores
-      included_services: form.value.included_services.length > 0
-        ? JSON.stringify(form.value.included_services)
-        : null,
-      publication_date: form.value.publication_date || null,
-      lat: locationData.lat,
-      lng: locationData.lng,
-      accuracy: locationData.accuracy,
-      images: JSON.stringify(imagesBase64)
+    // Datos básicos
+    formData.append('title', form.value.title)
+    formData.append('description', form.value.description)
+    formData.append('address', form.value.address)
+    if (form.value.city) formData.append('city', form.value.city)
+    formData.append('status', form.value.status)
+    formData.append('monthly_price', form.value.monthly_price.toString())
+    if (form.value.area_m2) formData.append('area_m2', form.value.area_m2.toString())
+    if (form.value.num_bedrooms) formData.append('num_bedrooms', form.value.num_bedrooms.toString())
+    if (form.value.num_bathrooms) formData.append('num_bathrooms', form.value.num_bathrooms.toString())
+    
+    if (form.value.included_services.length > 0) {
+      formData.append('included_services', JSON.stringify(form.value.included_services))
     }
+    if (form.value.publication_date) formData.append('publication_date', form.value.publication_date)
 
-    await api.post('/properties', payload)
+    // Ubicación
+    formData.append('lat', locationData.lat.toString())
+    formData.append('lng', locationData.lng.toString())
+    formData.append('accuracy', locationData.accuracy.toString())
+
+    // Imágenes
+    images.value.forEach((img) => {
+      formData.append('images[]', img.file)
+    })
+
+    await api.post('/properties', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      timeout: 60000, // Aumentar timeout a 60s para subidas pesadas
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total) {
+          uploadProgress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+        }
+      }
+    })
 
     success.value = true
     successAlert(t('property.create.successMessage'), t('property.create.successTitle'))
