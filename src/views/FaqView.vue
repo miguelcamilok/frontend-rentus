@@ -23,12 +23,12 @@
           v-for="(_, key) in filteredQuestions" 
           :key="key" 
           class="faq-item"
-          :class="{ 'is-active': activeKey === key }"
+          :class="{ 'is-active': activeKey === String(key) }"
         >
           <button 
             @click="toggleAccordion(String(key))" 
             class="faq-question-btn"
-            :aria-expanded="activeKey === key"
+            :aria-expanded="activeKey === String(key)"
           >
             <span class="question-text">{{ $t(`faq.questions.${String(key)}.question`) }}</span>
             <span class="question-icon">
