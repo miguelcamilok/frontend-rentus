@@ -85,29 +85,46 @@
             <div class="card-text">{{ $t('home.hero.floatingCards.rated') }}</div>
           </div>
 
-          <!-- Mini Mapa Preview -->
-          <div class="hero-image-placeholder map-preview-wrapper" @click="handleMapClick">
-            <div ref="miniMapEl" class="mini-map"></div>
+            <!-- Mini Mapa Preview -->
+            <div class="hero-image-placeholder map-preview-wrapper" @click="handleMapClick">
+              <div ref="miniMapEl" class="mini-map"></div>
 
-            <!-- Overlay con CTA -->
-            <div class="map-overlay">
-              <div class="map-overlay-content">
-                <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="map-overlay-icon" />
-                <span v-if="isUserAuthenticated">
-                  {{ $t('home.hero.map.explore') || 'Explorar en mapa' }}
-                </span>
-                <span v-else>
-                  {{ $t('home.hero.map.login') || 'Inicia sesión para explorar' }}
-                </span>
+              <!-- Mini Card Preview (Visible al cargar) -->
+              <!-- <Transition name="fade-up">
+                <div v-if="selectedMiniProperty" class="map-mini-card" @click.stop="viewPropertyDetails(selectedMiniProperty)">
+                  <div class="mini-card-img">
+                    <img :src="getPropertyImage(selectedMiniProperty)" :alt="selectedMiniProperty.title" />
+                  </div>
+                  <div class="mini-card-content">
+                    <div class="mini-card-price">{{ formatPrice(selectedMiniProperty.monthly_price) }}</div>
+                    <div class="mini-card-title">{{ truncateDescription(selectedMiniProperty.title, 35) }}</div>
+                    <div class="mini-card-city">
+                      <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
+                      {{ selectedMiniProperty.city }}
+                    </div>
+                  </div>
+                  <button class="mini-card-btn">
+                    <font-awesome-icon :icon="['fas', 'arrow-right']" />
+                  </button>
+                </div>
+              </Transition> -->
+
+              <!-- Overlay con CTA -->
+              <div class="map-overlay">
+                <div class="map-overlay-content">
+                  <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="map-overlay-icon" />
+                  <span>
+                    {{ $t('home.hero.map.explore') || 'Explorar en mapa' }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Pulse animado en esquina -->
+              <div class="map-live-badge">
+                <span class="live-dot"></span>
+                <span class="live-text">En vivo</span>
               </div>
             </div>
-
-            <!-- Pulse animado en esquina -->
-            <div class="map-live-badge">
-              <span class="live-dot"></span>
-              <span class="live-text">En vivo</span>
-            </div>
-          </div>
         </div>
       </div>
     </section>
@@ -472,7 +489,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, watchEffect } from "vue";
+import { ref, shallowRef, onMounted, onUnmounted, computed, watchEffect } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import L from "leaflet";
@@ -480,10 +497,9 @@ import "leaflet/dist/leaflet.css";
 import RequestVisitModal from "../components/modals/ModalRequest/RequestVisitModal.vue";
 import PropertySearch from '../components/search/PropertySearch.vue';
 import { usePropertyTypes } from '../types/usePropertyTypes';
-import { authService } from "../services/auth";
 import api from "../services/api";
 
-const DEFAULT_PROPERTY_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjE4IiBmaWxsPSIjNmM3NTdkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2VuIG5vIGRpc3BvbmlibGU8L3RleHQ+PC9zdmc+";
+const DEFAULT_PROPERTY_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI2MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2Yzc1N2QiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZW4gbm8gZGlzcG9uaWJsZTwvdGV4dD48L3N2Zz4=";
 
 // ==================== Composables ====================
 const { t } = useI18n();
@@ -497,6 +513,7 @@ const {
 // ==================== State ====================
 const properties = ref<any[]>([]);
 const selectedProperty = ref<any>(null);
+const selectedMiniProperty = ref<any>(null);
 const propertyForRequest = ref<any>(null);
 const showRequestModal = ref(false);
 const loadingProperties = ref(false);
@@ -505,11 +522,10 @@ const activeClientsCount = ref(0);
 const propertyCount = ref(0);
 const modalOpen = ref(false);
 
-// Mini mapa
 const miniMapEl = ref<HTMLElement | null>(null);
-const isUserAuthenticated = ref(authService.isAuthenticated());
-let miniMap: L.Map | null = null;
-let miniMarkersAdded = false;
+
+const miniMap = shallowRef<L.Map | null>(null);
+const miniMarkersAdded = ref(false);
 
 const PROPERTIES_LIMIT = 4;
 
@@ -553,51 +569,84 @@ const displayedProperties = computed(() => {
 
 // ==================== Mini Mapa ====================
 function handleMapClick() {
-  if (isUserAuthenticated.value) {
-    router.push({ name: 'MapExplorer' });
-  } else {
-    router.push({ name: 'Login' });
-  }
+  router.push({ name: 'MapExplorer' });
 }
 
 function initMiniMap() {
   if (!miniMapEl.value) return;
 
-  miniMap = L.map(miniMapEl.value, {
+  miniMap.value = L.map(miniMapEl.value, {
     center: [4.5709, -74.2973],
     zoom: 6,
     zoomControl: false,
-    dragging: false,
+    dragging: true,
     scrollWheelZoom: false,
     doubleClickZoom: false,
     boxZoom: false,
     keyboard: false,
     attributionControl: false,
-    touchZoom: false
+    touchZoom: true
   });
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19
-  }).addTo(miniMap);
+  }).addTo(miniMap.value);
 }
 
 // Agregar marcadores al mini mapa cuando las propiedades estén listas
 watchEffect(() => {
-  if (miniMap && properties.value.length > 0 && !miniMarkersAdded) {
-    miniMarkersAdded = true;
+  const map = miniMap.value;
+  if (map && properties.value.length > 0 && !miniMarkersAdded.value) {
+    console.log("📍 Inicializando marcadores en mini-mapa...", properties.value.length);
+    miniMarkersAdded.value = true;
+    
+    // Asegurar que el mapa conoce su tamaño real
+    map.invalidateSize();
+
+    // 📍 Lógica de ranking: Ciudad con más propiedades
+    const cityCounts: Record<string, number> = {};
+    properties.value.forEach(p => {
+      if (p.city) cityCounts[p.city] = (cityCounts[p.city] || 0) + 1;
+    });
+
+    const sortedCities = Object.entries(cityCounts).sort((a,b) => b[1] - a[1]);
+    const topCity = sortedCities[0]?.[0];
+
+    if (topCity) {
+      const bestProp = properties.value.find(p => 
+        p.city === topCity && 
+        p.lat && p.lng && 
+        !isNaN(parseFloat(p.lat)) && parseFloat(p.lat) !== 0
+      );
+      
+      if (bestProp) {
+        console.log(`🏠 Propiedad elegida para preview en ${topCity}:`, bestProp.title);
+        selectedMiniProperty.value = bestProp;
+        map.setView([parseFloat(bestProp.lat), parseFloat(bestProp.lng)], 13);
+      }
+    }
 
     properties.value
-      .filter(p => p.lat && p.lng && !isNaN(parseFloat(p.lat)) && !isNaN(parseFloat(p.lng)))
+      .filter(p => p.lat && p.lng && !isNaN(parseFloat(p.lat)) && parseFloat(p.lat) !== 0)
       .slice(0, 30)
       .forEach(p => {
-        L.circleMarker([parseFloat(p.lat), parseFloat(p.lng)], {
-          radius: 7,
-          fillColor: '#1e40af',
+        const isSelected = selectedMiniProperty.value?.id === p.id;
+        
+        const marker = L.circleMarker([parseFloat(p.lat), parseFloat(p.lng)], {
+          radius: isSelected ? 10 : 7,
+          fillColor: isSelected ? '#3b82f6' : '#1e40af',
           color: '#ffffff',
           weight: 2,
           opacity: 1,
           fillOpacity: 0.85
-        }).addTo(miniMap!);
+        }).addTo(map);
+
+        marker.on('click', (e) => {
+          // @ts-ignore
+          L.DomEvent.stopPropagation(e);
+          selectedMiniProperty.value = p;
+          map.flyTo([parseFloat(p.lat), parseFloat(p.lng)], 14);
+        });
       });
   }
 });
@@ -759,17 +808,13 @@ function getServicesArray(services: any) {
 function getPropertyImage(property: any) {
   if (!property) return DEFAULT_PROPERTY_IMAGE;
   
-  // 1. Prioridad: relación images (nueva tabla)
   if (property.images && Array.isArray(property.images) && property.images.length > 0) {
     const main = property.images.find((img: any) => img.is_main) || property.images[0];
     return main.url || main.image_url || DEFAULT_PROPERTY_IMAGE;
   }
   
-  // 2. Fallback: campo image_url antiguo
   if (property.image_url) {
-    if (Array.isArray(property.image_url) && property.image_url.length > 0) {
-      return property.image_url[0];
-    }
+    if (Array.isArray(property.image_url) && property.image_url.length > 0) return property.image_url[0];
     if (typeof property.image_url === 'string') {
       try {
         const parsed = JSON.parse(property.image_url);
@@ -780,7 +825,7 @@ function getPropertyImage(property: any) {
     }
   }
   
-  return DEFAULT_PROPERTY_IMAGE;
+  return property.image_url || DEFAULT_PROPERTY_IMAGE;
 }
 
 function viewPropertyDetails(property: any) {
@@ -820,11 +865,11 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  if (miniMap) {
-    miniMap.remove();
-    miniMap = null;
+  if (miniMap.value) {
+    miniMap.value.remove();
+    miniMap.value = null;
   }
-  miniMarkersAdded = false;
+  miniMarkersAdded.value = false;
 });
 </script>
 
@@ -853,8 +898,104 @@ onUnmounted(() => {
   height: 100%;
   min-height: 320px;
   border-radius: 18px;
-  pointer-events: none;
   display: block;
+}
+
+/* Mini Card Preview UI */
+.map-mini-card {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: calc(100% - 28px);
+  max-width: 280px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 10px;
+  display: flex;
+  gap: 12px;
+  z-index: 20;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  animation: slide-in-top 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.map-mini-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+  background: #ffffff;
+}
+
+.mini-card-img {
+  width: 70px;
+  height: 70px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.mini-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mini-card-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.mini-card-price {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1e40af;
+  margin-bottom: 2px;
+}
+
+.mini-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.mini-card-city {
+  font-size: 10px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mini-card-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3b82f6;
+  align-self: center;
+  transition: all 0.2s;
+}
+
+.map-mini-card:hover .mini-card-btn {
+  background: #3b82f6;
+  color: white;
+}
+
+@keyframes slide-in-top {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Overlay degradado + CTA */
