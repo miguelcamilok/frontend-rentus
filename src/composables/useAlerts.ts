@@ -1,7 +1,7 @@
 // composables/useAlerts.ts
 import { ref, computed } from 'vue'
 
-export type AlertType = 'success' | 'error' | 'warning' | 'info' | 'confirm'
+export type AlertType = 'success' | 'error' | 'warning' | 'info' | 'confirm' | 'danger'
 
 export interface Alert {
   id: string
@@ -33,7 +33,7 @@ export function useAlerts() {
     const duplicate = alerts.value.find(
       a => a.type === options.type && a.message === options.message
     )
-    
+
     if (duplicate) {
       // Si existe, no crear una nueva, solo resetear su duración
       return duplicate.id
@@ -41,7 +41,7 @@ export function useAlerts() {
 
     const id = `alert-${alertIdCounter++}`
     const alert: Alert = { id, ...options }
-    
+
     // Si hay demasiadas alertas, remover la más antigua (que no sea confirm)
     if (alerts.value.length >= maxAlerts) {
       const nonConfirmAlerts = alerts.value.filter(a => a.type !== 'confirm')
@@ -108,6 +108,28 @@ export function useAlerts() {
     })
   }
 
+  const danger = (
+    message: string,
+    onConfirm: () => void,
+    onCancel?: () => void,
+    options?: {
+      title?: string
+      confirmText?: string
+      cancelText?: string
+    }
+  ) => {
+    return show({
+      type: 'danger',
+      message,
+      title: options?.title,
+      confirmText: options?.confirmText || 'Eliminar',
+      cancelText: options?.cancelText || 'Cancelar',
+      onConfirm,
+      onCancel,
+      duration: 0
+    })
+  }
+
   const clear = () => {
     alerts.value = []
   }
@@ -121,6 +143,7 @@ export function useAlerts() {
     warning,
     info,
     confirm,
+    danger,
     clear
   }
 }

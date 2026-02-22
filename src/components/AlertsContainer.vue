@@ -23,8 +23,8 @@
               <p class="alert-message">{{ alert.message }}</p>
             </div>
 
-            <!-- Botón cerrar -->
-            <button v-if="alert.type !== 'confirm'" @click="removeAlert(alert.id)" class="alert-close"
+            <!-- Botón cerrar (Solo si no es de confirmación) -->
+            <button v-if="alert.type !== 'confirm' && alert.type !== 'danger'" @click="removeAlert(alert.id)" class="alert-close"
               aria-label="Cerrar alerta">
               <font-awesome-icon :icon="['fas', 'times']" />
             </button>
@@ -36,7 +36,7 @@
             :style="{ animationDuration: `${alert.duration || 4000}ms` }"></div>
 
           <!-- Botones de confirmación -->
-          <div v-if="alert.type === 'confirm'" class="alert-actions">
+          <div v-if="alert.type === 'confirm' || alert.type === 'danger'" class="alert-actions">
             <button @click="handleAction(alert, 'cancel')" class="btn-cancel">
               {{ alert.cancelText || 'Cancelar' }}
             </button>
@@ -54,9 +54,9 @@
 import { useAlerts } from '../composables/useAlerts'
 import type { Alert } from '../composables/useAlerts'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faCheckCircle, faTimesCircle, faExclamationTriangle, faInfoCircle, faQuestionCircle } from '@fortawesome/free-solid-svg-icons'
+import { faCheckCircle, faTimesCircle, faExclamationTriangle, faInfoCircle, faQuestionCircle, faTrash } from '@fortawesome/free-solid-svg-icons'
 
-type IconType = "success" | "error" | "warning" | "info" | "confirm";
+type IconType = "success" | "error" | "warning" | "info" | "confirm" | "danger";
 
 const { alerts, remove } = useAlerts()
 
@@ -75,7 +75,8 @@ const getIconComponent = (type: IconType) => {
     error: { component: FontAwesomeIcon, icon: faTimesCircle },
     warning: { component: FontAwesomeIcon, icon: faExclamationTriangle },
     info: { component: FontAwesomeIcon, icon: faInfoCircle },
-    confirm: { component: FontAwesomeIcon, icon: faQuestionCircle }, // o el que quieras
+    confirm: { component: FontAwesomeIcon, icon: faQuestionCircle },
+    danger: { component: FontAwesomeIcon, icon: faTrash }, 
   };
   return icons[type]
 }

@@ -394,6 +394,33 @@
   background: radial-gradient(circle, rgba(139, 92, 246, 0.4), transparent 70%);
 }
 
+.alert-danger .icon-container {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.alert-danger .icon {
+  color: #ef4444;
+}
+
+.alert-danger .icon-glow {
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.4), transparent 70%);
+}
+
+.alert-danger .alert-progress {
+  background: linear-gradient(90deg, #ef4444, rgba(239, 68, 68, 0.5));
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+.alert-danger .btn-confirm {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.alert-danger .btn-confirm:hover {
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 640px) {
   .alerts-container {
