@@ -449,7 +449,7 @@ async function fetchProperty() {
     console.log('📸 Imágenes disponibles:', property.value.images)
     
     // Incrementar vistas
-    await api.post(`/properties/${propertyId}/view`)
+    await api.post(`/properties/${propertyId}/views`)
   } catch (err) {
     console.error('Error al cargar la propiedad:', err)
     error.value = err.response?.data?.message || 'No se pudo cargar la propiedad'
