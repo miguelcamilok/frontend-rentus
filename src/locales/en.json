@@ -72,6 +72,25 @@
       "loadError": "Could not load property",
       "noPermission": "You don't have permissions to edit this property",
       "mustLogin": "You must log in to edit properties"
+    },
+    "eyebrow": "Editing",
+    "sectionDescriptions": {
+      "basicInfo": "Title, description, status and price of the property",
+      "location": "Address, city and GPS coordinates",
+      "features": "Area, bedrooms, bathrooms and parking",
+      "images": "Manage your property photos — minimum 1, maximum 10",
+      "services": "Services included in the rental price"
+    },
+    "images": {
+      "current": "Current images",
+      "principal": "Main",
+      "add": "Add new images",
+      "dropzone": {
+        "title": "Drag new images here or click",
+        "description": "JPG · PNG · WEBP · max. 5 MB"
+      },
+      "new": "New",
+      "delete": "Delete"
     }
   },
   "home": {
@@ -328,8 +347,9 @@
     },
     "askPrice": "Ask price",
     "create": {
-      "title": "Create New Property",
-      "subtitle": "Add a new property to your rental catalog",
+      "eyebrow": "Property Portfolio",
+      "title": "Publish Property",
+      "subtitle": "Complete the data and add photos to attract more tenants",
       "success": "Property created successfully!",
       "successTitle": "Success",
       "successMessage": "The property has been published correctly",
@@ -338,16 +358,48 @@
       "confirmCancel": "Are you sure you want to cancel? All entered data will be lost.",
       "cancelTitle": "Cancel creation",
       "publishing": "Publishing...",
+      "processing": "Processing...",
       "publish": "Publish Property",
+      "continueLocation": "Continue to Location →",
       "basicInfo": "Basic Information",
+      "basicInfoDesc": "Name, description and status of the property",
       "location": "Location",
+      "locationDesc": "Address and city where it is located",
       "locationHint": "Coordinates help display the property on the map",
+      "locationExactHint": "You can select the exact location on the map in the next step",
       "features": "Features",
+      "featuresDesc": "Price, area and space distribution",
       "services": "Included Services",
+      "servicesDesc": "Select the services included in the rent",
       "servicesHint": "Separate each service with commas (ex: WiFi, Gas, Water, Electricity)",
+      "serviceSelected": "service selected",
+      "servicesSelected": "services selected",
+      "clearSelection": "Clear selection",
       "noServices": "No services added yet",
+      "noServicesSelected": "No services selected — optional",
+      "imagesTitle": "Property Images",
+      "imagesDesc": "Upload up to 10 JPG, PNG or WEBP images (max. 2 MB each)",
+      "dropzoneTitle": "Drag images here or click to select",
+      "dropzoneDesc": "JPG · PNG · WEBP · max. 2 MB · {current}/10 images",
+      "mainImage": "Main",
+      "setAsMain": "Set as main",
+      "deleteImage": "Delete image",
+      "noImagesTitle": "No images",
+      "noImagesDesc": "Add photos to make your property more attractive",
       "image": "Image",
-      "imagePreview": "Image preview"
+      "imagePreview": "Image preview",
+      "errors": {
+        "maxImages": "Maximum 10 images allowed",
+        "limitReached": "Limit reached",
+        "invalidFormat": "Invalid format",
+        "maxSize": "Maximum 2MB",
+        "incompleteFields": "Please complete all required fields",
+        "incompleteTitle": "Incomplete fields",
+        "priceRequired": "Please enter the monthly price",
+        "priceTitle": "Price required",
+        "imageRequired": "Please add at least one image",
+        "imageTitle": "Image required"
+      }
     },
     "fields": {
       "title": "Title",

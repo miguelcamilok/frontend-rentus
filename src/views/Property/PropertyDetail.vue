@@ -1,337 +1,331 @@
 <template>
-  <div class="property-detail-page">
-    <!-- Background decorativo -->
-    <div class="page-background"></div>
-    
-    <!-- Loading State -->
-    <div v-if="loading" class="loading-container">
-      <div class="loading-spinner">
-        <font-awesome-icon :icon="['fas', 'spinner']" spin />
-      </div>
-      <p class="loading-text">{{ t('property.loadingDetails') }}</p>
+  <div class="pd-page">
+    <div class="pd-bg" aria-hidden="true">
+      <div class="pd-bg__orb pd-bg__orb--1"></div>
+      <div class="pd-bg__orb pd-bg__orb--2"></div>
     </div>
-    
-    <!-- Error State -->
-    <div v-else-if="error" class="error-container">
-      <div class="error-icon">
-        <font-awesome-icon :icon="['fas', 'exclamation-triangle']" />
-      </div>
+
+    <!-- Loading -->
+    <div v-if="loading" class="pd-state">
+      <div class="pd-spinner"></div>
+      <p>{{ t('property.loadingDetails') }}</p>
+    </div>
+
+    <!-- Error -->
+    <div v-else-if="error" class="pd-state pd-state--error">
+      <div class="pd-state__icon"><font-awesome-icon :icon="['fas', 'triangle-exclamation']" /></div>
       <h2>{{ t('property.notFound') }}</h2>
       <p>{{ error }}</p>
-      <button @click="router.push('/')" class="btn-back">
+      <button @click="router.push('/')" class="pd-btn-back">
         <font-awesome-icon :icon="['fas', 'arrow-left']" />
         {{ t('property.backHome') }}
       </button>
     </div>
-    
-    <!-- Property Content -->
-    <div v-else-if="property" class="property-content">
-      <!-- Hero Section con imagen -->
-      <div class="hero-section">
-        <div class="hero-overlay"></div>
-        
-        <!-- Navegación de breadcrumb flotante -->
-        <div class="breadcrumb-floating">
-          <router-link to="/" class="breadcrumb-item">
-            <font-awesome-icon :icon="['fas', 'home']" />
-          </router-link>
-          <font-awesome-icon :icon="['fas', 'chevron-right']" class="breadcrumb-separator" />
-          <router-link to="/propiedades" class="breadcrumb-item">{{ t('property.properties') }}</router-link>
-          <font-awesome-icon :icon="['fas', 'chevron-right']" class="breadcrumb-separator" />
-          <span class="breadcrumb-current">{{ property.title }}</span>
-        </div>
-        
-        <!-- Galería de imágenes -->
-        <div class="hero-gallery">
-          <transition name="fade" mode="out-in">
-            <img :key="currentImageIndex" :src="currentImage" :alt="property.title" @error="onImgError"
-              class="hero-image" />
-          </transition>
-          
-          <!-- Controles de galería -->
-          <div class="gallery-controls" v-if="propertyImages.length > 1">
-            <button @click="previousImage" class="gallery-btn prev" :disabled="currentImageIndex === 0">
+
+    <!-- Content -->
+    <div v-else-if="property" class="pd-shell">
+
+      <!-- ── Breadcrumb ── -->
+      <nav class="pd-breadcrumb">
+        <router-link to="/" class="pd-bc-item"><font-awesome-icon :icon="['fas', 'house']" /></router-link>
+        <font-awesome-icon :icon="['fas', 'chevron-right']" class="pd-bc-sep" />
+        <router-link to="/propiedades" class="pd-bc-item">{{ t('property.properties') }}</router-link>
+        <font-awesome-icon :icon="['fas', 'chevron-right']" class="pd-bc-sep" />
+        <span class="pd-bc-current">{{ property.title }}</span>
+      </nav>
+
+      <!-- ── Gallery ── -->
+      <div class="pd-gallery">
+
+        <!-- Main image -->
+        <div class="pd-gallery__main">
+          <Transition name="img-fade" mode="out-in">
+            <img
+              :key="currentImageIndex"
+              :src="currentImage"
+              :alt="property.title"
+              @error="onImgError"
+              class="pd-gallery__hero"
+            />
+          </Transition>
+
+          <!-- Nav arrows -->
+          <div class="pd-gallery__nav" v-if="propertyImages.length > 1">
+            <button class="pd-nav-btn" :disabled="currentImageIndex === 0" @click="previousImage">
               <font-awesome-icon :icon="['fas', 'chevron-left']" />
             </button>
-            <button @click="nextImage" class="gallery-btn next"
-              :disabled="currentImageIndex === propertyImages.length - 1">
+            <button class="pd-nav-btn" :disabled="currentImageIndex === propertyImages.length - 1" @click="nextImage">
               <font-awesome-icon :icon="['fas', 'chevron-right']" />
             </button>
           </div>
-          
-          <!-- Contador de imágenes -->
-          <div class="image-counter">
+
+          <!-- Counter -->
+          <div class="pd-gallery__counter">
             <font-awesome-icon :icon="['fas', 'images']" />
-            <span>{{ currentImageIndex + 1 }} / {{ propertyImages.length }}</span>
+            {{ currentImageIndex + 1 }} / {{ propertyImages.length }}
           </div>
-          
-          <!-- Badge de estado -->
-          <div class="status-badge" :class="`status-${property.status}`">
+
+          <!-- Status badge -->
+          <div :class="['pd-status-badge', `pd-status-badge--${property.status}`]">
             <font-awesome-icon :icon="getStatusIcon(property.status)" />
-            <span>{{ t(`property.status.${property.status}`) }}</span>
-          </div>
-          
-          <!-- Thumbnails -->
-          <div class="thumbnails-bar" v-if="propertyImages.length > 1">
-            <div v-for="(image, index) in propertyImages" :key="index" @click="currentImageIndex = index"
-              class="thumbnail-item" :class="{ active: currentImageIndex === index }">
-              <img :src="image" :alt="t('property.imageAlt', { index: index + 1 })" @error="onImgError" />
-            </div>
+            {{ t(`property.status.${property.status}`) }}
           </div>
         </div>
+
+        <!-- Thumbnails -->
+        <div class="pd-thumbs" v-if="propertyImages.length > 1">
+          <button
+            v-for="(img, idx) in propertyImages"
+            :key="idx"
+            :class="['pd-thumb', { 'pd-thumb--active': currentImageIndex === idx }]"
+            @click="currentImageIndex = idx"
+          >
+            <img :src="img" :alt="`Foto ${idx + 1}`" @error="onImgError" />
+          </button>
+        </div>
       </div>
-      
-      <!-- Main Content -->
-      <div class="main-content">
-        <div class="content-grid">
-          <!-- Columna Principal -->
-          <div class="main-column">
-            <!-- Header de la propiedad -->
-            <div class="property-header">
-              <div class="header-tags">
-                <span class="tag tag-type">
-                  <font-awesome-icon :icon="['fas', getTypeIcon(property)]" />
-                  <span class="type-text">{{ getTypeTranslated(property) }}</span>
-                </span>
-                <span v-if="property.featured" class="tag tag-featured">
-                  <font-awesome-icon :icon="['fas', 'star']" />
-                  {{ t('property.featured') }}
-                </span>
-                <span v-if="property.new_construction" class="tag tag-new">
-                  <font-awesome-icon :icon="['fas', 'helmet-safety']" />
-                  {{ t('property.new') }}
-                </span>
-                <span v-if="property.pet_friendly" class="tag tag-pet">
-                  <font-awesome-icon :icon="['fas', 'paw']" />
-                  {{ t('property.petFriendly') }}
-                </span>
-              </div>
-              
-              <h1 class="property-title">{{ property.title }}</h1>
-              
-              <div class="property-location">
-                <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="location-icon" />
-                <span>{{ property.address }}, {{ property.city }}</span>
-              </div>
-              
-              <div class="property-price-banner">
-                <div class="price-main">
-                  <span class="price-label">{{ t('property.monthlyPrice') }}</span>
-                  <span class="price-amount">{{ formatPrice(property.monthly_price) }}</span>
-                </div>
-                <div class="price-deposit" v-if="property.deposit_amount">
-                  <span class="deposit-label">{{ t('property.deposit') }}</span>
-                  <span class="deposit-amount">{{ formatPrice(property.deposit_amount) }}</span>
-                </div>
-              </div>
+
+      <!-- ── Main Grid ── -->
+      <div class="pd-grid">
+
+        <!-- ── Left / Main column ── -->
+        <div class="pd-main">
+
+          <!-- Property Header -->
+          <div class="pd-card pd-prop-header">
+            <div class="pd-tags">
+              <span class="pd-tag pd-tag--type">
+                <font-awesome-icon :icon="['fas', getTypeIcon(property)]" />
+                {{ getTypeTranslated(property) }}
+              </span>
+              <span v-if="property.featured" class="pd-tag pd-tag--gold">
+                <font-awesome-icon :icon="['fas', 'star']" />
+                {{ t('property.featured') }}
+              </span>
+              <span v-if="property.new_construction" class="pd-tag pd-tag--blue">
+                <font-awesome-icon :icon="['fas', 'helmet-safety']" />
+                {{ t('property.new') }}
+              </span>
+              <span v-if="property.pet_friendly" class="pd-tag pd-tag--green">
+                <font-awesome-icon :icon="['fas', 'paw']" />
+                {{ t('property.petFriendly') }}
+              </span>
             </div>
-            
-            <!-- Características principales -->
-            <div class="features-showcase">
-              <h2 class="section-title">
-                <font-awesome-icon :icon="['fas', 'list-check']" />
-                {{ t('property.mainFeatures') }}
-              </h2>
-              
-              <div class="features-grid-main">
-                <div class="feature-card" v-if="property.area_m2">
-                  <div class="feature-icon-wrapper">
-                    <font-awesome-icon :icon="['fas', 'ruler-combined']" />
-                  </div>
-                  <div class="feature-details">
-                    <span class="feature-value">{{ property.area_m2 }}</span>
-                    <span class="feature-label">{{ t('property.areaM2') }}</span>
-                  </div>
-                </div>
-                
-                <div class="feature-card" v-if="property.num_bedrooms">
-                  <div class="feature-icon-wrapper">
-                    <font-awesome-icon :icon="['fas', 'bed']" />
-                  </div>
-                  <div class="feature-details">
-                    <span class="feature-value">{{ property.num_bedrooms }}</span>
-                    <span class="feature-label">{{ t('property.bedrooms') }}</span>
-                  </div>
-                </div>
-                
-                <div class="feature-card" v-if="property.num_bathrooms">
-                  <div class="feature-icon-wrapper">
-                    <font-awesome-icon :icon="['fas', 'bath']" />
-                  </div>
-                  <div class="feature-details">
-                    <span class="feature-value">{{ property.num_bathrooms }}</span>
-                    <span class="feature-label">{{ t('property.bathrooms') }}</span>
-                  </div>
-                </div>
-                
-                <div class="feature-card" v-if="property.parking_spaces">
-                  <div class="feature-icon-wrapper">
-                    <font-awesome-icon :icon="['fas', 'car']" />
-                  </div>
-                  <div class="feature-details">
-                    <span class="feature-value">{{ property.parking_spaces }}</span>
-                    <span class="feature-label">{{ t('property.parkingSpaces') }}</span>
-                  </div>
-                </div>
-                
-                <div class="feature-card" v-if="property.floor_number">
-                  <div class="feature-icon-wrapper">
-                    <font-awesome-icon :icon="['fas', 'building']" />
-                  </div>
-                  <div class="feature-details">
-                    <span class="feature-value">{{ t('property.floor', { number: property.floor_number }) }}</span>
-                    <span class="feature-label">{{ t('property.floorLabel') }}</span>
-                  </div>
-                </div>
-                
-                <div class="feature-card" v-if="property.year_built">
-                  <div class="feature-icon-wrapper">
-                    <font-awesome-icon :icon="['fas', 'calendar']" />
-                  </div>
-                  <div class="feature-details">
-                    <span class="feature-value">{{ property.year_built }}</span>
-                    <span class="feature-label">{{ t('property.yearBuilt') }}</span>
-                  </div>
-                </div>
-              </div>
+
+            <h1 class="pd-prop-title">{{ property.title }}</h1>
+
+            <div class="pd-location">
+              <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="pd-location__ico" />
+              <span>{{ property.address }}<span v-if="property.city">, {{ property.city }}</span></span>
             </div>
-            
-            <!-- Descripción -->
-            <div class="description-section">
-              <h2 class="section-title">
-                <font-awesome-icon :icon="['fas', 'file-alt']" />
-                {{ t('property.description') }}
-              </h2>
-              <div class="description-content">
-                <p>{{ property.description || t('property.noDescription') }}</p>
+
+            <div class="pd-price-banner">
+              <div class="pd-price-main">
+                <span class="pd-price-label">{{ t('property.monthlyPrice') }}</span>
+                <span class="pd-price-amount">{{ formatPrice(property.monthly_price) }}</span>
               </div>
-            </div>
-            
-            <!-- Servicios incluidos -->
-            <div class="services-section" v-if="getServicesArray(property.included_services).length > 0">
-              <h2 class="section-title">
-                <font-awesome-icon :icon="['fas', 'check-circle']" />
-                {{ t('property.includedServices') }}
-              </h2>
-              <div class="services-grid">
-                <div v-for="service in getServicesArray(property.included_services)" :key="service"
-                  class="service-item">
-                  <font-awesome-icon :icon="['fas', 'check']" class="service-icon" />
-                  <span>{{ service }}</span>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Mapa -->
-            <div class="map-section" v-if="property.lat && property.lng">
-              <h2 class="section-title">
-                <font-awesome-icon :icon="['fas', 'map']" />
-                {{ t('property.mapLocation') }}
-              </h2>
-              <div class="map-container">
-                <MapView :id="(property as any).id" :lat="(property as any).lat" :lng="(property as any).lng" :owner-id="(property as any).user_id" />
-              </div>
-              <div class="map-coordinates">
-                <font-awesome-icon :icon="['fas', 'location-dot']" />
-                <span>{{ Number(property.lat).toFixed(6) }}, {{ Number(property.lng).toFixed(6) }}</span>
+              <div v-if="property.deposit_amount" class="pd-price-deposit">
+                <span class="pd-deposit-label">{{ t('property.deposit') }}</span>
+                <span class="pd-deposit-amount">{{ formatPrice(property.deposit_amount) }}</span>
               </div>
             </div>
           </div>
-          
-          <!-- Sidebar -->
-          <div class="sidebar-column">
-            <!-- Card de contacto -->
-            <div class="contact-card">
-              <div class="contact-header">
+
+          <!-- Features Grid -->
+          <div class="pd-card">
+            <h2 class="pd-card__title">
+              <font-awesome-icon :icon="['fas', 'list-check']" />
+              {{ t('property.mainFeatures') }}
+            </h2>
+            <div class="pd-features-grid">
+              <div class="pd-feature" v-if="property.area_m2">
+                <div class="pd-feature__ico"><font-awesome-icon :icon="['fas', 'ruler-combined']" /></div>
+                <div class="pd-feature__body">
+                  <span class="pd-feature__val">{{ property.area_m2 }}</span>
+                  <span class="pd-feature__lbl">{{ t('property.areaM2') }}</span>
+                </div>
+              </div>
+              <div class="pd-feature" v-if="property.num_bedrooms">
+                <div class="pd-feature__ico"><font-awesome-icon :icon="['fas', 'bed']" /></div>
+                <div class="pd-feature__body">
+                  <span class="pd-feature__val">{{ property.num_bedrooms }}</span>
+                  <span class="pd-feature__lbl">{{ t('property.bedrooms') }}</span>
+                </div>
+              </div>
+              <div class="pd-feature" v-if="property.num_bathrooms">
+                <div class="pd-feature__ico"><font-awesome-icon :icon="['fas', 'bath']" /></div>
+                <div class="pd-feature__body">
+                  <span class="pd-feature__val">{{ property.num_bathrooms }}</span>
+                  <span class="pd-feature__lbl">{{ t('property.bathrooms') }}</span>
+                </div>
+              </div>
+              <div class="pd-feature" v-if="property.parking_spaces">
+                <div class="pd-feature__ico"><font-awesome-icon :icon="['fas', 'square-parking']" /></div>
+                <div class="pd-feature__body">
+                  <span class="pd-feature__val">{{ property.parking_spaces }}</span>
+                  <span class="pd-feature__lbl">{{ t('property.parkingSpaces') }}</span>
+                </div>
+              </div>
+              <div class="pd-feature" v-if="property.floor_number">
+                <div class="pd-feature__ico"><font-awesome-icon :icon="['fas', 'building']" /></div>
+                <div class="pd-feature__body">
+                  <span class="pd-feature__val">{{ t('property.floor', { number: property.floor_number }) }}</span>
+                  <span class="pd-feature__lbl">{{ t('property.floorLabel') }}</span>
+                </div>
+              </div>
+              <div class="pd-feature" v-if="property.year_built">
+                <div class="pd-feature__ico"><font-awesome-icon :icon="['fas', 'calendar-days']" /></div>
+                <div class="pd-feature__body">
+                  <span class="pd-feature__val">{{ property.year_built }}</span>
+                  <span class="pd-feature__lbl">{{ t('property.yearBuilt') }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="pd-card">
+            <h2 class="pd-card__title">
+              <font-awesome-icon :icon="['fas', 'file-lines']" />
+              {{ t('property.description') }}
+            </h2>
+            <p class="pd-description">{{ property.description || t('property.noDescription') }}</p>
+          </div>
+
+          <!-- Services -->
+          <div class="pd-card" v-if="getServicesArray(property.included_services).length > 0">
+            <h2 class="pd-card__title">
+              <font-awesome-icon :icon="['fas', 'circle-check']" />
+              {{ t('property.includedServices') }}
+            </h2>
+            <div class="pd-services-grid">
+              <div
+                v-for="service in getServicesArray(property.included_services)"
+                :key="service"
+                class="pd-service-item"
+              >
+                <font-awesome-icon :icon="['fas', getServiceIcon(service)]" class="pd-service-ico" />
+                <span>{{ service }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Map -->
+          <div class="pd-card" v-if="property.lat && property.lng">
+            <h2 class="pd-card__title">
+              <font-awesome-icon :icon="['fas', 'map']" />
+              {{ t('property.mapLocation') }}
+            </h2>
+            <div class="pd-map-wrap">
+              <MapView :id="(property as any).id" :lat="(property as any).lat" :lng="(property as any).lng" :owner-id="(property as any).user_id" />
+            </div>
+            <div class="pd-coords">
+              <font-awesome-icon :icon="['fas', 'location-dot']" />
+              <span>{{ Number(property.lat).toFixed(6) }}, {{ Number(property.lng).toFixed(6) }}</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Sidebar ── -->
+        <aside class="pd-sidebar">
+          <div class="pd-contact-card">
+
+            <!-- Owner actions -->
+            <template v-if="(authUser as any)?.id && (property as any)?.user_id && (authUser as any).id === (property as any).user_id">
+              <div class="pd-owner-chip">
+                <font-awesome-icon :icon="['fas', 'crown']" />
+                {{ t('property.contact.ownerProperty') }}
+              </div>
+              <div class="pd-owner-actions">
+                <button class="pd-action-btn pd-action-btn--edit" @click="editProperty">
+                  <font-awesome-icon :icon="['fas', 'pen-to-square']" />
+                  {{ t('property.contact.editProperty') }}
+                </button>
+                <button class="pd-action-btn pd-action-btn--del" @click="deleteProperty">
+                  <font-awesome-icon :icon="['fas', 'trash-can']" />
+                  {{ t('property.contact.deleteProperty') }}
+                </button>
+              </div>
+            </template>
+
+            <!-- Visitor actions -->
+            <template v-else>
+              <div class="pd-contact-head">
                 <h3>{{ t('property.contact.header') }}</h3>
                 <p>{{ t('property.contact.subHeader') }}</p>
               </div>
-              
-              <div class="contact-actions">
-                <!-- Si es el propietario -->
-                <template v-if="(authUser as any)?.id && (property as any)?.user_id && (authUser as any).id === (property as any).user_id">
-                  <div class="btn-action btn-owner">
-                    <font-awesome-icon :icon="['fas', 'crown']" />
-                    <span>{{ t('property.contact.ownerProperty') }}</span>
-                  </div>
-                  
-                  <!-- Botones de gestión del propietario -->
-                  <div class="owner-actions">
-                    <button @click="editProperty" class="btn-action btn-edit">
-                      <font-awesome-icon :icon="['fas', 'edit']" />
-                      <span>{{ t('property.contact.editProperty') }}</span>
-                    </button>
-                    <button @click="deleteProperty" class="btn-action btn-delete">
-                      <font-awesome-icon :icon="['fas', 'trash-can']" />
-                      <span>{{ t('property.contact.deleteProperty') }}</span>
-                    </button>
-                  </div>
-                </template>
-                
-                <!-- Si NO es el propietario -->
-                <template v-else>
-                  <button v-if="property?.status === 'available' && isAuthenticated" @click="openRequestVisitModal"
-                    class="btn-action btn-primary">
-                    <font-awesome-icon :icon="['fas', 'calendar-check']" />
-                    <span>{{ t('property.contact.requestVisit') }}</span>
-                  </button>
-                  
-                  <button v-else-if="property?.status === 'available' && !isAuthenticated" @click="openRequestVisitModal"
-                    class="btn-action btn-login">
-                    <font-awesome-icon :icon="['fas', 'sign-in-alt']" />
-                    <span>{{ t('property.contact.login') }}</span>
-                  </button>
-                  
-                  <div v-else class="unavailable-alert">
-                    <font-awesome-icon :icon="['fas', 'ban']" />
-                    <div>
-                      <strong>{{ t('property.contact.notAvailable') }}</strong>
-                      <p>{{ t('property.contact.notAvailableDesc') }}</p>
-                    </div>
-                  </div>
-                </template>
-                
-                <button @click="contactAgent" class="btn-action btn-secondary">
-                  <font-awesome-icon :icon="['fas', 'phone']" />
-                  <span>{{ t('property.contact.contactAgent') }}</span>
-                </button>
-                
-                <div class="secondary-actions">
-                  <button @click="toggleFavorite" class="btn-icon-action" :class="{ active: isFavorite }">
-                    <font-awesome-icon :icon="isFavorite ? ['fas', 'heart'] : ['far', 'heart']" />
-                    <span>{{ isFavorite ? t('property.contact.saved') : t('property.contact.save') }}</span>
-                  </button>
-                  <button @click="shareProperty" class="btn-icon-action">
-                    <font-awesome-icon :icon="['fas', 'share-alt']" />
-                    <span>{{ t('property.contact.share') }}</span>
-                  </button>
+
+              <button
+                v-if="property?.status === 'available' && isAuthenticated"
+                @click="openRequestVisitModal"
+                class="pd-action-btn pd-action-btn--primary"
+              >
+                <font-awesome-icon :icon="['fas', 'calendar-check']" />
+                {{ t('property.contact.requestVisit') }}
+              </button>
+
+              <button
+                v-else-if="property?.status === 'available' && !isAuthenticated"
+                @click="openRequestVisitModal"
+                class="pd-action-btn pd-action-btn--login"
+              >
+                <font-awesome-icon :icon="['fas', 'right-to-bracket']" />
+                {{ t('property.contact.login') }}
+              </button>
+
+              <div v-else class="pd-unavailable">
+                <font-awesome-icon :icon="['fas', 'ban']" />
+                <div>
+                  <strong>{{ t('property.contact.notAvailable') }}</strong>
+                  <p>{{ t('property.contact.notAvailableDesc') }}</p>
                 </div>
               </div>
-              
-              <!-- Información adicional -->
-              <div class="property-meta">
-                <div class="meta-row">
-                  <font-awesome-icon :icon="['fas', 'clock']" />
-                  <span>{{ t('property.meta.published') }} {{ timeAgo(property.publication_date) }}</span>
-                </div>
-                <div class="meta-row">
-                  <font-awesome-icon :icon="['fas', 'eye']" />
-                  <span>{{ property.views || 0 }} {{ t('property.meta.views') }}</span>
-                </div>
-                <div class="meta-row">
-                  <font-awesome-icon :icon="['fas', 'hashtag']" />
-                  <span>{{ t('property.meta.id') }}: {{ (property as any).id }}</span>
-                </div>
+            </template>
+
+            <button class="pd-action-btn pd-action-btn--phone" @click="contactAgent">
+              <font-awesome-icon :icon="['fas', 'phone']" />
+              {{ t('property.contact.contactAgent') }}
+            </button>
+
+            <div class="pd-secondary-btns">
+              <button :class="['pd-icon-btn', { 'pd-icon-btn--active': isFavorite }]" @click="toggleFavorite">
+                <font-awesome-icon :icon="isFavorite ? ['fas', 'heart'] : ['far', 'heart']" />
+                <span>{{ isFavorite ? t('property.contact.saved') : t('property.contact.save') }}</span>
+              </button>
+              <button class="pd-icon-btn" @click="shareProperty">
+                <font-awesome-icon :icon="['fas', 'share-nodes']" />
+                <span>{{ t('property.contact.share') }}</span>
+              </button>
+            </div>
+
+            <!-- Meta -->
+            <div class="pd-meta">
+              <div class="pd-meta-row">
+                <font-awesome-icon :icon="['fas', 'clock']" />
+                <span>{{ t('property.meta.published') }} {{ timeAgo(property.publication_date) }}</span>
+              </div>
+              <div class="pd-meta-row">
+                <font-awesome-icon :icon="['fas', 'eye']" />
+                <span>{{ property.views || 0 }} {{ t('property.meta.views') }}</span>
+              </div>
+              <div class="pd-meta-row">
+                <font-awesome-icon :icon="['fas', 'hashtag']" />
+                <span>{{ t('property.meta.id') }}: {{ (property as any).id }}</span>
               </div>
             </div>
           </div>
-        </div>
+        </aside>
       </div>
     </div>
-    
-    <!-- Modal de solicitud de visita -->
-    <RequestVisitModal :open="showRequestModal" :property="property" @close="showRequestModal = false"
-      @success="handleVisitRequestSuccess" />
+
+    <!-- Visit Modal -->
+    <RequestVisitModal
+      :open="showRequestModal"
+      :property="property"
+      @close="showRequestModal = false"
+      @success="handleVisitRequestSuccess"
+    />
   </div>
 </template>
 
@@ -347,7 +341,6 @@ const { t, locale } = useI18n()
 const router = useRouter()
 const route = useRoute()
 
-// State
 const property = ref<any>(null)
 const loading = ref(true)
 const error = ref(null)
@@ -356,31 +349,21 @@ const isFavorite = ref(false)
 const showRequestModal = ref(false)
 const authUser = ref<any>(null)
 
-const DEFAULT_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI2MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2Yzc1N2QiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZW4gbm8gZGlzcG9uaWJsZTwvdGV4dD48L3N2Zz4="
+const DEFAULT_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI2MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjMWEwZTBhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiNkYTljNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5TaW4gaW1hZ2VuPC90ZXh0Pjwvc3ZnPg=="
 
-// Computed
-const isAuthenticated = computed(() => {
-  return !!localStorage.getItem("auth_token") || !!sessionStorage.getItem("auth_token")
-})
+const isAuthenticated = computed(() => !!(localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token")))
 
-// Build image array — handles both object arrays AND JSON-stringified strings
-const propertyImages = computed(() => {
+const propertyImages = computed((): string[] => {
   if (!property.value) return [DEFAULT_IMAGE]
-
   const images: string[] = []
-
-  // 1. Prioridad: relación images (nueva tabla con objetos {url, order, is_main...})
+  
   if (property.value.images && Array.isArray(property.value.images) && property.value.images.length > 0) {
-    // Si ya es un array de objetos desde la relación
     property.value.images.forEach((img: any) => {
       const url = img.url || img.image_url
-      if (typeof url === 'string') {
-        images.push(url)
-      }
+      if (typeof url === 'string') images.push(url)
     })
   }
-
-  // 2. Fallback: campo image_url antiguo (Legacy array de base64/URLs)
+  
   if (images.length === 0 && property.value.image_url) {
     const legacy = property.value.image_url
     if (Array.isArray(legacy)) {
@@ -389,90 +372,51 @@ const propertyImages = computed(() => {
       })
     } else if (typeof legacy === 'string') {
       try {
-        const parsed = JSON.parse(legacy)
-        if (Array.isArray(parsed)) {
-          parsed.forEach((img: any) => {
+        const p = JSON.parse(legacy)
+        if (Array.isArray(p)) {
+          p.forEach((img: any) => {
             if (typeof img === 'string') images.push(img)
           })
         } else {
           images.push(legacy)
         }
-      } catch {
+      } catch (e) {
         images.push(legacy)
       }
     }
   }
-
   return images.length > 0 ? images : [DEFAULT_IMAGE]
 })
 
-const currentImage = computed(() => {
-  return propertyImages.value[currentImageIndex.value] || DEFAULT_IMAGE
-})
+const currentImage = computed(() => propertyImages.value[currentImageIndex.value] || DEFAULT_IMAGE)
 
-// Methods
 function checkAuthentication() {
-  let userStr = localStorage.getItem('user') || sessionStorage.getItem('user')
-  if (userStr) {
-    try {
-      authUser.value = JSON.parse(userStr)
-    } catch (e) {
-      authUser.value = null
-    }
-  }
+  const userStr = localStorage.getItem('user') || sessionStorage.getItem('user')
+  if (userStr) { try { authUser.value = JSON.parse(userStr) } catch { authUser.value = null } }
 }
 
 async function fetchProperty() {
-  const propertyId = route.params.id
-  loading.value = true
-  error.value = null
-  
+  loading.value = true; error.value = null
   try {
-    const response = await api.get(`/properties/${propertyId}`)
-    
-    // Manejar estructura de respuesta del backend
-    if (response.data.success && response.data.data) {
-      property.value = response.data.data
-    } else if (response.data.data) {
-      property.value = response.data.data
-    } else {
-      property.value = response.data
-    }
-    
-    console.log('✅ Propiedad cargada:', property.value)
-    console.log('📸 Imágenes disponibles:', property.value.images)
-    
-    // Incrementar vistas
-    await api.post(`/properties/${propertyId}/views`)
+    const response = await api.get(`/properties/${route.params.id}`)
+    if (response.data.success && response.data.data) property.value = response.data.data
+    else if (response.data.data) property.value = response.data.data
+    else property.value = response.data
+    await api.post(`/properties/${route.params.id}/views`)
   } catch (err: any) {
-    console.error('Error al cargar la propiedad:', err)
     error.value = err.response?.data?.message || 'No se pudo cargar la propiedad'
   } finally {
     loading.value = false
   }
 }
 
-function onImgError(event: any) {
-  console.warn('❌ Error cargando imagen:', event.target.src)
-  event.target.src = DEFAULT_IMAGE
-}
-
-function previousImage() {
-  if (currentImageIndex.value > 0) {
-    currentImageIndex.value--
-  }
-}
-
-function nextImage() {
-  if (currentImageIndex.value < propertyImages.value.length - 1) {
-    currentImageIndex.value++
-  }
-}
+function onImgError(event: any) { event.target.src = DEFAULT_IMAGE }
+function previousImage() { if (currentImageIndex.value > 0) currentImageIndex.value-- }
+function nextImage() { if (currentImageIndex.value < propertyImages.value.length - 1) currentImageIndex.value++ }
 
 function openRequestVisitModal() {
   if (!isAuthenticated.value) {
-    const confirmLogin = confirm(t('property.contact.loginRequired'))
-    if (confirmLogin) {
+    if (confirm(t('property.contact.loginRequired'))) {
       localStorage.setItem('redirectAfterLogin', route.fullPath)
       router.push({ name: 'Login' })
     }
@@ -481,168 +425,94 @@ function openRequestVisitModal() {
   showRequestModal.value = true
 }
 
-const detectType = (propertyData: any) => {
-  if (!propertyData) return 'otro';
-  if (propertyData.type) return propertyData.type;
-  
-  const title = propertyData.title || '';
-  const tTitle = title.toLowerCase();
-  
-  if (tTitle.includes("casa")) return 'casa';
-  if (tTitle.includes("apartamento") || tTitle.includes("apto")) return 'apartamento';
-  if (tTitle.includes("local")) return 'local';
-  if (tTitle.includes("finca")) return 'finca';
-  return 'otro';
-};
-
-const getTypeTranslated = (propertyData: any) => {
-  const type = detectType(propertyData);
-  
-  const typeMap: Record<string, string> = {
-    casa: t('property.type.casa'),
-    apartamento: t('property.type.apartamento'),
-    local: t('property.type.local'),
-    finca: t('property.type.finca'),
-    otro: t('property.type.otro'),
-  };
-  
-  return typeMap[type] || t('property.type.otro');
-};
-
-const getTypeIcon = (propertyData: any) => {
-  if (!propertyData) return "home";
-  
-  const type = propertyData.type || '';
-  
-  if (type === 'casa') return "home";
-  if (type === 'apartamento') return "building";
-  if (type === 'local') return "store";
-  if (type === 'finca') return "tree";
-  
-  const title = propertyData.title || '';
-  const t = title.toLowerCase();
-  if (t.includes("casa")) return "home";
-  if (t.includes("apartamento") || t.includes("apto")) return "building";
-  if (t.includes("local")) return "store";
-  if (t.includes("finca")) return "tree";
-  return "home";
-};
-
-function handleVisitRequestSuccess() {
-  showRequestModal.value = false
-  alert(t('visitRequest.success'))
+const detectType = (p: any) => {
+  if (!p) return 'otro'
+  if (p.type) return p.type
+  const title = (p.title || '').toLowerCase()
+  if (title.includes('casa')) return 'casa'
+  if (title.includes('apartamento') || title.includes('apto')) return 'apartamento'
+  if (title.includes('local')) return 'local'
+  if (title.includes('finca')) return 'finca'
+  return 'otro'
+}
+const getTypeTranslated = (p: any) => {
+  const type = detectType(p)
+  const map: Record<string, string> = { casa: t('property.type.casa'), apartamento: t('property.type.apartamento'), local: t('property.type.local'), finca: t('property.type.finca'), otro: t('property.type.otro') }
+  return map[type] || t('property.type.otro')
+}
+const getTypeIcon = (p: any) => {
+  const type = p?.type || detectType(p)
+  const map: Record<string, string> = { casa: 'house', apartamento: 'building', local: 'store', finca: 'tree', otro: 'house' }
+  return map[type] || 'house'
 }
 
-function contactAgent() {
-  alert(t('property.contact.agentContact'))
+function getStatusIcon(status: any): [string, string] {
+  const map: Record<string, [string, string]> = {
+    available: ['fas', 'circle-check'],
+    rented: ['fas', 'circle-xmark'],
+    reserved: ['fas', 'clock'],
+    sold: ['fas', 'lock'],
+    maintenance: ['fas', 'screwdriver-wrench'],
+  }
+  return map[status] || ['fas', 'circle-info']
 }
 
-function toggleFavorite() {
-  isFavorite.value = !isFavorite.value
+function getServicesArray(services: any): string[] {
+  if (!services) return []
+  if (Array.isArray(services)) return services
+  if (typeof services === 'string') return services.split(',').map((s: string) => s.trim()).filter(Boolean)
+  return []
 }
 
+// Mapeo de valores de servicio a icono FA
+function getServiceIcon(service: string): string {
+  const map: Record<string, string> = {
+    water: 'droplet', electricity: 'bolt', gas: 'fire', internet: 'wifi',
+    cableTv: 'tv', cable_tv: 'tv', security: 'shield-halved', parking: 'square-parking',
+    gym: 'dumbbell', pool: 'person-swimming', bbqArea: 'fire-burner', bbq_area: 'fire-burner',
+    laundry: 'jug-detergent', elevator: 'elevator',
+    Agua: 'droplet', Electricidad: 'bolt', Gas: 'fire', Internet: 'wifi',
+    'Cable TV': 'tv', Seguridad: 'shield-halved', Parqueadero: 'square-parking',
+    Gimnasio: 'dumbbell', Piscina: 'person-swimming', 'Zona BBQ': 'fire-burner',
+    Lavandería: 'jug-detergent', Ascensor: 'elevator',
+  }
+  return map[service] || 'circle-check'
+}
+
+function handleVisitRequestSuccess() { showRequestModal.value = false; alert(t('visitRequest.success')) }
+function contactAgent() { alert(t('property.contact.agentContact')) }
+function toggleFavorite() { isFavorite.value = !isFavorite.value }
 function shareProperty() {
   if (navigator.share && property.value) {
-    navigator.share({
-      title: property.value.title,
-      text: t('property.contact.shareText', { title: property.value.title }),
-      url: window.location.href,
-    }).catch(err => console.log('Error al compartir:', err))
+    navigator.share({ title: property.value.title, text: t('property.contact.shareText', { title: property.value.title }), url: window.location.href }).catch(() => {})
   } else {
     navigator.clipboard.writeText(window.location.href)
     alert(t('property.contact.linkCopied'))
   }
 }
-
-function editProperty() {
-  router.push({
-    name: 'PropertyEdit',
-    params: { id: property.value.id }
-  })
-}
-
+function editProperty() { router.push({ name: 'PropertyEdit', params: { id: property.value.id } }) }
 async function deleteProperty() {
-  const confirmDelete = confirm(t('property.contact.deleteConfirm'))
-  if (!confirmDelete) return
-  
-  const confirmFinal = confirm(t('property.contact.deleteFinalConfirm'))
-  if (!confirmFinal) return
-  
+  if (!confirm(t('property.contact.deleteConfirm'))) return
+  if (!confirm(t('property.contact.deleteFinalConfirm'))) return
   try {
     loading.value = true
     await api.delete(`/properties/${property.value.id}`)
     alert(t('property.contact.deleteSuccess'))
     router.push({ name: 'PropertyView' })
   } catch (err: any) {
-    console.error('Error al eliminar la propiedad:', err)
-    
-    let errorMessage = t('property.contact.deleteError')
-    if (err.response?.status === 403) {
-      errorMessage = t('property.contact.deleteNoPermission')
-    } else if (err.response?.status === 404) {
-      errorMessage = t('property.contact.deleteNotFound')
-    }
-    
-    alert(errorMessage)
+    let msg = t('property.contact.deleteError')
+    if (err.response?.status === 403) msg = t('property.contact.deleteNoPermission')
+    else if (err.response?.status === 404) msg = t('property.contact.deleteNotFound')
+    alert(msg)
   } finally {
     loading.value = false
   }
 }
-
-function getServicesArray(services: any) {
-  if (!services) return []
-  if (Array.isArray(services)) return services
-  if (typeof services === 'string') {
-    return services.split(',').map(s => s.trim()).filter(s => s.length > 0)
-  }
-  return []
-}
-
 function formatPrice(price: any) {
   if (!price) return t('property.askPrice')
   const isEN = locale.value.startsWith('en')
-  return new Intl.NumberFormat(
-    isEN ? 'en-US' : 'es-CO',
-    {
-      style: 'currency',
-      currency: isEN ? 'USD' : 'COP',
-      minimumFractionDigits: 0
-    }
-  ).format(price)
+  return new Intl.NumberFormat(isEN ? 'en-US' : 'es-CO', { style: 'currency', currency: isEN ? 'USD' : 'COP', minimumFractionDigits: 0 }).format(price)
 }
-
-/* function getStatusText(status) {
-  const statusMap = {
-    available: t('property.status.available'),
-    rented: t('property.status.rented'),
-    reserved: t('property.status.reserved'),
-    sold: t('property.status.sold'),
-    maintenance: t('property.status.maintenance'),
-  }
-  return statusMap[status] || t('property.status.available')
-} */
-
-function getStatusIcon(status: any) {
-  const iconMap: Record<string, string[]> = {
-    available: ['fas', 'check-circle'],
-    rented: ['fas', 'times-circle'],
-    reserved: ['fas', 'clock'],
-    sold: ['fas', 'lock'],
-    maintenance: ['fas', 'toolbox'],
-  }
-  return iconMap[status] || ['fas', 'info-circle']
-}
-
-/* function getTypeText(type) {
-  const typeMap = {
-    casa: 'Casa',
-    apartamento: 'Apartamento',
-    local: 'Local Comercial',
-    finca: 'Finca',
-  }
-  return typeMap[type] || 'Propiedad'
-} */
-
 function timeAgo(dateString: any) {
   if (!dateString) return ''
   const diff = Math.floor((Date.now() - new Date(dateString).getTime()) / 86400000)
@@ -654,14 +524,350 @@ function timeAgo(dateString: any) {
   return t('time.yearsAgo', Math.floor(diff / 365))
 }
 
-// Lifecycle
-onMounted(() => {
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-  checkAuthentication()
-  fetchProperty()
-})
+onMounted(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); checkAuthentication(); fetchProperty() })
 </script>
 
 <style scoped>
-@import "../../assets/css/Properties/PropertyDetail.css";
+/* ══════════════════════════════════════════════════════════════
+   PROPERTY DETAIL VIEW
+   • padding-top: 65px  →  navbar fixed
+   • Paleta: #1a0e0a / #2e1d17 / #3b2416 + #da9c5f
+   ══════════════════════════════════════════════════════════════ */
+.pd-page {
+  min-height: calc(100vh - 65px);
+  padding-top: 65px;
+  position: relative;
+  overflow-x: hidden;
+  background: linear-gradient(135deg, #1a0e0a 0%, #2e1d17 50%, #3b2416 100%);
+}
+.pd-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("https://i.pinimg.com/1200x/e2/d2/b7/e2d2b7877ffb88a68d6b72e5ea0bd965.jpg") center/cover no-repeat;
+  opacity: 0.1;
+  filter: blur(7px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Orbs */
+.pd-bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+.pd-bg__orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.18; }
+.pd-bg__orb--1 { width: 480px; height: 480px; background: radial-gradient(circle, rgba(218,156,95,0.45), transparent); top: -180px; right: -180px; }
+.pd-bg__orb--2 { width: 360px; height: 360px; background: radial-gradient(circle, rgba(184,121,31,0.3), transparent); bottom: 20% ; left: -140px; }
+
+/* State screens */
+.pd-state {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: calc(100vh - 65px); gap: 1rem; text-align: center; padding: 2rem;
+}
+.pd-spinner { width: 44px; height: 44px; border-radius: 50%; border: 2px solid rgba(218,156,95,0.2); border-top-color: #da9c5f; animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.pd-state p { font-size: 0.95rem; color: rgba(240,229,219,0.5); }
+.pd-state h2 { font-size: 1.5rem; font-weight: 700; color: #f0e5db; margin: 0; }
+.pd-state__icon { width: 68px; height: 68px; border-radius: 50%; background: rgba(231,76,60,0.12); border: 1px solid rgba(231,76,60,0.3); display: flex; align-items: center; justify-content: center; color: #e74c3c; font-size: 1.6rem; }
+.pd-btn-back { display: inline-flex; align-items: center; gap: 7px; padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #da9c5f, #b8791f); border: none; border-radius: 10px; color: #1a0e0a; font-family: inherit; font-size: 0.9rem; font-weight: 700; cursor: pointer; margin-top: 0.5rem; }
+
+/* Shell */
+.pd-shell { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 2rem 2rem 5rem; }
+
+/* Breadcrumb */
+.pd-breadcrumb { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.pd-bc-item { font-size: 0.8rem; color: rgba(240,229,219,0.4); text-decoration: none; transition: color 0.2s; }
+.pd-bc-item:hover { color: #da9c5f; }
+.pd-bc-sep { font-size: 0.6rem; color: rgba(240,229,219,0.2); }
+.pd-bc-current { font-size: 0.8rem; color: #da9c5f; font-weight: 600; max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── Gallery ──────────────────────────────────────────────────── */
+.pd-gallery { margin-bottom: 2rem; }
+.pd-gallery__main {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(26,14,10,0.6);
+  border: 1px solid rgba(218,156,95,0.2);
+  aspect-ratio: 16/7;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+}
+.pd-gallery__hero { width: 100%; height: 100%; object-fit: cover; display: block; }
+.img-fade-enter-active, .img-fade-leave-active { transition: opacity 0.3s ease; }
+.img-fade-enter-from, .img-fade-leave-to { opacity: 0; }
+
+/* Nav buttons */
+.pd-gallery__nav {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  pointer-events: none;
+}
+.pd-nav-btn {
+  pointer-events: all;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: rgba(26,14,10,0.75);
+  border: 1px solid rgba(218,156,95,0.35);
+  color: #f0e5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(8px);
+  font-size: 0.9rem;
+}
+.pd-nav-btn:not(:disabled):hover { background: rgba(218,156,95,0.2); border-color: rgba(218,156,95,0.6); color: #da9c5f; transform: scale(1.05); }
+.pd-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* Counter */
+.pd-gallery__counter {
+  position: absolute;
+  bottom: 1rem; right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.3rem 0.85rem;
+  background: rgba(26,14,10,0.8);
+  border: 1px solid rgba(218,156,95,0.25);
+  border-radius: 100px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(240,229,219,0.75);
+  backdrop-filter: blur(8px);
+}
+
+/* Status badge */
+.pd-status-badge {
+  position: absolute;
+  top: 1rem; left: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.35rem 0.9rem;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  backdrop-filter: blur(8px);
+}
+.pd-status-badge--available { background: rgba(46,204,113,0.2); border: 1px solid rgba(46,204,113,0.4); color: #2ecc71; }
+.pd-status-badge--rented    { background: rgba(231,76,60,0.2);  border: 1px solid rgba(231,76,60,0.4);  color: #e74c3c; }
+.pd-status-badge--maintenance { background: rgba(245,158,11,0.2); border: 1px solid rgba(245,158,11,0.4); color: #f59e0b; }
+.pd-status-badge--reserved  { background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.4); color: #a5b4fc; }
+
+/* Thumbnails */
+.pd-thumbs {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+}
+.pd-thumbs::-webkit-scrollbar { display: none; }
+.pd-thumb {
+  flex-shrink: 0;
+  width: 80px; height: 56px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid rgba(218,156,95,0.15);
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+  background: none;
+}
+.pd-thumb:hover { border-color: rgba(218,156,95,0.5); transform: translateY(-2px); }
+.pd-thumb--active { border-color: #da9c5f; box-shadow: 0 0 0 2px rgba(218,156,95,0.3); }
+.pd-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ── Main Grid ───────────────────────────────────────────────── */
+.pd-grid { display: grid; grid-template-columns: 1fr 340px; gap: 1.5rem; align-items: start; }
+
+/* Cards */
+.pd-card {
+  background: linear-gradient(135deg, rgba(62,36,24,0.95), rgba(46,29,23,0.95));
+  border: 1px solid rgba(218,156,95,0.2);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.pd-card__title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #da9c5f;
+  margin: 0 0 1.1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(218,156,95,0.15);
+}
+
+/* Property header card */
+.pd-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.pd-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0.25rem 0.75rem;
+  border-radius: 100px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.pd-tag--type { background: rgba(218,156,95,0.12); border: 1px solid rgba(218,156,95,0.3); color: #da9c5f; }
+.pd-tag--gold { background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); color: #fbbf24; }
+.pd-tag--blue { background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.3); color: #a5b4fc; }
+.pd-tag--green { background: rgba(46,204,113,0.12); border: 1px solid rgba(46,204,113,0.3); color: #2ecc71; }
+
+.pd-prop-title { font-size: clamp(1.5rem, 3.5vw, 2.2rem); font-weight: 800; color: #f0e5db; line-height: 1.2; margin: 0 0 0.75rem; letter-spacing: -0.02em; text-shadow: 0 2px 12px rgba(218,156,95,0.25); }
+
+.pd-location { display: flex; align-items: center; gap: 0.6rem; color: rgba(240,229,219,0.55); font-size: 0.9rem; margin-bottom: 1.25rem; }
+.pd-location__ico { color: #da9c5f; flex-shrink: 0; }
+
+.pd-price-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.1rem 1.25rem;
+  background: rgba(218,156,95,0.08);
+  border: 1px solid rgba(218,156,95,0.25);
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+.pd-price-main, .pd-price-deposit { display: flex; flex-direction: column; gap: 2px; }
+.pd-price-label, .pd-deposit-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(240,229,219,0.4); }
+.pd-price-amount { font-size: 1.75rem; font-weight: 800; color: #da9c5f; line-height: 1; text-shadow: 0 2px 8px rgba(218,156,95,0.4); }
+.pd-deposit-amount { font-size: 1.1rem; font-weight: 700; color: rgba(240,229,219,0.65); }
+
+/* Features */
+.pd-features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.85rem; }
+.pd-feature { display: flex; align-items: center; gap: 0.85rem; padding: 0.9rem 1rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(218,156,95,0.15); border-radius: 12px; transition: all 0.2s; }
+.pd-feature:hover { border-color: rgba(218,156,95,0.35); background: rgba(218,156,95,0.06); }
+.pd-feature__ico { width: 36px; height: 36px; border-radius: 9px; background: rgba(218,156,95,0.1); display: flex; align-items: center; justify-content: center; color: #da9c5f; flex-shrink: 0; }
+.pd-feature__body { display: flex; flex-direction: column; gap: 1px; }
+.pd-feature__val { font-size: 1.05rem; font-weight: 800; color: #f0e5db; line-height: 1; }
+.pd-feature__lbl { font-size: 0.72rem; font-weight: 500; color: rgba(240,229,219,0.4); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* Description */
+.pd-description { font-size: 0.92rem; color: rgba(240,229,219,0.65); line-height: 1.8; margin: 0; }
+
+/* Services */
+.pd-services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.6rem; }
+.pd-service-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.65rem 0.9rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(218,156,95,0.15); border-radius: 9px; font-size: 0.84rem; color: rgba(240,229,219,0.65); }
+.pd-service-ico { color: #da9c5f; font-size: 0.85rem; flex-shrink: 0; }
+
+/* Map */
+.pd-map-wrap { border-radius: 12px; overflow: hidden; border: 1px solid rgba(218,156,95,0.2); height: 320px; margin-bottom: 0.75rem; }
+.pd-coords { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: rgba(240,229,219,0.35); }
+
+/* ── Sidebar / Contact Card ──────────────────────────────────── */
+.pd-sidebar { position: sticky; top: calc(65px + 1.5rem); }
+.pd-contact-card {
+  background: linear-gradient(135deg, rgba(62,36,24,0.97), rgba(46,29,23,0.97));
+  border: 1px solid rgba(218,156,95,0.25);
+  border-radius: 18px;
+  padding: 1.5rem;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.pd-contact-head h3 { font-size: 1.05rem; font-weight: 700; color: #f0e5db; margin: 0 0 0.25rem; }
+.pd-contact-head p { font-size: 0.82rem; color: rgba(240,229,219,0.4); margin: 0; }
+
+/* Owner chip */
+.pd-owner-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1rem;
+  background: rgba(218,156,95,0.1);
+  border: 1px solid rgba(218,156,95,0.3);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #da9c5f;
+}
+.pd-owner-actions { display: flex; flex-direction: column; gap: 0.6rem; }
+
+/* Action buttons */
+.pd-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  border-radius: 11px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: none;
+}
+.pd-action-btn--primary { background: linear-gradient(135deg, #da9c5f, #b8791f); color: #1a0e0a; box-shadow: 0 4px 14px rgba(218,156,95,0.4); }
+.pd-action-btn--primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(218,156,95,0.55); }
+.pd-action-btn--login { background: linear-gradient(135deg, rgba(99,102,241,0.8), rgba(79,70,229,0.8)); color: #fff; border: 1px solid rgba(99,102,241,0.4); }
+.pd-action-btn--login:hover { transform: translateY(-2px); }
+.pd-action-btn--phone { background: rgba(255,255,255,0.05); border: 1px solid rgba(218,156,95,0.25) !important; color: rgba(240,229,219,0.75); }
+.pd-action-btn--phone:hover { background: rgba(218,156,95,0.08); color: #f0e5db; border-color: rgba(218,156,95,0.5); }
+.pd-action-btn--edit { background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.3); color: #a5b4fc; }
+.pd-action-btn--edit:hover { background: rgba(99,102,241,0.2); }
+.pd-action-btn--del { background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.25); color: #e74c3c; }
+.pd-action-btn--del:hover { background: rgba(231,76,60,0.2); }
+
+/* Unavailable */
+.pd-unavailable { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.9rem 1rem; background: rgba(231,76,60,0.08); border: 1px solid rgba(231,76,60,0.2); border-radius: 10px; color: #e74c3c; font-size: 0.85rem; }
+.pd-unavailable strong { display: block; font-size: 0.88rem; margin-bottom: 0.2rem; }
+.pd-unavailable p { margin: 0; color: rgba(240,229,219,0.5); font-size: 0.8rem; }
+
+/* Secondary buttons */
+.pd-secondary-btns { display: flex; gap: 0.65rem; }
+.pd-icon-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 0.75rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(218,156,95,0.18);
+  border-radius: 10px;
+  color: rgba(240,229,219,0.5);
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.pd-icon-btn:hover { background: rgba(218,156,95,0.08); color: #da9c5f; border-color: rgba(218,156,95,0.4); }
+.pd-icon-btn--active { color: #e74c3c; border-color: rgba(231,76,60,0.3); background: rgba(231,76,60,0.07); }
+
+/* Meta */
+.pd-meta { display: flex; flex-direction: column; gap: 0.5rem; padding-top: 0.75rem; border-top: 1px solid rgba(218,156,95,0.12); }
+.pd-meta-row { display: flex; align-items: center; gap: 0.6rem; font-size: 0.78rem; color: rgba(240,229,219,0.35); }
+.pd-meta-row svg { color: rgba(218,156,95,0.5); flex-shrink: 0; }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .pd-grid { grid-template-columns: 1fr; }
+  .pd-sidebar { position: static; }
+}
+@media (max-width: 768px) {
+  .pd-shell { padding: 1.5rem 1.25rem 4rem; }
+  .pd-gallery__main { aspect-ratio: 4/3; }
+  .pd-features-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+}
+@media (max-width: 500px) {
+  .pd-shell { padding: 1rem 1rem 3.5rem; }
+  .pd-thumbs .pd-thumb { width: 64px; height: 44px; }
+  .pd-price-amount { font-size: 1.45rem; }
+}
 </style>

@@ -72,6 +72,25 @@
       "loadError": "No se pudo cargar la propiedad",
       "noPermission": "No tienes permisos para editar esta propiedad",
       "mustLogin": "Debes iniciar sesión para editar propiedades"
+    },
+    "eyebrow": "Edición",
+    "sectionDescriptions": {
+      "basicInfo": "Título, descripción, estado y precio de la propiedad",
+      "location": "Dirección, ciudad y coordenadas GPS",
+      "features": "Área, habitaciones, baños y parqueadero",
+      "images": "Administra las fotos de tu propiedad — mínimo 1, máximo 10",
+      "services": "Servicios incluidos en el precio del arrendamiento"
+    },
+    "images": {
+      "current": "Imágenes actuales",
+      "principal": "Principal",
+      "add": "Agregar nuevas imágenes",
+      "dropzone": {
+        "title": "Arrastra nuevas imágenes aquí o haz clic",
+        "description": "JPG · PNG · WEBP · máx. 5 MB"
+      },
+      "new": "Nueva",
+      "delete": "Eliminar"
     }
   },
   "home": {
@@ -328,8 +347,9 @@
     },
     "askPrice": "Consultar precio",
     "create": {
-      "title": "Crear Nueva Propiedad",
-      "subtitle": "Agrega una nueva propiedad a tu catálogo de arrendamientos",
+      "eyebrow": "Portafolio de Propiedades",
+      "title": "Publicar Propiedad",
+      "subtitle": "Completa los datos y agrega fotos para atraer más arrendatarios",
       "success": "¡Propiedad creada exitosamente!",
       "successTitle": "Éxito",
       "successMessage": "La propiedad ha sido publicada correctamente",
@@ -338,16 +358,48 @@
       "confirmCancel": "¿Estás seguro de que deseas cancelar? Se perderán todos los datos ingresados.",
       "cancelTitle": "Cancelar creación",
       "publishing": "Publicando...",
+      "processing": "Procesando...",
       "publish": "Publicar Propiedad",
+      "continueLocation": "Continuar a Ubicación →",
       "basicInfo": "Información Básica",
+      "basicInfoDesc": "Nombre, descripción y estado de la propiedad",
       "location": "Ubicación",
+      "locationDesc": "Dirección y ciudad donde se encuentra",
       "locationHint": "Las coordenadas ayudan a mostrar la propiedad en el mapa",
+      "locationExactHint": "Podrás seleccionar la ubicación exacta en el mapa en el siguiente paso",
       "features": "Características",
+      "featuresDesc": "Precio, área y distribución de espacios",
       "services": "Servicios Incluidos",
+      "servicesDesc": "Selecciona los servicios incluidos en el arriendo",
       "servicesHint": "Separa cada servicio con comas (ej: WiFi, Gas, Agua, Luz)",
+      "serviceSelected": "servicio seleccionado",
+      "servicesSelected": "servicios seleccionados",
+      "clearSelection": "Limpiar selección",
       "noServices": "No se han agregado servicios aún",
+      "noServicesSelected": "Ningún servicio seleccionado — opcional",
+      "imagesTitle": "Imágenes de la Propiedad",
+      "imagesDesc": "Sube hasta 10 imágenes JPG, PNG o WEBP (máx. 2 MB c/u)",
+      "dropzoneTitle": "Arrastra imágenes aquí o haz clic para seleccionar",
+      "dropzoneDesc": "JPG · PNG · WEBP · máx. 2 MB · {current}/10 imágenes",
+      "mainImage": "Principal",
+      "setAsMain": "Establecer como principal",
+      "deleteImage": "Eliminar imagen",
+      "noImagesTitle": "No hay imágenes",
+      "noImagesDesc": "Agrega fotos para que tu propiedad sea más atractiva",
       "image": "Imagen",
-      "imagePreview": "Vista previa de la imagen"
+      "imagePreview": "Vista previa de la imagen",
+      "errors": {
+        "maxImages": "Máximo 10 imágenes permitidas",
+        "limitReached": "Límite alcanzado",
+        "invalidFormat": "Formato no válido",
+        "maxSize": "Máximo 2MB",
+        "incompleteFields": "Por favor completa todos los campos requeridos",
+        "incompleteTitle": "Campos incompletos",
+        "priceRequired": "Por favor ingresa el precio mensual",
+        "priceTitle": "Precio requerido",
+        "imageRequired": "Por favor agrega al menos una imagen",
+        "imageTitle": "Imagen requerida"
+      }
     },
     "fields": {
       "title": "Título",
