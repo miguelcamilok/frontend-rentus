@@ -229,7 +229,7 @@
                 {{ t('property.mapLocation') }}
               </h2>
               <div class="map-container">
-                <MapView :id="property.id" :lat="property.lat" :lng="property.lng" :owner-id="property.user_id" />
+                <MapView :id="(property as any).id" :lat="(property as any).lat" :lng="(property as any).lng" :owner-id="(property as any).user_id" />
               </div>
               <div class="map-coordinates">
                 <font-awesome-icon :icon="['fas', 'location-dot']" />
@@ -249,7 +249,7 @@
               
               <div class="contact-actions">
                 <!-- Si es el propietario -->
-                <template v-if="authUser?.id && property?.user_id && authUser.id === property.user_id">
+                <template v-if="authUser?.id && (property as any)?.user_id && authUser.id === (property as any).user_id">
                   <div class="btn-action btn-owner">
                     <font-awesome-icon :icon="['fas', 'crown']" />
                     <span>{{ t('property.contact.ownerProperty') }}</span>
@@ -320,7 +320,7 @@
                 </div>
                 <div class="meta-row">
                   <font-awesome-icon :icon="['fas', 'hashtag']" />
-                  <span>{{ t('property.meta.id') }}: {{ property.id }}</span>
+                  <span>{{ t('property.meta.id') }}: {{ (property as any).id }}</span>
                 </div>
               </div>
             </div>
@@ -343,7 +343,7 @@ import MapView from '../../components/modals/Maps/MapView.vue'
 import api from '../../services/api'
 import { useI18n } from 'vue-i18n'
 
-const { t, tm, locale } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 const route = useRoute()
 
@@ -444,7 +444,7 @@ async function fetchProperty() {
     
     // Incrementar vistas
     await api.post(`/properties/${propertyId}/views`)
-  } catch (err) {
+  } catch (err: any) {
     console.error('Error al cargar la propiedad:', err)
     error.value = err.response?.data?.message || 'No se pudo cargar la propiedad'
   } finally {
@@ -452,7 +452,7 @@ async function fetchProperty() {
   }
 }
 
-function onImgError(event) {
+function onImgError(event: any) {
   console.warn('❌ Error cargando imagen:', event.target.src)
   event.target.src = DEFAULT_IMAGE
 }
@@ -481,7 +481,7 @@ function openRequestVisitModal() {
   showRequestModal.value = true
 }
 
-const detectType = (propertyData) => {
+const detectType = (propertyData: any) => {
   if (!propertyData) return 'otro';
   if (propertyData.type) return propertyData.type;
   
@@ -495,10 +495,10 @@ const detectType = (propertyData) => {
   return 'otro';
 };
 
-const getTypeTranslated = (propertyData) => {
+const getTypeTranslated = (propertyData: any) => {
   const type = detectType(propertyData);
   
-  const typeMap = {
+  const typeMap: Record<string, string> = {
     casa: t('property.type.casa'),
     apartamento: t('property.type.apartamento'),
     local: t('property.type.local'),
@@ -509,7 +509,7 @@ const getTypeTranslated = (propertyData) => {
   return typeMap[type] || t('property.type.otro');
 };
 
-const getTypeIcon = (propertyData) => {
+const getTypeIcon = (propertyData: any) => {
   if (!propertyData) return "home";
   
   const type = propertyData.type || '';
@@ -573,7 +573,7 @@ async function deleteProperty() {
     await api.delete(`/properties/${property.value.id}`)
     alert(t('property.contact.deleteSuccess'))
     router.push({ name: 'PropertyView' })
-  } catch (err) {
+  } catch (err: any) {
     console.error('Error al eliminar la propiedad:', err)
     
     let errorMessage = t('property.contact.deleteError')
@@ -589,7 +589,7 @@ async function deleteProperty() {
   }
 }
 
-function getServicesArray(services) {
+function getServicesArray(services: any) {
   if (!services) return []
   if (Array.isArray(services)) return services
   if (typeof services === 'string') {
@@ -598,7 +598,7 @@ function getServicesArray(services) {
   return []
 }
 
-function formatPrice(price) {
+function formatPrice(price: any) {
   if (!price) return t('property.askPrice')
   const isEN = locale.value.startsWith('en')
   return new Intl.NumberFormat(
@@ -611,7 +611,7 @@ function formatPrice(price) {
   ).format(price)
 }
 
-function getStatusText(status) {
+/* function getStatusText(status) {
   const statusMap = {
     available: t('property.status.available'),
     rented: t('property.status.rented'),
@@ -620,10 +620,10 @@ function getStatusText(status) {
     maintenance: t('property.status.maintenance'),
   }
   return statusMap[status] || t('property.status.available')
-}
+} */
 
-function getStatusIcon(status) {
-  const iconMap = {
+function getStatusIcon(status: any) {
+  const iconMap: Record<string, string[]> = {
     available: ['fas', 'check-circle'],
     rented: ['fas', 'times-circle'],
     reserved: ['fas', 'clock'],
@@ -633,7 +633,7 @@ function getStatusIcon(status) {
   return iconMap[status] || ['fas', 'info-circle']
 }
 
-function getTypeText(type) {
+/* function getTypeText(type) {
   const typeMap = {
     casa: 'Casa',
     apartamento: 'Apartamento',
@@ -641,11 +641,11 @@ function getTypeText(type) {
     finca: 'Finca',
   }
   return typeMap[type] || 'Propiedad'
-}
+} */
 
-function timeAgo(dateString) {
+function timeAgo(dateString: any) {
   if (!dateString) return ''
-  const diff = Math.floor((Date.now() - new Date(dateString)) / 86400000)
+  const diff = Math.floor((Date.now() - new Date(dateString).getTime()) / 86400000)
   if (diff === 0) return t('time.today')
   if (diff === 1) return t('time.yesterday')
   if (diff < 7) return t('time.daysAgo', diff)

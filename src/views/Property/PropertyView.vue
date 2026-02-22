@@ -152,10 +152,10 @@
           >
             <article
               v-for="(property, index) in paginatedProperties"
-              :key="property.id"
+              :key="(property as any).id"
               class="property-card"
               :style="{ animationDelay: (index * 0.1) + 's' }"
-              @click="goToDetail(property.id)"
+              @click="goToDetail((property as any).id)"
             >
               <div class="card-glow"></div>
 
@@ -177,7 +177,7 @@
 
                 <div v-if="authUser?.id === property.user_id" class="action-buttons">
                   <router-link
-                    :to="{ name: 'PropertyEdit', params: { id: property.id } }"
+                    :to="{ name: 'PropertyEdit', params: { id: (property as any).id } }"
                     class="action-btn edit-btn"
                     :title="$t('properties.card.edit')"
                     @click.stop
@@ -324,7 +324,7 @@ const { detectTypeNormalized, detectTypeTranslated, getTypeIcon } = usePropertyT
 const status       = ref('loading');
 const errorMessage = ref('');
 
-const authUser     = ref(null);
+const authUser     = ref<any>(null);
 const properties   = ref<any[]>([]);
 const currentPage  = ref(1);
 const itemsPerPage = ref(9);
@@ -345,7 +345,7 @@ const filteredProperties = computed(() =>
       p.city.toLowerCase().includes(s.search.toLowerCase());
     const matchCity  = !s.city     || p.city.toLowerCase().includes(s.city.toLowerCase());
     const matchType  = !s.type     || s.type === typeFromTitle;
-    const matchPrice = !s.maxPrice || Number(p.monthly_price) <= s.maxPrice;
+    const matchPrice = !s.maxPrice || Number((p as any).monthly_price) <= s.maxPrice;
     return matchSearch && matchCity && matchType && matchPrice;
   })
 );
@@ -366,7 +366,7 @@ const isAuthenticated = computed(() =>
 );
 
 // ── Methods ───────────────────────────────────────────────
-const handlePageChange = (page) => {
+const handlePageChange = (page: number) => {
   currentPage.value = page;
   // Scroll al inicio de la sección de propiedades, no del documento entero
   const section = document.querySelector(".properties-section");
@@ -376,7 +376,7 @@ const handlePageChange = (page) => {
   }
 };
 
-const formatPrice = (price) => {
+const formatPrice = (price: any) => {
   if (!price && price !== 0) return "$0";
   return new Intl.NumberFormat("es-CO", {
     style: "currency", currency: "COP",
@@ -412,7 +412,7 @@ const loadProperties = async () => {
     // 2️⃣ Según la respuesta: success o empty
     status.value = list.length > 0 ? 'success' : 'empty';
 
-  } catch (err) {
+  } catch (err: any) {
     // 3️⃣ Si falla: error con mensaje legible
     if (!navigator.onLine)                errorMessage.value = t("properties.error.offline");
     else if (err.response?.status >= 500) errorMessage.value = t("properties.error.server");
@@ -426,9 +426,9 @@ const loadProperties = async () => {
 
 const retryLoad = () => loadProperties();
 
-const friendlyStatus = (s) => {
+const friendlyStatus = (s: any) => {
   if (!s) return t("properties.card.status.available");
-  const map = {
+  const map: Record<string, string> = {
     available:   t("properties.card.status.available"),
     rented:      t("properties.card.status.rented"),
     reserved:    t("properties.card.status.reserved"),
@@ -438,7 +438,7 @@ const friendlyStatus = (s) => {
   return map[s.toString().trim().toLowerCase()] || t("properties.card.status.available");
 };
 
-const truncateDescription = (d, max = 120) =>
+const truncateDescription = (d: any, max = 120) =>
   !d ? '' : d.length > max ? d.substring(0, max) + "..." : d;
 
 const getPropertyImage = (property: any) => {
@@ -465,10 +465,10 @@ const clearFilters = () => {
   currentPage.value = 1;
 };
 
-const goToDetail       = (id) => router.push({ name: "PropertyDetail", params: { id } });
-const handleImageError = (e)  => { e.target.src = DEFAULT_PROPERTY_IMAGE; };
+const goToDetail       = (id: any) => router.push({ name: "PropertyDetail", params: { id } });
+const handleImageError = (e: any)  => { e.target.src = DEFAULT_PROPERTY_IMAGE; };
 
-const deleteProperty = async (id) => {
+const deleteProperty = async (id: any) => {
   if (!confirm(t("properties.delete.confirm"))) return;
   try {
     await api.delete(`/properties/${id}`);
