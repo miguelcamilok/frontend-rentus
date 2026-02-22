@@ -96,7 +96,8 @@ const getAccuracyColor = (): string => { if (currentAccuracy.value <= 100) retur
 const geocodeAddress = async (address: string): Promise<{ lat: number; lng: number } | null> => {
   try {
     const query = `${address}, ${props.propertyData.city}, Colombia`;
-    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+    // Usar el proxy del backend para evitar CORS y límites de Nominatim en el navegador
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/geocoding/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
     const data = await response.json();
     if (data && data.length > 0) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
     return null;
@@ -109,7 +110,8 @@ const handleAddressSearch = () => {
   searchTimeout = setTimeout(async () => {
     try {
       const query = `${searchQuery.value}, ${props.propertyData.city}, Colombia`;
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
+      // Usar el proxy del backend
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/geocoding/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
       const data = await response.json();
       searchResults.value = data.map((item: any) => ({ place_id: item.place_id, description: item.display_name, lat: parseFloat(item.lat), lng: parseFloat(item.lon) }));
     } catch (error) { console.error('Error buscando direcciones:', error); searchResults.value = []; }
