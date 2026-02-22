@@ -175,7 +175,7 @@
                   <span class="status-text">{{ friendlyStatus(property.status) }}</span>
                 </div>
 
-                <div v-if="authUser?.id === property.user_id" class="action-buttons">
+                <div v-if="(authUser as any)?.id === (property as any).user_id" class="action-buttons">
                   <router-link
                     :to="{ name: 'PropertyEdit', params: { id: (property as any).id } }"
                     class="action-btn edit-btn"

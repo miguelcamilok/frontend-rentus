@@ -249,7 +249,7 @@
               
               <div class="contact-actions">
                 <!-- Si es el propietario -->
-                <template v-if="authUser?.id && (property as any)?.user_id && authUser.id === (property as any).user_id">
+                <template v-if="(authUser as any)?.id && (property as any)?.user_id && (authUser as any).id === (property as any).user_id">
                   <div class="btn-action btn-owner">
                     <font-awesome-icon :icon="['fas', 'crown']" />
                     <span>{{ t('property.contact.ownerProperty') }}</span>
@@ -354,7 +354,7 @@ const error = ref(null)
 const currentImageIndex = ref(0)
 const isFavorite = ref(false)
 const showRequestModal = ref(false)
-const authUser = ref(null)
+const authUser = ref<any>(null)
 
 const DEFAULT_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI2MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2Yzc1N2QiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZW4gbm8gZGlzcG9uaWJsZTwvdGV4dD48L3N2Zz4="
 
