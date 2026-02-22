@@ -20,7 +20,7 @@
   height: 100%;
   background: linear-gradient(135deg, #1a0e0a 0%, #2e1d17 50%, #3b2416 100%);
   pointer-events: none;
-  z-index: 0;
+  z-index: -10;
 }
 
 .page-background::before {
@@ -33,7 +33,7 @@
   background: url("https://i.pinimg.com/1200x/e2/d2/b7/e2d2b7877ffb88a68d6b72e5ea0bd965.jpg") center center / cover no-repeat;
   opacity: 0.15;
   filter: blur(8px);
-  z-index: -1;
+  z-index: 0;
 }
 
 .gradient-orb {
@@ -73,12 +73,16 @@
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
   }
+
   33% {
     transform: translate(30px, -30px) scale(1.1);
   }
+
   66% {
     transform: translate(-20px, 20px) scale(0.9);
   }
@@ -92,7 +96,7 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 1;
+  z-index: -1;
 }
 
 .particle {
@@ -109,12 +113,15 @@
     transform: translateY(0) translateX(0);
     opacity: 0;
   }
+
   10% {
     opacity: 1;
   }
+
   90% {
     opacity: 1;
   }
+
   100% {
     transform: translateY(-100vh) translateX(50px);
     opacity: 0;
@@ -163,10 +170,13 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(-50%, -50%) scale(1);
     opacity: 0.5;
   }
+
   50% {
     transform: translate(-50%, -50%) scale(1.2);
     opacity: 0.8;
@@ -192,7 +202,7 @@
   justify-content: center;
   gap: 1rem;
   text-shadow: 0 4px 15px rgba(218, 156, 95, 0.4),
-              0 0 30px rgba(218, 156, 95, 0.2);
+    0 0 30px rgba(218, 156, 95, 0.2);
 }
 
 .page-title svg {
@@ -224,6 +234,7 @@
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -498,6 +509,7 @@ select option {
     opacity: 0;
     transform: scale(0.8);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -706,6 +718,7 @@ select option {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -795,6 +808,7 @@ select option {
   input,
   textarea,
   select {
-    font-size: 16px; /* Prevents zoom on iOS */
+    font-size: 16px;
+    /* Prevents zoom on iOS */
   }
 }

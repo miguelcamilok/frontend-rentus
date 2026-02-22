@@ -1,5 +1,6 @@
 <template>
     <div class="about">
+        <div class="page-background"></div>
 
         <!-- ░░ CANVAS PARTICLES ░░ -->
         <canvas class="about__canvas" ref="canvasRef" aria-hidden="true"></canvas>
