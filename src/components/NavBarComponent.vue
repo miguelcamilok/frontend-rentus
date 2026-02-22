@@ -185,7 +185,7 @@
                   <font-awesome-icon icon="flag" class="item-icon" />
                   <div class="icon-glow"></div>
                 </div>
-                <div class="item-text">Mis Reportes</div>
+                <div class="item-text">{{ $t('navbar.dropdown.myReports') }}</div>
                 <font-awesome-icon icon="chevron-right" class="item-arrow" />
               </div>
 

@@ -2,57 +2,57 @@
   <div v-if="isVisible" class="modal-overlay" @click.self="closeModal">
     <div class="modal-content">
       <span class="close" @click="closeModal">&times;</span>
-      <h2>Solicitud de Mantenimiento</h2>
+      <h2>{{ $t('maintenance.modals.create.title') }}</h2>
       
       <form @submit.prevent="submitMaintenanceRequest" class="maintenance-form">
         <div class="form-group">
-          <label for="property">Propiedad / Inmueble:</label>
+          <label for="property">{{ $t('maintenance.modals.create.fields.property') }}</label>
           <select 
             id="property" 
             v-model="formData.property_id" 
             required
           >
-            <option value="">Seleccione una propiedad</option>
+            <option value="">{{ $t('maintenance.modals.create.fields.selectProperty') }}</option>
             <option v-for="contract in userContracts" :key="contract.property_id" :value="contract.property_id">
-              {{ contract.property?.title || 'Propiedad ID: ' + contract.property_id }} (Contrato #{{ contract.id }})
+              {{ contract.property?.title || 'Propiedad ID: ' + contract.property_id }} ({{ $t('payments.table.contractId') }}{{ contract.id }})
             </option>
           </select>
         </div>
 
         <div class="form-group">
-          <label for="title">Asunto de Mantenimiento:</label>
+          <label for="title">{{ $t('maintenance.modals.create.fields.title') }}</label>
           <input 
             type="text" 
             id="title" 
             v-model="formData.title" 
             required
             class="form-input"
-            placeholder="Ej: Fuga de agua en el baño principal"
+            :placeholder="$t('maintenance.modals.create.fields.titlePlaceholder')"
           />
         </div>
 
         <div class="form-group">
-          <label for="priority">Prioridad:</label>
+          <label for="priority">{{ $t('maintenance.modals.create.fields.priority') }}</label>
           <select 
             id="priority" 
             v-model="formData.priority" 
             required
           >
-            <option value="low">Baja</option>
-            <option value="medium">Media</option>
-            <option value="high">Alta</option>
-            <option value="urgent">Urgente</option>
+            <option value="low">{{ $t('maintenance.priority.low') }}</option>
+            <option value="medium">{{ $t('maintenance.priority.medium') }}</option>
+            <option value="high">{{ $t('maintenance.priority.high') }}</option>
+            <option value="urgent">{{ $t('maintenance.priority.urgent') }}</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label for="description">Descripción del problema:</label>
+          <label for="description">{{ $t('maintenance.modals.create.fields.description') }}</label>
           <textarea 
             id="description" 
             v-model="formData.description" 
             rows="4" 
             required
-            placeholder="Describe detalladamente el problema, ubicación exacta y cualquier información relevante..."
+            :placeholder="$t('maintenance.modals.create.fields.descriptionPlaceholder')"
           ></textarea>
           <div class="char-counter">{{ formData.description.length }}/500</div>
         </div>
@@ -60,7 +60,7 @@
         <div class="form-group">
           <label for="image" class="file-label">
             <span class="file-icon">📎</span>
-            Adjuntar imagen del problema (opcional)
+            {{ $t('maintenance.modals.create.fields.attachImage') }}
           </label>
           <input 
             type="file" 
@@ -74,7 +74,7 @@
             <div class="progress-bar">
               <div class="progress-fill" :style="{ width: uploadProgress + '%' }"></div>
             </div>
-            <span class="progress-text">Subiendo: {{ uploadProgress }}%</span>
+            <span class="progress-text">{{ $t('maintenance.modals.create.fields.uploading', { progress: uploadProgress }) }}</span>
           </div>
 
           <div v-if="formData.image && !uploading" class="image-preview">
@@ -90,14 +90,14 @@
 
           <div v-if="uploadedImageUrl" class="upload-success">
             <span class="success-icon">✅</span>
-            <span>Imagen subida correctamente</span>
-            <a :href="uploadedImageUrl" target="_blank" class="view-link">Ver imagen</a>
+            <span>{{ $t('maintenance.modals.create.fields.uploadSuccess') }}</span>
+            <a :href="uploadedImageUrl" target="_blank" class="view-link">{{ $t('maintenance.modals.create.fields.viewImage') }}</a>
           </div>
         </div>
 
         <div class="form-actions">
           <button type="button" class="btn-cancel" @click="closeModal">
-            Cancelar
+            {{ $t('common.cancel') }}
           </button>
           <button type="submit" class="btn-submit" :disabled="loading || uploading">
             <span v-if="loading || uploading" class="loading-spinner"></span>
@@ -113,6 +113,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { contractService } from '@/services/contractService'
 import api from '@/services/api'
+import { useI18n } from 'vue-i18n'
 
 export default {
   name: 'MaintenanceModal',
@@ -127,6 +128,7 @@ export default {
   emits: ['close', 'submitted'],
 
   setup(props, { emit }) {
+    const { t } = useI18n()
     // Estado del formulario 
     const formData = reactive({
       title: '',
@@ -163,9 +165,9 @@ export default {
     })
 
     const getSubmitButtonText = computed(() => {
-      if (uploading.value) return 'Subiendo imagen...'
-      if (loading.value) return 'Enviando solicitud...'
-      return 'Enviar Solicitud'
+      if (uploading.value) return t('maintenance.modals.create.actions.uploading')
+      if (loading.value) return t('maintenance.modals.create.actions.sending')
+      return t('maintenance.modals.create.actions.send')
     })
 
     const IMGBB_API_KEY = '16768ff5cf17e35243555fd8b388abd7' 
@@ -180,14 +182,14 @@ export default {
       if (file) {
         // Validar tipo de archivo
         if (!file.type.startsWith('image/')) {
-          alert('Por favor, selecciona solo imágenes (JPEG, PNG, GIF)')
+          alert(t('maintenance.alerts.imageType'))
           event.target.value = ''
           return
         }
         
         // Validar tamaño (max 10MB para ImgBB)
         if (file.size > 10 * 1024 * 1024) {
-          alert('La imagen no debe superar los 10MB')
+          alert(t('maintenance.alerts.imageSize'))
           event.target.value = ''
           return
         }
@@ -227,7 +229,7 @@ export default {
 
       } catch (error) {
         console.error('Error subiendo imagen:', error)
-        throw new Error('No se pudo subir la imagen. Intenta nuevamente.')
+        throw new Error(t('maintenance.alerts.imageError'))
       } finally {
         uploading.value = false
         setTimeout(() => {
@@ -268,22 +270,22 @@ export default {
     const submitMaintenanceRequest = async () => {
       // Validaciones básicas
       if (!formData.title) {
-        alert('Por favor ingresa un título para el asunto')
+        alert(t('maintenance.alerts.validationTitle'))
         return
       }
 
       if (!formData.property_id) {
-        alert('Por favor selecciona una propiedad afectada')
+        alert(t('maintenance.alerts.validationProperty'))
         return
       }
 
       if (!formData.description.trim()) {
-        alert('Por favor describe el problema')
+        alert(t('maintenance.alerts.validationDescription'))
         return
       }
 
       if (formData.description.length > 500) {
-        alert('La descripción no puede exceder los 500 caracteres')
+        alert(t('maintenance.alerts.validationLength'))
         return
       }
 
@@ -309,7 +311,7 @@ export default {
         // Éxito - Emitir evento con todos los datos devueltos
         emit('submitted', res.data?.data || payload)
         
-        alert('¡Solicitud de mantenimiento enviada correctamente! Te contactaremos pronto.')
+        alert(t('maintenance.alerts.submitSuccessFull'))
         closeModal()
         
       } catch (error) {
