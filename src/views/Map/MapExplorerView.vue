@@ -119,17 +119,10 @@
             <!-- Área principal: selecciona en el mapa -->
             <div class="property-card__image" @click="selectProperty(property)">
               <img
-                v-if="getPropertyImage(property)"
-                :src="getPropertyImage(property)!"
+                :src="getPropertyImage(property)"
                 :alt="property.title"
                 loading="lazy"
               />
-              <div v-else class="property-card__image-placeholder">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.5">
-                  <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
-                  <path d="M21 15l-5-5L5 21"/>
-                </svg>
-              </div>
               <span
                 class="property-card__status"
                 :class="`property-card__status--${property.status}`"
@@ -230,16 +223,9 @@
           <div class="preview-card__inner">
             <div class="preview-card__image">
               <img
-                v-if="getPropertyImage(selectedProperty)"
-                :src="getPropertyImage(selectedProperty)!"
+                :src="getPropertyImage(selectedProperty)"
                 :alt="selectedProperty.title"
               />
-              <div v-else class="preview-card__image-placeholder">
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.5">
-                  <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
-                  <path d="M21 15l-5-5L5 21"/>
-                </svg>
-              </div>
             </div>
 
             <div class="preview-card__content">
@@ -298,6 +284,7 @@ import {
 const COLOMBIA_CENTER = { lat: 2.4448, lng: -76.6147 };
 const DEFAULT_ZOOM = 15;
 const DEBOUNCE_DELAY = 400;
+const DEFAULT_IMAGE = '/img/default.webp'; // Fallback image
 
 // ──────────────────────────────────────────────
 // ROUTER
@@ -363,12 +350,12 @@ const propertiesWithCoords = computed(() =>
 // ──────────────────────────────────────────────
 // HELPERS
 // ──────────────────────────────────────────────
-function getPropertyImage(property: MapProperty): string | null {
+function getPropertyImage(property: MapProperty): string {
   if (property.images?.length) {
     const main = property.images.find(i => i.is_main) ?? property.images[0];
-    return main?.image_url ?? null;
+    return main?.image_url ?? DEFAULT_IMAGE;
   }
-  return property.image_url ?? null;
+  return property.image_url ?? DEFAULT_IMAGE;
 }
 
 function statusLabel(status: string): string {
@@ -668,7 +655,33 @@ async function loadProperties() {
     if (map) {
       // ✅ FIX: Invalidar el tamaño del mapa por si el contenedor cambió
       map.invalidateSize();
-      renderMarkersForCurrentView();
+      
+      // 📍 Lógica de ubicación por defecto dinámica (Ranking de ciudades)
+      const hasSavedCoords = route.query.mapLat && route.query.mapLng;
+      
+      if (!hasSavedCoords && allProperties.value.length > 0) {
+        // Calcular ciudad con más propiedades
+        const cityCounts: Record<string, number> = {};
+        allProperties.value.forEach(p => {
+          if (p.city) {
+            cityCounts[p.city] = (cityCounts[p.city] || 0) + 1;
+          }
+        });
+
+        const sortedCities = Object.entries(cityCounts).sort((a,b) => b[1] - a[1]);
+        const topCity = sortedCities[0]?.[0];
+
+        if (topCity) {
+          const firstProp = allProperties.value.find(p => p.city === topCity);
+          if (firstProp) {
+            console.log(`📍 Centrando mapa en ${topCity} (Ciudad con más propiedades: ${sortedCities[0][1]})`);
+            map.setView([firstProp.lat, firstProp.lng], 13);
+            selectProperty(firstProp);
+          }
+        }
+      } else {
+        renderMarkersForCurrentView();
+      }
     }
 
   } catch (error) {

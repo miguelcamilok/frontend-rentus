@@ -1,401 +1,382 @@
 <template>
-  <div class="create-property-page">
-    <!-- Background animado -->
-    <div class="page-background">
-      <div class="gradient-orb orb-1"></div>
-      <div class="gradient-orb orb-2"></div>
-      <div class="gradient-orb orb-3"></div>
+  <div class="cp-page">
+    <!-- Background -->
+    <div class="cp-bg" aria-hidden="true">
+      <div class="cp-bg__orb cp-bg__orb--1"></div>
+      <div class="cp-bg__orb cp-bg__orb--2"></div>
     </div>
 
-    <!-- Contenido principal -->
-    <main class="property-container">
-      <!-- Hero Section -->
-      <div class="hero-section">
-        <div class="hero-content">
-          <h1 class="page-title">
-            <font-awesome-icon :icon="['fas', 'home']" />
-            {{ t('property.create.title') }}
-          </h1>
-          <p class="page-subtitle">{{ t('property.create.subtitle') }}</p>
-        </div>
-      </div>
+    <main class="cp-shell">
 
-      <!-- Alertas -->
-      <Transition name="alert">
-        <div v-if="success" class="alert alert-success">
-          <font-awesome-icon :icon="['fas', 'check-circle']" />
+      <!-- ── Header ── -->
+      <header class="cp-header">
+        <span class="cp-eyebrow">
+          <span class="ew-pip"></span>
+          {{ t('property.create.eyebrow') }}
+        </span>
+        <h1 class="cp-title" v-html="t('property.create.title')"></h1>
+        <p class="cp-subtitle">{{ t('property.create.subtitle') }}</p>
+      </header>
+
+      <!-- ── Alerts ── -->
+      <Transition name="alert-slide">
+        <div v-if="success" class="cp-alert cp-alert--success">
+          <font-awesome-icon :icon="['fas', 'circle-check']" />
           <span>{{ t('property.create.success') }}</span>
         </div>
       </Transition>
-
-      <Transition name="alert">
-        <div v-if="errorMessage" class="alert alert-error">
-          <font-awesome-icon :icon="['fas', 'exclamation-circle']" />
+      <Transition name="alert-slide">
+        <div v-if="errorMessage" class="cp-alert cp-alert--error">
+          <font-awesome-icon :icon="['fas', 'circle-exclamation']" />
           <span>{{ errorMessage }}</span>
         </div>
       </Transition>
 
-      <!-- Formulario -->
-      <div class="form-wrapper">
-        <form @submit.prevent="openLocationModal">
-          <!-- Información Básica -->
-          <div class="content-section">
-            <div class="section-header">
-              <h3>
-                <font-awesome-icon :icon="['fas', 'info-circle']" />
-                {{ t('property.create.basicInfo') }}
-              </h3>
+      <!-- ── Form ── -->
+      <form @submit.prevent="openLocationModal" class="cp-form">
+
+        <!-- Información Básica -->
+        <div class="cp-section">
+          <div class="cp-section__head">
+            <div class="cp-section__icon">
+              <font-awesome-icon :icon="['fas', 'circle-info']" />
             </div>
-
-            <div class="form-grid">
-              <div class="form-group full-width">
-                <label for="title">
-                  {{ t('property.fields.title') }}
-                  <span class="required">*</span>
-                </label>
-                <input
-                  id="title"
-                  v-model="form.title"
-                  type="text"
-                  :placeholder="t('property.placeholders.title')"
-                  maxlength="255"
-                  required
-                />
-              </div>
-
-              <div class="form-group full-width">
-                <label for="description">
-                  {{ t('property.fields.description') }}
-                  <span class="required">*</span>
-                </label>
-                <textarea
-                  id="description"
-                  v-model="form.description"
-                  rows="5"
-                  :placeholder="t('property.placeholders.description')"
-                  required
-                ></textarea>
-              </div>
-
-              <div class="form-group">
-                <label for="status">{{ t('property.fields.status') }}</label>
-                <select id="status" v-model="form.status">
-                  <option value="available">{{ t('property.status.available') }}</option>
-                  <option value="rented">{{ t('property.status.rented') }}</option>
-                  <option value="maintenance">{{ t('property.status.maintenance') }}</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label for="publication_date">{{ t('property.fields.publicationDate') }}</label>
-                <input
-                  id="publication_date"
-                  v-model="form.publication_date"
-                  type="date"
-                />
-              </div>
+            <div>
+              <h2 class="cp-section__title">{{ t('property.create.basicInfo') }}</h2>
+              <p class="cp-section__desc">{{ t('property.create.basicInfoDesc') }}</p>
             </div>
           </div>
 
-          <!-- Ubicación -->
-          <div class="content-section">
-            <div class="section-header">
-              <h3>
-                <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
-                {{ t('property.create.location') }}
-              </h3>
-            </div>
-
-            <div class="form-grid">
-              <div class="form-group">
-                <label for="address">
-                  {{ t('property.fields.address') }}
-                  <span class="required">*</span>
-                </label>
-                <input
-                  id="address"
-                  v-model="form.address"
-                  type="text"
-                  :placeholder="t('property.placeholders.address')"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label for="city">{{ t('property.fields.city') }}</label>
-                <input
-                  id="city"
-                  v-model="form.city"
-                  type="text"
-                  :placeholder="t('property.placeholders.city')"
-                  maxlength="120"
-                />
-              </div>
-            </div>
-
-            <div class="info-banner">
-              <font-awesome-icon :icon="['fas', 'lightbulb']" />
-              <span>Podrás seleccionar la ubicación exacta en el mapa en el siguiente paso</span>
-            </div>
-          </div>
-
-          <!-- Características -->
-          <div class="content-section">
-            <div class="section-header">
-              <h3>
-                <font-awesome-icon :icon="['fas', 'sliders-h']" />
-                {{ t('property.create.features') }}
-              </h3>
-            </div>
-
-            <div class="form-grid">
-              <div class="form-group">
-                <label for="monthly_price">
-                  {{ t('property.fields.monthlyPrice') }}
-                  <span class="required">*</span>
-                </label>
-                <div class="input-group">
-                  <span class="input-addon">$</span>
-                  <input
-                    id="monthly_price"
-                    v-model="displayPrice"
-                    type="text"
-                    :placeholder="t('property.placeholders.price')"
-                    required
-                    @input="handlePriceInput"
-                    @blur="formatPriceOnBlur"
-                  />
-                </div>
-                <span class="help-text">{{ formattedPrice }}</span>
-              </div>
-
-              <div class="form-group">
-                <label for="area_m2">{{ t('property.fields.area') }}</label>
-                <div class="input-group">
-                  <input
-                    id="area_m2"
-                    v-model.number="form.area_m2"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    :placeholder="t('property.placeholders.area')"
-                  />
-                  <span class="input-addon">m²</span>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="num_bedrooms">{{ t('property.fields.bedrooms') }}</label>
-                <div class="input-with-icon">
-                  <font-awesome-icon :icon="['fas', 'bed']" class="input-icon" />
-                  <input
-                    id="num_bedrooms"
-                    v-model.number="form.num_bedrooms"
-                    type="number"
-                    min="0"
-                    :placeholder="t('property.placeholders.bedrooms')"
-                  />
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="num_bathrooms">{{ t('property.fields.bathrooms') }}</label>
-                <div class="input-with-icon">
-                  <font-awesome-icon :icon="['fas', 'bath']" class="input-icon" />
-                  <input
-                    id="num_bathrooms"
-                    v-model.number="form.num_bathrooms"
-                    type="number"
-                    min="0"
-                    :placeholder="t('property.placeholders.bathrooms')"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- ✅ SERVICIOS INCLUIDOS — ahora con checkboxes -->
-          <div class="content-section">
-            <div class="section-header">
-              <h3>
-                <font-awesome-icon :icon="['fas', 'check-square']" />
-                {{ t('property.create.services') }}
-              </h3>
-              <p class="section-description">
-                Selecciona los servicios que están incluidos en el arriendo
-              </p>
-            </div>
-
-            <div class="services-checklist">
-              <label
-                v-for="service in AVAILABLE_SERVICES"
-                :key="service.value"
-                class="service-checkbox-item"
-                :class="{ 'is-checked': form.included_services.includes(service.value) }"
-              >
-                <input
-                  type="checkbox"
-                  :value="service.value"
-                  v-model="form.included_services"
-                  class="service-hidden-checkbox"
-                />
-                <span class="service-check-icon">
-                  <font-awesome-icon
-                    :icon="form.included_services.includes(service.value)
-                      ? ['fas', 'check-circle']
-                      : ['far', 'circle']"
-                  />
-                </span>
-                <span class="service-emoji">{{ service.emoji }}</span>
-                <span class="service-name">{{ t(service.labelKey) }}</span>
+          <div class="cp-grid">
+            <div class="cp-field cp-field--full">
+              <label for="title">
+                {{ t('property.fields.title') }}
+                <span class="req">*</span>
               </label>
-            </div>
-
-            <!-- Resumen de seleccionados -->
-            <div v-if="form.included_services.length > 0" class="services-summary">
-              <span class="summary-label">
-                <font-awesome-icon :icon="['fas', 'check']" />
-                {{ form.included_services.length }}
-                {{ form.included_services.length === 1 ? 'servicio seleccionado' : 'servicios seleccionados' }}
-              </span>
-              <button type="button" class="btn-clear-services" @click="form.included_services = []">
-                Limpiar selección
-              </button>
-            </div>
-            <div v-else class="services-empty-hint">
-              <font-awesome-icon :icon="['fas', 'info-circle']" />
-              <span>Ningún servicio seleccionado — opcional</span>
-            </div>
-          </div>
-          <!-- ✅ FIN SERVICIOS -->
-
-          <!-- Imágenes -->
-          <div class="content-section">
-            <div class="section-header">
-              <h3>
-                <font-awesome-icon :icon="['fas', 'images']" />
-                Imágenes de la Propiedad
-              </h3>
-              <p class="section-description">
-                Sube hasta 10 imágenes en formato JPG, PNG o WEBP (máx. 2MB cada una)
-              </p>
-            </div>
-
-            <div class="image-upload-section">
               <input
-                ref="fileInput"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                multiple
-                class="file-input-hidden"
-                @change="handleImageSelection"
+                id="title"
+                v-model="form.title"
+                type="text"
+                :placeholder="t('property.placeholders.title')"
+                maxlength="255"
+                required
               />
+            </div>
 
-              <div
-                class="upload-dropzone"
-                :class="{ 'is-dragging': isDragging }"
-                @click="triggerFileInput"
-                @dragover.prevent="isDragging = true"
-                @dragleave.prevent="isDragging = false"
-                @drop.prevent="handleDrop"
-              >
-                <div class="dropzone-content">
-                  <font-awesome-icon :icon="['fas', 'cloud-upload-alt']" class="upload-icon" />
-                  <h4>Arrastra imágenes aquí o haz clic para seleccionar</h4>
-                  <p class="upload-hint">
-                    JPG, PNG, WEBP hasta 2MB | {{ images.length }}/10 imágenes
-                  </p>
-                </div>
+            <div class="cp-field cp-field--full">
+              <label for="description">
+                {{ t('property.fields.description') }}
+                <span class="req">*</span>
+              </label>
+              <textarea
+                id="description"
+                v-model="form.description"
+                rows="5"
+                :placeholder="t('property.placeholders.description')"
+                required
+              ></textarea>
+            </div>
+
+            <div class="cp-field">
+              <label for="status">{{ t('property.fields.status') }}</label>
+              <select id="status" v-model="form.status">
+                <option value="available">{{ t('property.status.available') }}</option>
+                <option value="rented">{{ t('property.status.rented') }}</option>
+                <option value="maintenance">{{ t('property.status.maintenance') }}</option>
+              </select>
+            </div>
+
+            <div class="cp-field">
+              <label for="publication_date">{{ t('property.fields.publicationDate') }}</label>
+              <input id="publication_date" v-model="form.publication_date" type="date" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Ubicación -->
+        <div class="cp-section">
+          <div class="cp-section__head">
+            <div class="cp-section__icon">
+              <font-awesome-icon :icon="['fas', 'map-location-dot']" />
+            </div>
+            <div>
+              <h2 class="cp-section__title">{{ t('property.create.location') }}</h2>
+              <p class="cp-section__desc">{{ t('property.create.locationDesc') }}</p>
+            </div>
+          </div>
+
+          <div class="cp-grid">
+            <div class="cp-field">
+              <label for="address">
+                {{ t('property.fields.address') }}
+                <span class="req">*</span>
+              </label>
+              <input
+                id="address"
+                v-model="form.address"
+                type="text"
+                :placeholder="t('property.placeholders.address')"
+                required
+              />
+            </div>
+
+            <div class="cp-field">
+              <label for="city">{{ t('property.fields.city') }}</label>
+              <input
+                id="city"
+                v-model="form.city"
+                type="text"
+                :placeholder="t('property.placeholders.city')"
+                maxlength="120"
+              />
+            </div>
+          </div>
+
+          <div class="cp-info-banner">
+            <font-awesome-icon :icon="['fas', 'lightbulb']" />
+            <span>{{ t('property.create.locationExactHint') }}</span>
+          </div>
+        </div>
+
+        <!-- Características -->
+        <div class="cp-section">
+          <div class="cp-section__head">
+            <div class="cp-section__icon">
+              <font-awesome-icon :icon="['fas', 'sliders']" />
+            </div>
+            <div>
+              <h2 class="cp-section__title">{{ t('property.create.features') }}</h2>
+              <p class="cp-section__desc">{{ t('property.create.featuresDesc') }}</p>
+            </div>
+          </div>
+
+          <div class="cp-grid">
+            <div class="cp-field">
+              <label for="monthly_price">
+                {{ t('property.fields.monthlyPrice') }}
+                <span class="req">*</span>
+              </label>
+              <div class="cp-input-addon">
+                <span class="cp-addon cp-addon--left">$</span>
+                <input
+                  id="monthly_price"
+                  v-model="displayPrice"
+                  type="text"
+                  :placeholder="t('property.placeholders.price')"
+                  required
+                  @input="handlePriceInput"
+                  @blur="formatPriceOnBlur"
+                />
               </div>
+              <span class="cp-help">{{ formattedPrice }}</span>
+            </div>
 
-              <div v-if="uploadProgress > 0 && uploadProgress < 100" class="upload-progress">
-                <div class="progress-bar" :style="{ width: uploadProgress + '%' }"></div>
-                <span class="progress-text">{{ uploadProgress }}%</span>
+            <div class="cp-field">
+              <label for="area_m2">{{ t('property.fields.area') }}</label>
+              <div class="cp-input-addon">
+                <input
+                  id="area_m2"
+                  v-model.number="form.area_m2"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  :placeholder="t('property.placeholders.area')"
+                />
+                <span class="cp-addon cp-addon--right">m²</span>
               </div>
             </div>
 
-            <TransitionGroup name="image-list" tag="div" class="images-grid">
-              <div
-                v-for="(image, index) in images"
-                :key="image.id"
-                class="image-card"
-                :class="{ 'is-main': index === 0 }"
-              >
-                <div class="image-preview">
-                  <img :src="image.preview" :alt="`Imagen ${index + 1}`" />
-                  <div v-if="index === 0" class="main-badge">
+            <div class="cp-field">
+              <label for="num_bedrooms">{{ t('property.fields.bedrooms') }}</label>
+              <div class="cp-icon-input">
+                <font-awesome-icon :icon="['fas', 'bed']" class="cp-input-ico" />
+                <input
+                  id="num_bedrooms"
+                  v-model.number="form.num_bedrooms"
+                  type="number"
+                  min="0"
+                  :placeholder="t('property.placeholders.bedrooms')"
+                />
+              </div>
+            </div>
+
+            <div class="cp-field">
+              <label for="num_bathrooms">{{ t('property.fields.bathrooms') }}</label>
+              <div class="cp-icon-input">
+                <font-awesome-icon :icon="['fas', 'bath']" class="cp-input-ico" />
+                <input
+                  id="num_bathrooms"
+                  v-model.number="form.num_bathrooms"
+                  type="number"
+                  min="0"
+                  :placeholder="t('property.placeholders.bathrooms')"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Servicios -->
+        <div class="cp-section">
+          <div class="cp-section__head">
+            <div class="cp-section__icon">
+              <font-awesome-icon :icon="['fas', 'square-check']" />
+            </div>
+            <div>
+              <h2 class="cp-section__title">{{ t('property.create.services') }}</h2>
+              <p class="cp-section__desc">{{ t('property.create.servicesDesc') }}</p>
+            </div>
+          </div>
+
+          <div class="cp-services-grid">
+            <label
+              v-for="service in AVAILABLE_SERVICES"
+              :key="service.value"
+              :class="['cp-service', { 'cp-service--on': form.included_services.includes(service.value) }]"
+            >
+              <input
+                type="checkbox"
+                :value="service.value"
+                v-model="form.included_services"
+                class="cp-service__native"
+              />
+              <span class="cp-service__check">
+                <font-awesome-icon
+                  :icon="form.included_services.includes(service.value)
+                    ? ['fas', 'circle-check']
+                    : ['far', 'circle']"
+                />
+              </span>
+              <span class="cp-service__ico">
+                <font-awesome-icon :icon="['fas', service.faIcon]" />
+              </span>
+              <span class="cp-service__name">{{ t(service.labelKey) }}</span>
+            </label>
+          </div>
+
+          <div v-if="form.included_services.length > 0" class="cp-services-summary">
+            <span>
+              <font-awesome-icon :icon="['fas', 'check']" />
+              {{ form.included_services.length }}
+              {{ form.included_services.length === 1 ? t('property.create.serviceSelected') : t('property.create.servicesSelected') }}
+            </span>
+            <button type="button" class="cp-btn-clear" @click="form.included_services = []">
+              {{ t('property.create.clearSelection') }}
+            </button>
+          </div>
+          <div v-else class="cp-services-hint">
+            <font-awesome-icon :icon="['fas', 'circle-info']" />
+            <span>{{ t('property.create.noServicesSelected') }}</span>
+          </div>
+        </div>
+
+        <!-- Imágenes -->
+        <div class="cp-section">
+          <div class="cp-section__head">
+            <div class="cp-section__icon">
+              <font-awesome-icon :icon="['fas', 'images']" />
+            </div>
+            <div>
+              <h2 class="cp-section__title">{{ t('property.create.imagesTitle') }}</h2>
+              <p class="cp-section__desc">{{ t('property.create.imagesDesc') }}</p>
+            </div>
+          </div>
+
+          <input
+            ref="fileInput"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            class="cp-file-hidden"
+            @change="handleImageSelection"
+          />
+
+          <div
+            :class="['cp-dropzone', { 'cp-dropzone--dragging': isDragging }]"
+            @click="triggerFileInput"
+            @dragover.prevent="isDragging = true"
+            @dragleave.prevent="isDragging = false"
+            @drop.prevent="handleDrop"
+          >
+            <font-awesome-icon :icon="['fas', 'cloud-arrow-up']" class="cp-dropzone__ico" />
+            <h4>{{ t('property.create.dropzoneTitle') }}</h4>
+            <p>{{ t('property.create.dropzoneDesc', { current: images.length }) }}</p>
+          </div>
+
+          <div v-if="uploadProgress > 0 && uploadProgress < 100" class="cp-progress">
+            <div class="cp-progress__bar" :style="{ width: uploadProgress + '%' }"></div>
+            <span>{{ uploadProgress }}%</span>
+          </div>
+
+          <!-- Grid de imágenes -->
+          <TransitionGroup name="img-list" tag="div" class="cp-images-grid">
+            <div
+              v-for="(image, index) in images"
+              :key="image.id"
+              :class="['cp-img-card', { 'cp-img-card--main': index === 0 }]"
+            >
+              <div class="cp-img-preview">
+                <img :src="image.preview" :alt="`Imagen ${index + 1}`" />
+                <div v-if="index === 0" class="cp-img-badge">
+                  <font-awesome-icon :icon="['fas', 'star']" />
+                  {{ t('property.create.mainImage') }}
+                </div>
+                <div class="cp-img-overlay">
+                  <button
+                    v-if="index !== 0"
+                    type="button"
+                    class="cp-img-btn"
+                    :title="t('property.create.setAsMain')"
+                    @click="setAsMain(index)"
+                  >
                     <font-awesome-icon :icon="['fas', 'star']" />
-                    Principal
-                  </div>
-                  <div class="image-overlay">
-                    <button
-                      v-if="index !== 0"
-                      type="button"
-                      @click="setAsMain(index)"
-                      class="btn-overlay"
-                      title="Establecer como principal"
-                    >
-                      <font-awesome-icon :icon="['fas', 'star']" />
-                    </button>
-                    <button
-                      type="button"
-                      @click="removeImage(index)"
-                      class="btn-overlay btn-danger"
-                      title="Eliminar imagen"
-                    >
-                      <font-awesome-icon :icon="['fas', 'trash']" />
-                    </button>
-                  </div>
-                </div>
-                <div class="image-info">
-                  <span class="image-number">#{{ index + 1 }}</span>
-                  <span class="image-size">{{ formatFileSize(image.size) }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="cp-img-btn cp-img-btn--del"
+                    :title="t('property.create.deleteImage')"
+                    @click="removeImage(index)"
+                  >
+                    <font-awesome-icon :icon="['fas', 'trash']" />
+                  </button>
                 </div>
               </div>
-            </TransitionGroup>
-
-            <div v-if="images.length === 0" class="empty-images">
-              <font-awesome-icon :icon="['fas', 'image']" class="empty-icon" />
-              <h4>No hay imágenes</h4>
-              <p>Agrega fotos para que tu propiedad sea más atractiva</p>
+              <div class="cp-img-footer">
+                <span class="cp-img-num">#{{ index + 1 }}</span>
+                <span class="cp-img-size">{{ formatFileSize(image.size) }}</span>
+              </div>
             </div>
-          </div>
+          </TransitionGroup>
 
-          <!-- Botones de acción -->
-          <div class="form-actions">
-            <button
-              type="button"
-              @click="cancelForm"
-              class="btn-secondary"
-              :disabled="loading"
-            >
-              <font-awesome-icon :icon="['fas', 'times']" />
-              <span>{{ t('common.cancel') }}</span>
-            </button>
-            <button
-              type="submit"
-              class="btn-primary"
-              :disabled="loading || images.length === 0"
-            >
-              <font-awesome-icon
-                :icon="loading ? ['fas', 'spinner'] : ['fas', 'map-marker-alt']"
-                :spin="loading"
-              />
-              <span>{{ loading ? 'Procesando...' : 'Continuar a Ubicación →' }}</span>
-            </button>
+          <div v-if="images.length === 0" class="cp-no-images">
+            <font-awesome-icon :icon="['fas', 'image']" class="cp-no-images__ico" />
+            <h4>{{ t('property.create.noImagesTitle') }}</h4>
+            <p>{{ t('property.create.noImagesDesc') }}</p>
           </div>
-        </form>
-      </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="cp-actions">
+          <button type="button" class="cp-btn-secondary" :disabled="loading" @click="cancelForm">
+            <font-awesome-icon :icon="['fas', 'xmark']" />
+            {{ t('common.cancel') }}
+          </button>
+          <button type="submit" class="cp-btn-primary" :disabled="loading || images.length === 0">
+            <font-awesome-icon
+              :icon="loading ? ['fas', 'spinner'] : ['fas', 'map-location-dot']"
+              :spin="loading"
+            />
+            {{ loading ? t('property.create.processing') : t('property.create.continueLocation') }}
+          </button>
+        </div>
+
+      </form>
     </main>
 
-    <!-- Modal de ubicación -->
+    <!-- Modal ubicación -->
     <PropertyLocationModal
       :show="showLocationModal"
-      :property-data="{
-        title: form.title,
-        city: form.city,
-        address: form.address
-      }"
+      :property-data="{ title: form.title, city: form.city, address: form.address }"
       @confirm="handleLocationConfirm"
       @close="handleLocationCancel"
     />
@@ -410,7 +391,6 @@ import { useAlerts } from '../../composables/useAlerts'
 import { useI18n } from 'vue-i18n'
 import PropertyLocationModal from '../../admin/components/Properties/PropertyLocationModal.vue'
 
-// ==================== INTERFACES ====================
 interface PropertyImage {
   id: string
   file: File
@@ -428,45 +408,35 @@ interface PropertyForm {
   area_m2: number | null
   num_bedrooms: number | null
   num_bathrooms: number | null
-  included_services: string[]   // ← ahora se llena con checkboxes
+  included_services: string[]
   publication_date: string
 }
 
-// ==================== SERVICIOS DISPONIBLES ====================
-// Lista centralizada — mismos valores que EditProperty.vue usa en selectedServices
+// Font Awesome icons por servicio (sin emojis)
 const AVAILABLE_SERVICES = [
-  { value: 'water',       emoji: '💧', labelKey: 'editProperty.services.water' },
-  { value: 'electricity', emoji: '⚡', labelKey: 'editProperty.services.electricity' },
-  { value: 'gas',         emoji: '🔥', labelKey: 'editProperty.services.gas' },
-  { value: 'internet',    emoji: '🌐', labelKey: 'editProperty.services.internet' },
-  { value: 'cableTv',     emoji: '📺', labelKey: 'editProperty.services.cableTv' },
-  { value: 'security',    emoji: '🔒', labelKey: 'editProperty.services.security' },
-  { value: 'parking',     emoji: '🚗', labelKey: 'editProperty.services.parking' },
-  { value: 'gym',         emoji: '🏋️', labelKey: 'editProperty.services.gym' },
-  { value: 'pool',        emoji: '🏊', labelKey: 'editProperty.services.pool' },
-  { value: 'bbqArea',     emoji: '🍖', labelKey: 'editProperty.services.bbqArea' },
-  { value: 'laundry',     emoji: '👕', labelKey: 'editProperty.services.laundry' },
-  { value: 'elevator',    emoji: '🛗', labelKey: 'editProperty.services.elevator' },
+  { value: 'water',       faIcon: 'droplet',        labelKey: 'editProperty.services.water' },
+  { value: 'electricity', faIcon: 'bolt',            labelKey: 'editProperty.services.electricity' },
+  { value: 'gas',         faIcon: 'fire',            labelKey: 'editProperty.services.gas' },
+  { value: 'internet',    faIcon: 'wifi',            labelKey: 'editProperty.services.internet' },
+  { value: 'cableTv',     faIcon: 'tv',              labelKey: 'editProperty.services.cableTv' },
+  { value: 'security',    faIcon: 'shield-halved',   labelKey: 'editProperty.services.security' },
+  { value: 'parking',     faIcon: 'square-parking',  labelKey: 'editProperty.services.parking' },
+  { value: 'gym',         faIcon: 'dumbbell',        labelKey: 'editProperty.services.gym' },
+  { value: 'pool',        faIcon: 'person-swimming', labelKey: 'editProperty.services.pool' },
+  { value: 'bbqArea',     faIcon: 'fire-burner',     labelKey: 'editProperty.services.bbqArea' },
+  { value: 'laundry',     faIcon: 'jug-detergent',   labelKey: 'editProperty.services.laundry' },
+  { value: 'elevator',    faIcon: 'elevator',        labelKey: 'editProperty.services.elevator' },
 ]
 
-// ==================== COMPOSABLES ====================
 const { t } = useI18n()
 const router = useRouter()
 const { success: successAlert, error: errorAlert, confirm } = useAlerts()
 
-// ==================== STATE ====================
 const form = ref<PropertyForm>({
-  title: '',
-  description: '',
-  address: '',
-  city: '',
-  status: 'available',
-  monthly_price: 0,
-  area_m2: null,
-  num_bedrooms: null,
-  num_bathrooms: null,
-  included_services: [],  // ← array de valores, e.g. ['water', 'gas']
-  publication_date: '',
+  title: '', description: '', address: '', city: '',
+  status: 'available', monthly_price: 0,
+  area_m2: null, num_bedrooms: null, num_bathrooms: null,
+  included_services: [], publication_date: '',
 })
 
 const images = ref<PropertyImage[]>([])
@@ -479,18 +449,14 @@ const showLocationModal = ref(false)
 const isDragging = ref(false)
 const uploadProgress = ref(0)
 
-// ==================== COMPUTED ====================
 const formattedPrice = computed(() => {
-  if (!form.value.monthly_price || form.value.monthly_price === 0) return 'COP $0'
+  if (!form.value.monthly_price) return 'COP $0'
   return new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    style: 'currency', currency: 'COP',
+    minimumFractionDigits: 0, maximumFractionDigits: 0,
   }).format(form.value.monthly_price)
 })
 
-// ==================== PRECIO ====================
 const formatNumber = (value: number): string => {
   if (!value) return ''
   return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
@@ -502,66 +468,45 @@ const handlePriceInput = (event: Event) => {
   const numericValue = parseInt(value) || 0
   form.value.monthly_price = numericValue
   displayPrice.value = formatNumber(numericValue)
-  setTimeout(() => {
-    input.setSelectionRange(displayPrice.value.length, displayPrice.value.length)
-  }, 0)
+  setTimeout(() => input.setSelectionRange(displayPrice.value.length, displayPrice.value.length), 0)
 }
 
 const formatPriceOnBlur = () => {
-  displayPrice.value = form.value.monthly_price > 0
-    ? formatNumber(form.value.monthly_price)
-    : ''
+  displayPrice.value = form.value.monthly_price > 0 ? formatNumber(form.value.monthly_price) : ''
 }
 
-// ==================== IMÁGENES (sin cambios) ====================
 const triggerFileInput = () => fileInput.value?.click()
 
 const handleImageSelection = async (event: Event) => {
   const target = event.target as HTMLInputElement
-  const files = Array.from(target.files || [])
-  await processFiles(files)
+  await processFiles(Array.from(target.files || []))
   if (fileInput.value) fileInput.value.value = ''
 }
 
 const handleDrop = async (event: DragEvent) => {
   isDragging.value = false
-  const files = Array.from(event.dataTransfer?.files || [])
-  await processFiles(files)
+  await processFiles(Array.from(event.dataTransfer?.files || []))
 }
 
 const processFiles = async (files: File[]) => {
-  if (files.length === 0) return
+  if (!files.length) return
   if (images.value.length + files.length > 10) {
-    errorAlert('Máximo 10 imágenes permitidas', 'Límite alcanzado')
-    return
+    errorAlert(t('property.create.errors.maxImages'), t('property.create.errors.limitReached')); return
   }
   uploadProgress.value = 0
-  const totalFiles = files.length
-  let processedFiles = 0
-
+  let processed = 0
   for (const file of files) {
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp']
-    if (!validTypes.includes(file.type)) {
-      errorAlert(`${file.name}: Formato no válido (usa JPG, PNG o WEBP)`, 'Error')
-      continue
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      errorAlert(`${file.name}: ${t('property.create.errors.invalidFormat')}`, t('property.create.errorTitle')); continue
     }
     if (file.size > 2 * 1024 * 1024) {
-      errorAlert(`${file.name}: Tamaño máximo 2MB (actual: ${formatFileSize(file.size)})`, 'Error')
-      continue
+      errorAlert(`${file.name}: ${t('property.create.errors.maxSize')}`, t('property.create.errorTitle')); continue
     }
-    try {
-      const preview = URL.createObjectURL(file)
-      images.value.push({ id: `${Date.now()}-${Math.random()}`, file, preview, size: file.size })
-      processedFiles++
-      uploadProgress.value = Math.round((processedFiles / totalFiles) * 100)
-    } catch (error) {
-      errorAlert(`Error procesando ${file.name}`, 'Error')
-    }
+    images.value.push({ id: `${Date.now()}-${Math.random()}`, file, preview: URL.createObjectURL(file), size: file.size })
+    uploadProgress.value = Math.round((++processed / files.length) * 100)
   }
   setTimeout(() => { uploadProgress.value = 0 }, 1000)
 }
-
-// Eliminada compresión base64 por ser ineficiente
 
 const removeImage = (index: number) => {
   URL.revokeObjectURL(images.value[index].preview)
@@ -569,24 +514,20 @@ const removeImage = (index: number) => {
 }
 
 const setAsMain = (index: number) => {
-  const image = images.value.splice(index, 1)[0]
-  images.value.unshift(image)
+  const img = images.value.splice(index, 1)[0]
+  images.value.unshift(img)
 }
 
-const formatFileSize = (bytes: number): string => {
+const formatFileSize = (bytes: number) => {
   if (bytes < 1024) return bytes + ' B'
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
 }
 
-// ==================== FORMULARIO ====================
 const cancelForm = () => {
   confirm(
     t('property.create.confirmCancel'),
-    () => {
-      images.value.forEach(img => URL.revokeObjectURL(img.preview))
-      router.back()
-    },
+    () => { images.value.forEach(i => URL.revokeObjectURL(i.preview)); router.back() },
     () => {},
     { title: t('property.create.cancelTitle'), confirmText: t('common.yes'), cancelText: t('common.no') }
   )
@@ -594,347 +535,534 @@ const cancelForm = () => {
 
 const openLocationModal = () => {
   if (!form.value.title || !form.value.description || !form.value.address) {
-    errorAlert('Por favor completa todos los campos requeridos', 'Campos incompletos')
-    return
+    errorAlert(t('property.create.errors.incompleteFields'), t('property.create.errors.incompleteTitle')); return
   }
-  if (!form.value.monthly_price || form.value.monthly_price === 0) {
-    errorAlert('Por favor ingresa el precio mensual', 'Precio requerido')
-    return
+  if (!form.value.monthly_price) {
+    errorAlert(t('property.create.errors.priceRequired'), t('property.create.errors.priceTitle')); return
   }
-  if (images.value.length === 0) {
-    errorAlert('Por favor agrega al menos una imagen', 'Imagen requerida')
-    return
+  if (!images.value.length) {
+    errorAlert(t('property.create.errors.imageRequired'), t('property.create.errors.imageTitle')); return
   }
   showLocationModal.value = true
 }
 
 const handleLocationConfirm = async (locationData: { lat: number; lng: number; accuracy: number }) => {
-  loading.value = true
-  errorMessage.value = ''
-  success.value = false
-
-  const requestStartTime = performance.now()
-
+  loading.value = true; errorMessage.value = ''; success.value = false
   try {
-    const formData = new FormData()
+    const fd = new FormData()
+    fd.append('title', form.value.title)
+    fd.append('description', form.value.description)
+    fd.append('address', form.value.address)
+    if (form.value.city) fd.append('city', form.value.city)
+    fd.append('status', form.value.status)
+    fd.append('monthly_price', form.value.monthly_price.toString())
+    if (form.value.area_m2) fd.append('area_m2', form.value.area_m2.toString())
+    if (form.value.num_bedrooms) fd.append('num_bedrooms', form.value.num_bedrooms.toString())
+    if (form.value.num_bathrooms) fd.append('num_bathrooms', form.value.num_bathrooms.toString())
+    if (form.value.included_services.length) fd.append('included_services', JSON.stringify(form.value.included_services))
+    if (form.value.publication_date) fd.append('publication_date', form.value.publication_date)
+    fd.append('lat', locationData.lat.toString())
+    fd.append('lng', locationData.lng.toString())
+    fd.append('accuracy', locationData.accuracy.toString())
+    images.value.forEach(img => fd.append('images[]', img.file))
 
-    // Datos básicos
-    formData.append('title', form.value.title)
-    formData.append('description', form.value.description)
-    formData.append('address', form.value.address)
-    if (form.value.city) formData.append('city', form.value.city)
-    formData.append('status', form.value.status)
-    formData.append('monthly_price', form.value.monthly_price.toString())
-    if (form.value.area_m2) formData.append('area_m2', form.value.area_m2.toString())
-    if (form.value.num_bedrooms) formData.append('num_bedrooms', form.value.num_bedrooms.toString())
-    if (form.value.num_bathrooms) formData.append('num_bathrooms', form.value.num_bathrooms.toString())
-    
-    if (form.value.included_services.length > 0) {
-      formData.append('included_services', JSON.stringify(form.value.included_services))
-    }
-    if (form.value.publication_date) formData.append('publication_date', form.value.publication_date)
-
-    // Ubicación
-    formData.append('lat', locationData.lat.toString())
-    formData.append('lng', locationData.lng.toString())
-    formData.append('accuracy', locationData.accuracy.toString())
-
-    // Imágenes
-    images.value.forEach((img) => {
-      formData.append('images[]', img.file)
-    })
-
-    await api.post('/properties', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      timeout: 60000, // Aumentar timeout a 60s para subidas pesadas
-      onUploadProgress: (progressEvent) => {
-        if (progressEvent.total) {
-          uploadProgress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-        }
-      }
+    await api.post('/properties', fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 60000,
+      onUploadProgress: (e) => { if (e.total) uploadProgress.value = Math.round((e.loaded * 100) / e.total) }
     })
 
     success.value = true
     successAlert(t('property.create.successMessage'), t('property.create.successTitle'))
     showLocationModal.value = false
-    images.value.forEach(img => URL.revokeObjectURL(img.preview))
-
+    images.value.forEach(i => URL.revokeObjectURL(i.preview))
     setTimeout(() => router.push('/propiedades'), 1500)
-
   } catch (err: any) {
-    const errorData = err.response?.data
-    
-    // 🔥 DEBUGGING FRONTEND EXTREMO 🔥
-    if (err.response?.status === 500 && errorData && errorData.trace) {
-      console.error(
-        '%c🚨 [RENTUS DEBUG] FATAL 500 ERROR CAUGHT 🚨\n' +
-        `%cTime Taken: ${((performance.now() - requestStartTime) / 1000).toFixed(2)}s\n` +
-        `%cMessage:%c ${errorData.message}\n` +
-        `%cFile:%c ${errorData.file} (Line: ${errorData.line})\n` +
-        `%cInputs Sent:%c\n`,
-        'background: red; color: white; font-size: 16px; font-weight: bold; padding: 4px;',
-        'color: orange; font-weight: bold;',
-        'color: #ff4444; font-weight: bold;', 'color: inherit;',
-        'color: #ff4444; font-weight: bold;', 'color: inherit;',
-        'color: #ff4444; font-weight: bold;', 'color: inherit;'
-      )
-      console.error(errorData.input)
-      console.error('%c[STACK TRACE]:', 'color: red; font-weight: bold;', '\n' + errorData.trace)
-      
-      errorMessage.value = `Error 500 en el servidor. Por favor, revisa la consola (F12) para ver los detalles técnicos y pásaselos al equipo de desarrollo.`
-    } 
-    else if (errorData?.errors) {
-      const errors = Object.values(errorData.errors).flat() as string[]
-      errorMessage.value = errors.join(', ')
-    } 
-    else if (errorData?.message) {
-      errorMessage.value = errorData.message
-    } 
-    else {
-      errorMessage.value = t('property.create.errorMessage')
-    }
-    
+    const d = err.response?.data
+    if (d?.errors) errorMessage.value = Object.values(d.errors).flat().join(', ')
+    else errorMessage.value = d?.message || t('property.create.errorMessage')
     errorAlert(errorMessage.value, t('property.create.errorTitle'))
   } finally {
     loading.value = false
   }
 }
 
-const handleLocationCancel = () => {
-  showLocationModal.value = false
-}
+const handleLocationCancel = () => { showLocationModal.value = false }
 </script>
 
 <style scoped>
-@import "../../assets/css/Properties/PropertyCreate.css";
+/* ══════════════════════════════════════════════════════════════
+   CREATE PROPERTY VIEW
+   • Paleta: #1a0e0a / #2e1d17 / #3b2416 + #da9c5f
+   • Navbar: padding-top 65px
+   ══════════════════════════════════════════════════════════════ */
 
-/* ==================== IMÁGENES (sin cambios) ==================== */
-.file-input-hidden { display: none; }
-
-.image-upload-section { margin-bottom: 2rem; }
-
-.upload-dropzone {
-  border: 2px dashed #cbd5e1;
-  border-radius: 16px;
-  padding: 3rem 2rem;
-  text-align: center;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.cp-page {
+  min-height: calc(100vh - 65px);
+  padding-top: 65px;
+  position: relative;
+  overflow-x: hidden;
+  background: linear-gradient(135deg, #1a0e0a 0%, #2e1d17 50%, #3b2416 100%);
 }
-.upload-dropzone:hover,
-.upload-dropzone.is-dragging {
-  border-color: #3b251d;
-  background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-}
-.dropzone-content { pointer-events: none; }
-.upload-icon { font-size: 3rem; color: #8b6f47; margin-bottom: 1rem; }
-.upload-dropzone h4 { font-size: 1.125rem; font-weight: 600; color: #1e293b; margin-bottom: 0.5rem; }
-.upload-hint { font-size: 0.875rem; color: #64748b; }
-
-.upload-progress {
-  position: relative; height: 8px; background: #e2e8f0;
-  border-radius: 4px; margin-top: 1rem; overflow: hidden;
-}
-.progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, #3b251d 0%, #8b6f47 100%);
-  transition: width 0.3s ease;
-}
-.progress-text {
-  position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 0.75rem; font-weight: 700; color: #1e293b;
+.cp-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("https://i.pinimg.com/1200x/e2/d2/b7/e2d2b7877ffb88a68d6b72e5ea0bd965.jpg") center/cover no-repeat;
+  opacity: 0.1;
+  filter: blur(7px);
+  pointer-events: none;
+  z-index: 0;
 }
 
-.images-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1.5rem; margin-top: 2rem;
-}
-.image-card {
-  position: relative; border-radius: 16px; overflow: hidden;
-  background: #fff;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.image-card.is-main { box-shadow: 0 0 0 3px #3b251d, 0 10px 15px -3px rgba(0,0,0,0.2); }
-.image-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); }
-.image-preview { position: relative; aspect-ratio: 4/3; overflow: hidden; }
-.image-preview img { width: 100%; height: 100%; object-fit: cover; }
-.main-badge {
-  position: absolute; top: 0.75rem; left: 0.75rem;
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  color: #1e293b; padding: 0.375rem 0.75rem; border-radius: 8px;
-  font-size: 0.75rem; font-weight: 700; display: flex; align-items: center;
-  gap: 0.375rem; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-.image-overlay {
-  position: absolute; inset: 0; background: rgba(0,0,0,0.6);
-  display: flex; align-items: center; justify-content: center;
-  gap: 0.75rem; opacity: 0; transition: opacity 0.3s ease;
-}
-.image-card:hover .image-overlay { opacity: 1; }
-.btn-overlay {
-  display: flex; align-items: center; justify-content: center;
-  width: 40px; height: 40px; background: rgba(255,255,255,0.95);
-  color: #1e293b; border: none; border-radius: 50%; cursor: pointer;
-  transition: all 0.3s ease; font-size: 1rem;
-}
-.btn-overlay:hover { transform: scale(1.1); background: #fff; }
-.btn-overlay.btn-danger { background: rgba(220,38,38,0.95); color: #fff; }
-.btn-overlay.btn-danger:hover { background: #dc2626; }
-.image-info {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 0.75rem; background: #f8fafc; border-top: 1px solid #e2e8f0;
-}
-.image-number { font-size: 0.875rem; font-weight: 700; color: #3b251d; }
-.image-size { font-size: 0.75rem; color: #64748b; }
-.empty-images {
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; gap: 1rem; padding: 4rem 2rem;
-  border: 2px dashed #e2e8f0; border-radius: 16px;
-  background: #f8fafc; text-align: center;
-}
-.empty-icon { font-size: 4rem; color: #cbd5e1; }
-.empty-images h4 { font-size: 1.125rem; font-weight: 600; color: #475569; margin: 0; }
-.empty-images p { font-size: 0.875rem; color: #94a3b8; margin: 0; }
+/* Orbs */
+.cp-bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+.cp-bg__orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.18; }
+.cp-bg__orb--1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(218,156,95,0.5), transparent); top: -200px; right: -200px; }
+.cp-bg__orb--2 { width: 380px; height: 380px; background: radial-gradient(circle, rgba(184,121,31,0.35), transparent); bottom: -120px; left: -120px; }
 
-/* ==================== SERVICIOS CON CHECKBOXES ==================== */
-
-.services-checklist {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
+/* Shell */
+.cp-shell {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 5rem;
 }
 
-.service-checkbox-item {
+/* ── Header ──────────────────────────────────────────────────── */
+.cp-header { margin-bottom: 2.5rem; }
+.cp-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #da9c5f;
+  margin-bottom: 0.6rem;
+}
+.ew-pip { display: block; width: 6px; height: 6px; border-radius: 50%; background: #da9c5f; box-shadow: 0 0 8px rgba(218,156,95,0.7); }
+.cp-title {
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  font-weight: 800;
+  color: #f0e5db;
+  line-height: 1.15;
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.02em;
+  text-shadow: 0 4px 20px rgba(218,156,95,0.35), 0 0 40px rgba(218,156,95,0.15);
+}
+.cp-title em { font-style: italic; color: #da9c5f; font-weight: 500; }
+.cp-subtitle { font-size: 0.95rem; color: rgba(240,229,219,0.5); margin: 0; }
+
+/* ── Alerts ──────────────────────────────────────────────────── */
+.cp-alert {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
-  padding: 0.75rem 1rem;
-  border: 1.5px solid #e2e8f0;
+  gap: 0.75rem;
+  padding: 0.9rem 1.25rem;
   border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+.cp-alert--success { background: rgba(46,204,113,0.12); border: 1px solid rgba(46,204,113,0.3); color: #2ecc71; }
+.cp-alert--error   { background: rgba(231,76,60,0.12);  border: 1px solid rgba(231,76,60,0.3);  color: #e74c3c; }
+.alert-slide-enter-active, .alert-slide-leave-active { transition: all 0.3s ease; }
+.alert-slide-enter-from, .alert-slide-leave-to { opacity: 0; transform: translateY(-8px); }
+
+/* ── Sections ────────────────────────────────────────────────── */
+.cp-section {
+  background: linear-gradient(135deg, rgba(62,36,24,0.95), rgba(46,29,23,0.95));
+  border: 1px solid rgba(218,156,95,0.2);
+  border-radius: 18px;
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.cp-section__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(218,156,95,0.15);
+}
+.cp-section__icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: rgba(218,156,95,0.12);
+  border: 1px solid rgba(218,156,95,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #da9c5f;
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+.cp-section__title { font-size: 1rem; font-weight: 700; color: #f0e5db; margin: 0 0 0.2rem; }
+.cp-section__desc  { font-size: 0.82rem; color: rgba(240,229,219,0.4); margin: 0; }
+
+/* ── Grid & Fields ───────────────────────────────────────────── */
+.cp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+.cp-field { display: flex; flex-direction: column; gap: 0.45rem; }
+.cp-field--full { grid-column: 1 / -1; }
+
+.cp-field label {
+  font-size: 0.79rem;
+  font-weight: 700;
+  color: rgba(240,229,219,0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.req { color: #e74c3c; margin-left: 3px; }
+
+.cp-field input,
+.cp-field textarea,
+.cp-field select {
+  padding: 0.75rem 1rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(218,156,95,0.22);
+  border-radius: 10px;
+  color: #f0e5db;
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  width: 100%;
+}
+.cp-field input::placeholder,
+.cp-field textarea::placeholder { color: rgba(240,229,219,0.25); }
+.cp-field input:focus,
+.cp-field textarea:focus,
+.cp-field select:focus {
+  outline: none;
+  border-color: rgba(218,156,95,0.6);
+  background: rgba(255,255,255,0.08);
+  box-shadow: 0 0 0 3px rgba(218,156,95,0.1);
+}
+.cp-field select { cursor: pointer; }
+.cp-field select option { background: #2e1d17; color: #f0e5db; }
+.cp-field textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
+.cp-help { font-size: 0.78rem; color: #2ecc71; font-weight: 600; }
+
+/* Input con addon */
+.cp-input-addon {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid rgba(218,156,95,0.22);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background: rgba(255,255,255,0.05);
+}
+.cp-input-addon:focus-within {
+  border-color: rgba(218,156,95,0.6);
+  box-shadow: 0 0 0 3px rgba(218,156,95,0.1);
+}
+.cp-input-addon input { border: none; border-radius: 0; background: transparent; box-shadow: none; }
+.cp-input-addon input:focus { box-shadow: none; }
+.cp-addon {
+  display: flex;
+  align-items: center;
+  padding: 0 0.85rem;
+  background: rgba(218,156,95,0.1);
+  color: #da9c5f;
+  font-size: 0.85rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Input con icon */
+.cp-icon-input { position: relative; }
+.cp-input-ico {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(218,156,95,0.5);
+  pointer-events: none;
+  font-size: 0.9rem;
+}
+.cp-icon-input input { padding-left: 2.75rem; }
+
+/* Banner info */
+.cp-info-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 1rem;
+  padding: 0.8rem 1rem;
+  background: rgba(218,156,95,0.08);
+  border: 1px solid rgba(218,156,95,0.2);
+  border-radius: 10px;
+  color: rgba(240,229,219,0.6);
+  font-size: 0.84rem;
+}
+.cp-info-banner svg { color: #da9c5f; flex-shrink: 0; }
+
+/* ── Servicios ───────────────────────────────────────────────── */
+.cp-services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+.cp-service {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgba(218,156,95,0.18);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
   cursor: pointer;
-  background: #f8fafc;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
   user-select: none;
 }
-
-.service-checkbox-item:hover {
-  border-color: #8b6f47;
-  background: #fff;
+.cp-service:hover {
+  border-color: rgba(218,156,95,0.4);
+  background: rgba(218,156,95,0.06);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
 }
-
-.service-checkbox-item.is-checked {
-  border-color: #3b251d;
-  background: linear-gradient(135deg, #fdf8f5 0%, #f5ece6 100%);
-  box-shadow: 0 0 0 2px rgba(59, 37, 29, 0.12);
+.cp-service--on {
+  border-color: rgba(218,156,95,0.55);
+  background: rgba(218,156,95,0.1);
+  box-shadow: 0 0 0 2px rgba(218,156,95,0.12);
 }
+.cp-service__native { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+.cp-service__check { color: rgba(240,229,219,0.25); font-size: 0.9rem; flex-shrink: 0; transition: color 0.2s; }
+.cp-service--on .cp-service__check { color: #da9c5f; }
+.cp-service__ico { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: rgba(240,229,219,0.4); font-size: 0.85rem; flex-shrink: 0; transition: color 0.2s; }
+.cp-service--on .cp-service__ico { color: #da9c5f; }
+.cp-service__name { font-size: 0.82rem; font-weight: 500; color: rgba(240,229,219,0.55); transition: color 0.2s; }
+.cp-service--on .cp-service__name { color: #f0e5db; font-weight: 600; }
 
-/* Ocultar el checkbox nativo */
-.service-hidden-checkbox {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-}
-
-.service-check-icon {
-  font-size: 1rem;
-  color: #cbd5e1;
-  flex-shrink: 0;
-  transition: color 0.2s;
-}
-
-.service-checkbox-item.is-checked .service-check-icon {
-  color: #3b251d;
-}
-
-.service-emoji {
-  font-size: 1.125rem;
-  flex-shrink: 0;
-}
-
-.service-name {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #475569;
-  line-height: 1.2;
-}
-
-.service-checkbox-item.is-checked .service-name {
-  color: #1e293b;
-  font-weight: 600;
-}
-
-/* Resumen y acciones */
-.services-summary {
+.cp-services-summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1rem;
-  background: linear-gradient(135deg, #fdf8f5 0%, #f5ece6 100%);
-  border: 1.5px solid #d4a88a;
+  padding: 0.7rem 1rem;
+  background: rgba(218,156,95,0.08);
+  border: 1px solid rgba(218,156,95,0.25);
   border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #da9c5f;
   gap: 1rem;
 }
-
-.summary-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #3b251d;
-}
-
-.btn-clear-services {
+.cp-btn-clear {
   background: none;
-  border: 1px solid #d4a88a;
-  color: #8b6f47;
-  font-size: 0.8rem;
-  padding: 0.3rem 0.75rem;
-  border-radius: 6px;
+  border: 1px solid rgba(218,156,95,0.3);
+  color: rgba(218,156,95,0.7);
+  font-family: inherit;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 7px;
   cursor: pointer;
   transition: all 0.2s;
-  white-space: nowrap;
 }
-.btn-clear-services:hover {
-  background: #fff;
-  border-color: #3b251d;
-  color: #3b251d;
+.cp-btn-clear:hover { color: #da9c5f; border-color: rgba(218,156,95,0.6); background: rgba(218,156,95,0.08); }
+.cp-services-hint { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: rgba(240,229,219,0.3); }
+
+/* ── Imágenes ────────────────────────────────────────────────── */
+.cp-file-hidden { display: none; }
+
+.cp-dropzone {
+  border: 2px dashed rgba(218,156,95,0.3);
+  border-radius: 14px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  background: rgba(255,255,255,0.02);
+  transition: all 0.3s;
+  margin-bottom: 1.5rem;
+}
+.cp-dropzone:hover,
+.cp-dropzone--dragging {
+  border-color: rgba(218,156,95,0.65);
+  background: rgba(218,156,95,0.05);
+  transform: translateY(-2px);
+}
+.cp-dropzone__ico {
+  font-size: 2.8rem;
+  color: rgba(218,156,95,0.5);
+  margin-bottom: 0.75rem;
+  display: block;
+}
+.cp-dropzone h4 { font-size: 1rem; font-weight: 600; color: rgba(240,229,219,0.65); margin: 0 0 0.4rem; }
+.cp-dropzone p { font-size: 0.82rem; color: rgba(240,229,219,0.3); margin: 0; }
+
+.cp-progress {
+  position: relative;
+  height: 7px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 100px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+.cp-progress__bar {
+  height: 100%;
+  background: linear-gradient(90deg, #da9c5f, #b8791f);
+  border-radius: 100px;
+  transition: width 0.3s;
+}
+.cp-progress span {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #f0e5db;
 }
 
-.services-empty-hint {
+.cp-images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 1.25rem;
+}
+.cp-img-card {
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(218,156,95,0.15);
+  transition: all 0.3s;
+}
+.cp-img-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+.cp-img-card--main { border-color: #da9c5f; box-shadow: 0 0 0 2px rgba(218,156,95,0.35); }
+.cp-img-preview { position: relative; aspect-ratio: 4/3; overflow: hidden; }
+.cp-img-preview img { width: 100%; height: 100%; object-fit: cover; }
+.cp-img-badge {
+  position: absolute;
+  top: 0.6rem; left: 0.6rem;
+  background: linear-gradient(135deg, #da9c5f, #b8791f);
+  color: #1a0e0a;
+  padding: 0.3rem 0.65rem;
+  border-radius: 7px;
+  font-size: 0.7rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.825rem;
-  color: #94a3b8;
-  padding: 0.5rem 0;
+  gap: 4px;
 }
+.cp-img-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.cp-img-card:hover .cp-img-overlay { opacity: 1; }
+.cp-img-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.92);
+  border: none;
+  color: #1a0e0a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+}
+.cp-img-btn:hover { transform: scale(1.1); }
+.cp-img-btn--del { background: rgba(231,76,60,0.92); color: #fff; }
+.cp-img-btn--del:hover { background: #e74c3c; }
+.cp-img-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0.85rem;
+  border-top: 1px solid rgba(218,156,95,0.12);
+}
+.cp-img-num { font-size: 0.8rem; font-weight: 700; color: #da9c5f; }
+.cp-img-size { font-size: 0.72rem; color: rgba(240,229,219,0.35); }
 
-/* Animaciones */
-.image-list-enter-active,
-.image-list-leave-active { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-.image-list-enter-from { opacity: 0; transform: scale(0.8) translateY(20px); }
-.image-list-leave-to { opacity: 0; transform: scale(0.8) translateY(-20px); }
-.image-list-move { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+.cp-no-images {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 3rem 2rem;
+  border: 2px dashed rgba(218,156,95,0.15);
+  border-radius: 14px;
+  text-align: center;
+}
+.cp-no-images__ico { font-size: 3.5rem; color: rgba(218,156,95,0.2); }
+.cp-no-images h4 { font-size: 1rem; font-weight: 600; color: rgba(240,229,219,0.4); margin: 0; }
+.cp-no-images p { font-size: 0.85rem; color: rgba(240,229,219,0.25); margin: 0; }
 
-/* Responsive */
+/* Transitions */
+.img-list-enter-active, .img-list-leave-active { transition: all 0.35s ease; }
+.img-list-enter-from { opacity: 0; transform: scale(0.85) translateY(16px); }
+.img-list-leave-to { opacity: 0; transform: scale(0.85) translateY(-16px); }
+.img-list-move { transition: transform 0.35s ease; }
+
+/* ── Acciones ────────────────────────────────────────────────── */
+.cp-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+.cp-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0.8rem 1.5rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(218,156,95,0.25);
+  border-radius: 11px;
+  color: rgba(240,229,219,0.6);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cp-btn-secondary:hover:not(:disabled) { background: rgba(218,156,95,0.08); color: #f0e5db; }
+.cp-btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.cp-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0.8rem 1.75rem;
+  background: linear-gradient(135deg, #da9c5f, #b8791f);
+  border: none;
+  border-radius: 11px;
+  color: #1a0e0a;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 16px rgba(218,156,95,0.4);
+}
+.cp-btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(218,156,95,0.55); background: linear-gradient(135deg, #e0a96a, #c9851f); }
+.cp-btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+/* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .images-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
-  .upload-dropzone { padding: 2rem 1rem; }
-  .upload-icon { font-size: 2rem; }
-  .services-checklist { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .cp-shell { padding: 2rem 1.25rem 4rem; }
+  .cp-grid { grid-template-columns: 1fr; }
+  .cp-field--full { grid-column: 1; }
+  .cp-images-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .cp-actions { flex-direction: column; }
+  .cp-btn-primary, .cp-btn-secondary { width: 100%; justify-content: center; }
+}
+@media (max-width: 500px) {
+  .cp-shell { padding: 1.5rem 1rem 3.5rem; }
+  .cp-services-grid { grid-template-columns: 1fr 1fr; }
 }
 </style>

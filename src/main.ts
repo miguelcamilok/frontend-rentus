@@ -40,7 +40,17 @@ import {
   faHammer, faArrowUp, faArrowDown, faMinus, faFileContract, faChartBar,
   faFire, faArrowTrendUp, faUserShield, faFolderOpen, faQuestion,
   faInbox, faFileExport, faHandsClapping, faUserPlus, faUserEdit, faUserMinus,
-  faUserCog, faExchangeAlt, faFileSignature, faThumbtack
+  faUserCog, faExchangeAlt, faFileSignature, faThumbtack,
+  faDroplet,
+  faWifi,
+  faMapLocationDot,
+  faTv,
+  faDumbbell,
+  faSquareParking,
+  faFireBurner,
+  faElevator,
+  faPersonSwimming,
+  faJugDetergent
 } from '@fortawesome/free-solid-svg-icons';
 
 // Regular icons
@@ -79,7 +89,9 @@ library.add(
   faHammer, faArrowUp, faArrowDown, faMinus, faFileContract, faChartBar,
   faFire, faArrowTrendUp, faUserShield, faFolderOpen, faQuestion,
   faInbox, faFileExport, faHandsClapping, faUserPlus, faUserEdit, faUserMinus,
-  faUserCog, faExchangeAlt, faFileSignature, faThumbtack,
+  faUserCog, faExchangeAlt, faFileSignature, faThumbtack, faDroplet, faWifi,
+  faMapLocationDot, faTv, faDumbbell, faSquareParking, faFireBurner, faElevator,
+  faPersonSwimming, faJugDetergent, faToggleOn,
   // Regular
   faCircleRegular, faHeartRegular,
   // Brand

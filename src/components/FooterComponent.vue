@@ -16,7 +16,7 @@
           </li>
           <li><router-link to="/propiedades">{{ $t('footer.quickLinks.properties') }}</router-link></li>
           <li><a href="#">{{ $t('footer.quickLinks.contact') }}</a></li>
-          <li><a href="#">{{ $t('footer.quickLinks.faq') }}</a></li>
+          <li><router-link to="/preguntas-frecuentes">{{ $t('footer.quickLinks.faq') }}</router-link></li>
         </ul>
       </div>
 

@@ -72,6 +72,25 @@
       "loadError": "Could not load property",
       "noPermission": "You don't have permissions to edit this property",
       "mustLogin": "You must log in to edit properties"
+    },
+    "eyebrow": "Editing",
+    "sectionDescriptions": {
+      "basicInfo": "Title, description, status and price of the property",
+      "location": "Address, city and GPS coordinates",
+      "features": "Area, bedrooms, bathrooms and parking",
+      "images": "Manage your property photos — minimum 1, maximum 10",
+      "services": "Services included in the rental price"
+    },
+    "images": {
+      "current": "Current images",
+      "principal": "Main",
+      "add": "Add new images",
+      "dropzone": {
+        "title": "Drag new images here or click",
+        "description": "JPG · PNG · WEBP · max. 5 MB"
+      },
+      "new": "New",
+      "delete": "Delete"
     }
   },
   "home": {
@@ -328,8 +347,9 @@
     },
     "askPrice": "Ask price",
     "create": {
-      "title": "Create New Property",
-      "subtitle": "Add a new property to your rental catalog",
+      "eyebrow": "Property Portfolio",
+      "title": "Publish Property",
+      "subtitle": "Complete the data and add photos to attract more tenants",
       "success": "Property created successfully!",
       "successTitle": "Success",
       "successMessage": "The property has been published correctly",
@@ -338,16 +358,48 @@
       "confirmCancel": "Are you sure you want to cancel? All entered data will be lost.",
       "cancelTitle": "Cancel creation",
       "publishing": "Publishing...",
+      "processing": "Processing...",
       "publish": "Publish Property",
+      "continueLocation": "Continue to Location →",
       "basicInfo": "Basic Information",
+      "basicInfoDesc": "Name, description and status of the property",
       "location": "Location",
+      "locationDesc": "Address and city where it is located",
       "locationHint": "Coordinates help display the property on the map",
+      "locationExactHint": "You can select the exact location on the map in the next step",
       "features": "Features",
+      "featuresDesc": "Price, area and space distribution",
       "services": "Included Services",
+      "servicesDesc": "Select the services included in the rent",
       "servicesHint": "Separate each service with commas (ex: WiFi, Gas, Water, Electricity)",
+      "serviceSelected": "service selected",
+      "servicesSelected": "services selected",
+      "clearSelection": "Clear selection",
       "noServices": "No services added yet",
+      "noServicesSelected": "No services selected — optional",
+      "imagesTitle": "Property Images",
+      "imagesDesc": "Upload up to 10 JPG, PNG or WEBP images (max. 2 MB each)",
+      "dropzoneTitle": "Drag images here or click to select",
+      "dropzoneDesc": "JPG · PNG · WEBP · max. 2 MB · {current}/10 images",
+      "mainImage": "Main",
+      "setAsMain": "Set as main",
+      "deleteImage": "Delete image",
+      "noImagesTitle": "No images",
+      "noImagesDesc": "Add photos to make your property more attractive",
       "image": "Image",
-      "imagePreview": "Image preview"
+      "imagePreview": "Image preview",
+      "errors": {
+        "maxImages": "Maximum 10 images allowed",
+        "limitReached": "Limit reached",
+        "invalidFormat": "Invalid format",
+        "maxSize": "Maximum 2MB",
+        "incompleteFields": "Please complete all required fields",
+        "incompleteTitle": "Incomplete fields",
+        "priceRequired": "Please enter the monthly price",
+        "priceTitle": "Price required",
+        "imageRequired": "Please add at least one image",
+        "imageTitle": "Image required"
+      }
     },
     "fields": {
       "title": "Title",
@@ -427,6 +479,44 @@
       "rights": "© 2025 RentUs. All rights reserved",
       "legal": "Legal Notice",
       "privacy": "Privacy Policy"
+    }
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Find quick answers to the most common questions about RentUs",
+    "cta": {
+      "text": "Didn't find your answer?",
+      "button": "Talk to support"
+    },
+    "empty": {
+      "title": "No questions available",
+      "description": "We are working to add content here soon."
+    },
+    "questions": {
+      "q1": {
+        "question": "How can I publish my property on RentUs?",
+        "answer": "It's very simple. Register as an owner, go to your dashboard, and select 'Publish Property'. Complete the basic data, upload high-quality photos, and you're done! Our team will review the information to activate it."
+      },
+      "q2": {
+        "question": "What payment methods can I use?",
+        "answer": "We accept credit and debit cards (Visa, Mastercard, American Express). You can also link your bank account for automatic recurring payments through our secure platform."
+      },
+      "q3": {
+        "question": "How do digital contracts work?",
+        "answer": "All our contracts are legally binding and signed electronically. Once both parties accept the terms, the system generates a certified PDF that you can download at any time from your 'Contracts' section."
+      },
+      "q4": {
+        "question": "How do I report a technical problem in the property?",
+        "answer": "If you are a tenant, go to the 'Maintenance' section in your user menu. There you can create a detailed report with photos, which will go directly to the owner or administrator for management."
+      },
+      "q5": {
+        "question": "Is it safe to share my personal data?",
+        "answer": "Absolutely. At RentUs, we use bank-grade encryption (SSL) to protect all your sensitive information. We never share your data with third parties without your explicit consent."
+      },
+      "q6": {
+        "question": "Can I cancel my contract early?",
+        "answer": "Early cancellation depends on the specific clauses agreed upon in your digital contract. We recommend reviewing the 'Termination' section in your current contract or contacting the owner directly."
+      }
     }
   },
   "properties": {
