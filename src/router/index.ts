@@ -2,6 +2,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import type { RouteRecordRaw } from "vue-router";
 import { authService } from "@/services/auth";
+import { useUserStore } from "@/stores/useUserStore";
 import logger from "@/utils/logger";
 
 // ── Eager-loaded routes (critical path) ──────────────────────────────────
@@ -185,8 +186,8 @@ const router = createRouter({
 });
 
 // ── Navigation guard ──────────────────────────────────────────────────────
-router.beforeEach(async (to, _from, next) => {
-  // Update document title
+router.beforeEach((to, _from, next) => {
+  // 1. Update document title immediately (Synchronous)
   document.title = to.meta.title
     ? `${to.meta.title} | RentUs`
     : "RentUs — Encuentra tu hogar ideal";
@@ -197,68 +198,84 @@ router.beforeEach(async (to, _from, next) => {
   const requiresAdmin = to.matched.some((r) => r.meta.requiresAdmin);
   const requiresRole = to.meta.requiresRole as string | undefined;
 
-  // 1. Protected route, no session
+  // 2. Critical Block: No session on protected route
   if (requiresAuth && !isAuthenticated) {
     localStorage.setItem("redirectAfterLogin", to.fullPath);
     next({ name: "Login", query: { redirect: to.fullPath } });
     return;
   }
 
-  // 2. Authenticated user tries to visit login/register
+  // 3. Simple Redirect: Authenticated user tries to visit login/register
   if (hideForAuth && isAuthenticated) {
-    try {
-      const user = await authService.getMe();
-      if (user.role === "admin" || user.role === "support") {
-        next({ name: "admin-dashboard" });
-      } else {
-        next({ name: "home" });
-      }
-    } catch {
+    const cachedUser = authService.getUser();
+    if (cachedUser && (cachedUser.role === "admin" || cachedUser.role === "support")) {
+      next({ name: "admin-dashboard" });
+    } else {
       next({ name: "home" });
     }
     return;
   }
 
-  // 3. Validate token on protected routes + check admin role
-  if (isAuthenticated && requiresAuth) {
-    try {
-      const user = await authService.getMe();
+  // 4. Preliminary Role Check (Synchronous using cache)
+  // If cache exists and confirms lack of permissions, block immediately.
+  if (isAuthenticated && (requiresAdmin || requiresRole)) {
+    const cachedUser = authService.getUser();
+    if (cachedUser) {
+      const isAdminAccess = cachedUser.role === "admin" || cachedUser.role === "support";
+      if (requiresAdmin && !isAdminAccess) {
+        next({ name: "home", query: { error: "unauthorized" } });
+        return;
+      }
+      if (requiresRole && cachedUser.role !== requiresRole) {
+        next({
+          name: "admin-dashboard",
+          query: { error: "insufficient_permissions" },
+        });
+        return;
+      }
+    }
+  }
 
-      if (requiresAdmin) {
-        const role = user.role;
-        if (role !== "admin" && role !== "support") {
-          logger.warn("Access denied — admin role required.");
-          next({ name: "home", query: { error: "unauthorized" } });
-          return;
-        }
-        if (requiresRole && role !== requiresRole) {
-          logger.warn(
-            `Access denied — requires role "${requiresRole}", has "${role}".`
-          );
-          next({
+  // 5. Background Validation (Non-blocking)
+  // We let the user navigate immediately, then verify the session/roles in the background.
+  if (isAuthenticated) {
+    const userStore = useUserStore();
+
+    // Trigger background refresh (don't await)
+    userStore.loadMe().then(() => {
+      const currentUser = userStore.user;
+
+      // If session is found to be invalid/expired in the background
+      if (!currentUser && (requiresAuth || requiresAdmin)) {
+        logger.warn("Session expired or invalid. Redirecting to login.");
+        router.push({ name: "Login", query: { redirect: to.fullPath } });
+        return;
+      }
+
+      // Late role check: if data changed or cache was wrong
+      if (currentUser && requiresAdmin) {
+        const isAdminAccess = currentUser.role === "admin" || currentUser.role === "support";
+        if (!isAdminAccess) {
+          logger.warn("Access denied: user is not an admin.");
+          router.push({ name: "home", query: { error: "unauthorized" } });
+        } else if (requiresRole && currentUser.role !== requiresRole) {
+          logger.warn(`Access denied: required role "${requiresRole}", has "${currentUser.role}".`);
+          router.push({
             name: "admin-dashboard",
             query: { error: "insufficient_permissions" },
           });
-          return;
         }
       }
-
-      next();
-    } catch {
-      await authService.logout();
-      localStorage.setItem("redirectAfterLogin", to.fullPath);
-      next({ name: "Login", query: { redirect: to.fullPath } });
-    }
-    return;
+    }).catch((err) => {
+      logger.error("Background validation error:", err);
+      // If it's a 401 or similar, authService already cleared local state.
+      if (requiresAuth || requiresAdmin) {
+        router.push({ name: "Login", query: { redirect: to.fullPath } });
+      }
+    });
   }
 
-  // 4. Admin route without any session
-  if (requiresAdmin && !isAuthenticated) {
-    localStorage.setItem("redirectAfterLogin", to.fullPath);
-    next({ name: "Login", query: { redirect: to.fullPath } });
-    return;
-  }
-
+  // 6. Finalize navigation immediately
   next();
 });
 

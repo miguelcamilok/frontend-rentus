@@ -240,6 +240,7 @@
       "ownerRequests": "Solicitudes (Dueño)",
       "myRequests": "Mis Solicitudes",
       "adminPanel": "Panel de Administración",
+      "myReports": "Mis reportes",
       "settings": "Ajustes"
     },
     "alerts": {
@@ -521,7 +522,9 @@
     "locationModal": {
       "title": "Ubicación",
       "department": "Departamento",
-      "city": "Ciudad"
+      "city": "Ciudad",
+      "selectDepartment": "Selecciona un departamento",
+      "selectCity": "Selecciona una ciudad"
     }
   },
   "contracts": {
@@ -570,7 +573,7 @@
   },
   "notifications": {
     "title": "Notificaciones",
-    "markAll": "Marcar todas",
+    "markAll": "Marcar todas como leídas",
     "loading": "Cargando notificaciones...",
     "empty": {
       "title": "Sin notificaciones",
@@ -579,15 +582,297 @@
     "dates": {
       "today": "Hoy",
       "yesterday": "Ayer"
+    }
+  },
+  "payments": {
+    "eyebrow": "Mis Contratos",
+    "title": "Historial de Pagos",
+    "subtitle": "Pagos realizados en tus contratos de arrendamiento activos",
+    "actions": {
+      "payNow": "Realizar Pago",
+      "manageMethods": "Gestionar Tarjetas"
     },
-    "newsEmails": "Correos de novedades",
-    "newsEmailsDesc": "Recibe actualizaciones sobre nuevas funcionalidades",
-    "propertyAlerts": "Alertas de propiedades",
-    "propertyAlertsDesc": "Notificaciones sobre propiedades que coinciden con tus criterios",
-    "reminders": "Recordatorios",
-    "remindersDesc": "Recordatorios sobre tus citas y actividades programadas",
-    "specialPromotions": "Promociones especiales",
-    "specialPromotionsDesc": "Ofertas y descuentos exclusivos"
+    "counters": {
+      "records": "Registros",
+      "pending": "Pendientes"
+    },
+    "searchPlaceholder": "Buscar por ID de contrato o monto...",
+    "filters": {
+      "all": "Todos los estados",
+      "paid": "Pagados",
+      "pending": "Por pagar / Pendientes",
+      "failed": "Fallidos"
+    },
+    "states": {
+      "loading": "Cargando pagos...",
+      "empty": {
+        "title": "No se encontraron pagos",
+        "description": "Aún no tienes registros de pagos o tu búsqueda no arrojó resultados."
+      }
+    },
+    "table": {
+      "headers": {
+        "id": "ID",
+        "date": "Fecha",
+        "amount": "Monto",
+        "status": "Estado",
+        "type": "Tipo",
+        "contract": "Contrato"
+      },
+      "contractId": "Contrato #"
+    },
+    "badges": {
+      "new": "NUEVO"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "paid": "Pagado",
+      "failed": "Fallido",
+      "refunded": "Reembolsado",
+      "unpaid": "POR PAGAR",
+      "completed": "Completado"
+    },
+    "type": {
+      "rental": "Alquiler",
+      "deposit": "Depósito",
+      "fee": "Tarifa",
+      "maintenance": "Mantenimiento"
+    },
+    "pagination": {
+      "prev": "Anterior",
+      "next": "Siguiente",
+      "info": "Página {page} de {total}"
+    },
+    "modals": {
+      "detail": {
+        "title": "Detalle del Pago",
+        "transactionId": "ID Transacción:",
+        "amount": "Monto Total",
+        "download": "Descargar Comprobante PDF",
+        "status": "Estado",
+        "date": "Fecha",
+        "type": "Tipo",
+        "reference": "Referencia",
+        "method": "Método de Pago",
+        "cardEnding": "Tarjeta terminada en **** {lastFour}"
+      },
+      "methods": {
+        "title": "Mis Tarjetas",
+        "subtitle": "Gestiona tus métodos de pago guardados",
+        "empty": "No tienes tarjetas guardadas",
+        "newCard": "Nueva Tarjeta",
+        "expiring": "Expira: {date}",
+        "vence": "Vence {date}"
+      },
+      "payment": {
+        "title": "Realizar Pago",
+        "amountToPay": "Monto a pagar",
+        "savedCard": "Tarjeta Guardada",
+        "newCard": "Nueva Tarjeta",
+        "holderName": "Nombre del Titular",
+        "holderPlaceholder": "Como aparece en la tarjeta",
+        "cardNumber": "Número de Tarjeta",
+        "cardPlaceholder": "0000 0000 0000 0000",
+        "expiryDate": "Fecha Expiración",
+        "expiryPlaceholder": "MM/YY",
+        "cvv": "CVV",
+        "cvvPlaceholder": "***",
+        "saveCard": "Guardar tarjeta para futuros pagos",
+        "confirm": "Confirmar Pago {amount}",
+        "cancel": "Cancelar"
+      },
+      "success": {
+        "title": "¡Pago Exitoso!",
+        "description": "Tu pago ha sido procesado correctamente y el contrato ahora está activo.",
+        "done": "Entendido"
+      },
+      "receipt": {
+        "labels": {
+          "id": "ID Pago:",
+          "date": "Fecha:",
+          "amount": "Monto:",
+          "contract": "Contrato:",
+          "card": "Tarjeta:",
+          "status": "Estado:"
+        }
+      }
+    },
+    "alerts": {
+      "fetchError": "No se pudieron cargar los pagos. Intenta de nuevo.",
+      "methodsError": "Error al cargar los métodos de pago.",
+      "deleteMethodConfirm": "¿Estás seguro de que deseas eliminar esta tarjeta?",
+      "deleteMethodSuccess": "Tarjeta eliminada correctamente",
+      "deleteMethodError": "Error al eliminar el método de pago.",
+      "validation": {
+        "holder": "El nombre del titular es requerido",
+        "card": "Número de tarjeta inválido",
+        "cvv": "CVV inválido",
+        "expiry": "Fecha de expiración inválida (MM/YY)",
+        "savedCard": "Selecciona una tarjeta guardada"
+      },
+      "paymentSuccess": "Pago procesado con éxito. Tu contrato ahora está ACTIVO.",
+      "pdfSuccess": "Comprobante generado"
+    }
+  },
+  "maintenance": {
+    "eyebrow": "Gestión Operativa",
+    "title": "Solicitudes de Mantenimiento",
+    "subtitle": "Supervisa y gestiona cada reporte activo de tu portafolio",
+    "counters": {
+      "results": "Resultados",
+      "pending": "Pendientes"
+    },
+    "actions": {
+      "new": "Nueva Solicitud",
+      "create": "Generar Reporte"
+    },
+    "tabs": {
+      "all": "Todos",
+      "pending": "Pendiente",
+      "in_progress": "En Progreso",
+      "completed": "Completado",
+      "cancelled": "Cancelado"
+    },
+    "searchPlaceholder": "Buscar por título, propiedad...",
+    "filters": {
+      "priorityAll": "Todas las prioridades"
+    },
+    "states": {
+      "loading": "Cargando solicitudes...",
+      "empty": {
+        "title": "Sin solicitudes de mantenimiento",
+        "description": "No hay reportes que coincidan con los filtros. Crea una nueva solicitud para empezar."
+      }
+    },
+    "table": {
+      "headers": {
+        "id": "ID",
+        "date": "Fecha",
+        "property": "Propiedad",
+        "title": "Título",
+        "priority": "Prioridad",
+        "status": "Estado"
+      }
+    },
+    "priority": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta",
+      "emergency": "Emergencia",
+      "urgent": "Urgente"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "in_progress": "En Progreso",
+      "completed": "Completado",
+      "cancelled": "Cancelado"
+    },
+    "modals": {
+      "create": {
+        "title": "Solicitud de Mantenimiento",
+        "fields": {
+          "property": "Propiedad / Inmueble:",
+          "selectProperty": "Seleccione una propiedad",
+          "title": "Asunto de Mantenimiento:",
+          "titlePlaceholder": "Ej: Fuga de agua en el baño principal",
+          "priority": "Prioridad:",
+          "description": "Descripción del problema:",
+          "descriptionPlaceholder": "Describe detalladamente el problema, ubicación exacta y cualquier información relevante...",
+          "attachImage": "Adjuntar imagen del problema (opcional)",
+          "uploading": "Subiendo: {progress}%",
+          "uploadSuccess": "Imagen subida correctamente",
+          "viewImage": "Ver imagen"
+        },
+        "actions": {
+          "uploading": "Subiendo imagen...",
+          "sending": "Enviando solicitud...",
+          "send": "Enviar Solicitud"
+        }
+      }
+    },
+    "alerts": {
+      "fetchError": "No se pudieron cargar las solicitudes. Intenta de nuevo.",
+      "submitSuccess": "Solicitud enviada correctamente",
+      "submitSuccessFull": "¡Solicitud de mantenimiento enviada correctamente! Te contactaremos pronto.",
+      "validationTitle": "Por favor ingresa un título para el asunto",
+      "validationProperty": "Por favor selecciona una propiedad afectada",
+      "validationDescription": "Por favor describe el problema",
+      "validationLength": "La descripción no puede exceder los 500 caracteres",
+      "imageType": "Por favor, selecciona solo imágenes (JPEG, PNG, GIF)",
+      "imageSize": "La imagen no debe superar los 10MB",
+      "imageError": "No se pudo subir la imagen. Intenta nuevamente.",
+      "confirmDelete": "¿Estás seguro de que deseas eliminar esta tarjeta?"
+    }
+  },
+  "reports": {
+    "eyebrow": "Soporte & Comunidad",
+    "title": "Mis Reportes y Quejas",
+    "subtitle": "Realiza y haz seguimiento a tus reclamos sobre usuarios o propiedades",
+    "actions": {
+      "new": "Nuevo Reporte",
+      "create": "Crear Reporte",
+      "cancel": "Cancelar",
+      "send": "Enviar Reporte"
+    },
+    "searchPlaceholder": "Buscar por detalle...",
+    "filters": {
+      "all": "Todos los estados"
+    },
+    "states": {
+      "loading": "Cargando reportes...",
+      "empty": {
+        "title": "No has generado ningún reporte",
+        "description": "Si tuviste algún inconveniente en la plataforma, puedes crear un reporte aquí."
+      }
+    },
+    "table": {
+      "headers": {
+        "id": "ID",
+        "date": "Fecha",
+        "type": "Tipo",
+        "detail": "Detalle",
+        "status": "Estado"
+      }
+    },
+    "status": {
+      "pending": "Pendiente",
+      "reviewed": "En Revisión",
+      "resolved": "Resuelto",
+      "dismissed": "Desestimado"
+    },
+    "type": {
+      "property": "Propiedad",
+      "user": "Usuario",
+      "review": "Reseña",
+      "other": "Otro"
+    },
+    "pagination": {
+      "prev": "Anterior",
+      "next": "Siguiente",
+      "info": "Página {page} de {total}"
+    },
+    "modals": {
+      "create": {
+        "eyebrow": "Nuevo registro",
+        "title": "Crear Reporte",
+        "fields": {
+          "type": "Tipo de Reporte",
+          "propertyId": "ID de la Propiedad",
+          "propertyIdPlaceholder": "Ej: 123",
+          "userId": "ID del Usuario",
+          "userIdPlaceholder": "Ej: 42",
+          "optional": "(Opcional)",
+          "description": "Detalle de lo ocurrido",
+          "descriptionPlaceholder": "Por favor, sé lo más específico posible...",
+          "charCount": "caracteres"
+        }
+      }
+    },
+    "alerts": {
+      "fetchError": "No se pudieron cargar tus reportes.",
+      "submitSuccess": "Tu reporte ha sido enviado. Será revisado por un administrador.",
+      "submitError": "No pudimos enviar tu reporte. Intenta más tarde."
+    }
   },
   "requests": {
     "title": "Solicitudes de Arriendo",
@@ -800,6 +1085,7 @@
     "savePreferences": "Guardar preferencias",
     "logout": "Cerrar sesión",
     "yes": "Sí",
-    "no": "No"
+    "no": "No",
+    "validation": "Validación"
   }
 }

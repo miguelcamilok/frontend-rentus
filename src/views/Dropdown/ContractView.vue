@@ -763,6 +763,15 @@ const loadContracts = async () => {
       return contractData;
     });
 
+    // UX: Los contratos pendientes (Acción Requerida) deben ir SIEMPRE de primero
+    contracts.value.sort((a, b) => {
+      const aPending = a.status === 'pending' && isUserTenant(a);
+      const bPending = b.status === 'pending' && isUserTenant(b);
+      if (aPending && !bPending) return -1;
+      if (!aPending && bPending) return 1;
+      return 0;
+    });
+
     console.log(`✅ ${contracts.value.length} contratos procesados`);
     loadContractStats(); // Calculate stats after loading
   } catch (error) {

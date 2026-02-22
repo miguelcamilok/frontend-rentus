@@ -229,7 +229,7 @@
                 {{ t('property.mapLocation') }}
               </h2>
               <div class="map-container">
-                <MapView :id="property.id" :lat="property.lat" :lng="property.lng" :owner-id="property.user_id" />
+                <MapView :id="(property as any).id" :lat="(property as any).lat" :lng="(property as any).lng" :owner-id="(property as any).user_id" />
               </div>
               <div class="map-coordinates">
                 <font-awesome-icon :icon="['fas', 'location-dot']" />
@@ -249,7 +249,7 @@
               
               <div class="contact-actions">
                 <!-- Si es el propietario -->
-                <template v-if="authUser?.id && property?.user_id && authUser.id === property.user_id">
+                <template v-if="(authUser as any)?.id && (property as any)?.user_id && (authUser as any).id === (property as any).user_id">
                   <div class="btn-action btn-owner">
                     <font-awesome-icon :icon="['fas', 'crown']" />
                     <span>{{ t('property.contact.ownerProperty') }}</span>
@@ -320,7 +320,7 @@
                 </div>
                 <div class="meta-row">
                   <font-awesome-icon :icon="['fas', 'hashtag']" />
-                  <span>{{ t('property.meta.id') }}: {{ property.id }}</span>
+                  <span>{{ t('property.meta.id') }}: {{ (property as any).id }}</span>
                 </div>
               </div>
             </div>
@@ -335,7 +335,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import RequestVisitModal from '../../components/modals/ModalRequest/RequestVisitModal.vue'
@@ -343,18 +343,18 @@ import MapView from '../../components/modals/Maps/MapView.vue'
 import api from '../../services/api'
 import { useI18n } from 'vue-i18n'
 
-const { t, tm, locale } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 const route = useRoute()
 
 // State
-const property = ref(null)
+const property = ref<any>(null)
 const loading = ref(true)
 const error = ref(null)
 const currentImageIndex = ref(0)
 const isFavorite = ref(false)
 const showRequestModal = ref(false)
-const authUser = ref(null)
+const authUser = ref<any>(null)
 
 const DEFAULT_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI2MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2Yzc1N2QiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZW4gbm8gZGlzcG9uaWJsZTwvdGV4dD48L3N2Zz4="
 
@@ -367,46 +367,40 @@ const isAuthenticated = computed(() => {
 const propertyImages = computed(() => {
   if (!property.value) return [DEFAULT_IMAGE]
 
-  const images = []
+  const images: string[] = []
 
-  let rawImages = property.value.images
-
-  // If the backend returned a JSON-stringified array, parse it first
-  if (typeof rawImages === 'string') {
-    try {
-      rawImages = JSON.parse(rawImages)
-    } catch {
-      // Not valid JSON — might be a single URL or data URI
-      if (rawImages.startsWith('data:') || rawImages.startsWith('http')) {
-        images.push(rawImages)
+  // 1. Prioridad: relación images (nueva tabla con objetos {url, order, is_main...})
+  if (property.value.images && Array.isArray(property.value.images) && property.value.images.length > 0) {
+    // Si ya es un array de objetos desde la relación
+    property.value.images.forEach((img: any) => {
+      const url = img.url || img.image_url
+      if (typeof url === 'string') {
+        images.push(url)
       }
-    }
+    })
   }
 
-  // Array of image objects (hasMany relation) with image_url field
-  if (Array.isArray(rawImages) && rawImages.length > 0) {
-    // Could be an array of objects { image_url, order, ... } OR plain strings (base64 / URLs)
-    for (const img of rawImages) {
-      if (typeof img === 'string') {
-        images.push(img)
-      } else if (img?.image_url) {
-        images.push(img.image_url)
-      }
-    }
-    // Sort by order if objects had that field
-    if (typeof rawImages[0] === 'object' && 'order' in rawImages[0]) {
-      const sorted = [...rawImages].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-      images.length = 0
-      sorted.forEach((img) => {
+  // 2. Fallback: campo image_url antiguo (Legacy array de base64/URLs)
+  if (images.length === 0 && property.value.image_url) {
+    const legacy = property.value.image_url
+    if (Array.isArray(legacy)) {
+      legacy.forEach((img: any) => {
         if (typeof img === 'string') images.push(img)
-        else if (img?.image_url) images.push(img.image_url)
       })
+    } else if (typeof legacy === 'string') {
+      try {
+        const parsed = JSON.parse(legacy)
+        if (Array.isArray(parsed)) {
+          parsed.forEach((img: any) => {
+            if (typeof img === 'string') images.push(img)
+          })
+        } else {
+          images.push(legacy)
+        }
+      } catch {
+        images.push(legacy)
+      }
     }
-  }
-
-  // Fallback: use main image_url if exists
-  if (images.length === 0 && property.value.image_url?.trim()) {
-    images.push(property.value.image_url)
   }
 
   return images.length > 0 ? images : [DEFAULT_IMAGE]
@@ -450,7 +444,7 @@ async function fetchProperty() {
     
     // Incrementar vistas
     await api.post(`/properties/${propertyId}/views`)
-  } catch (err) {
+  } catch (err: any) {
     console.error('Error al cargar la propiedad:', err)
     error.value = err.response?.data?.message || 'No se pudo cargar la propiedad'
   } finally {
@@ -458,7 +452,7 @@ async function fetchProperty() {
   }
 }
 
-function onImgError(event) {
+function onImgError(event: any) {
   console.warn('❌ Error cargando imagen:', event.target.src)
   event.target.src = DEFAULT_IMAGE
 }
@@ -487,7 +481,7 @@ function openRequestVisitModal() {
   showRequestModal.value = true
 }
 
-const detectType = (propertyData) => {
+const detectType = (propertyData: any) => {
   if (!propertyData) return 'otro';
   if (propertyData.type) return propertyData.type;
   
@@ -501,10 +495,10 @@ const detectType = (propertyData) => {
   return 'otro';
 };
 
-const getTypeTranslated = (propertyData) => {
+const getTypeTranslated = (propertyData: any) => {
   const type = detectType(propertyData);
   
-  const typeMap = {
+  const typeMap: Record<string, string> = {
     casa: t('property.type.casa'),
     apartamento: t('property.type.apartamento'),
     local: t('property.type.local'),
@@ -515,7 +509,7 @@ const getTypeTranslated = (propertyData) => {
   return typeMap[type] || t('property.type.otro');
 };
 
-const getTypeIcon = (propertyData) => {
+const getTypeIcon = (propertyData: any) => {
   if (!propertyData) return "home";
   
   const type = propertyData.type || '';
@@ -579,7 +573,7 @@ async function deleteProperty() {
     await api.delete(`/properties/${property.value.id}`)
     alert(t('property.contact.deleteSuccess'))
     router.push({ name: 'PropertyView' })
-  } catch (err) {
+  } catch (err: any) {
     console.error('Error al eliminar la propiedad:', err)
     
     let errorMessage = t('property.contact.deleteError')
@@ -595,7 +589,7 @@ async function deleteProperty() {
   }
 }
 
-function getServicesArray(services) {
+function getServicesArray(services: any) {
   if (!services) return []
   if (Array.isArray(services)) return services
   if (typeof services === 'string') {
@@ -604,7 +598,7 @@ function getServicesArray(services) {
   return []
 }
 
-function formatPrice(price) {
+function formatPrice(price: any) {
   if (!price) return t('property.askPrice')
   const isEN = locale.value.startsWith('en')
   return new Intl.NumberFormat(
@@ -617,7 +611,7 @@ function formatPrice(price) {
   ).format(price)
 }
 
-function getStatusText(status) {
+/* function getStatusText(status) {
   const statusMap = {
     available: t('property.status.available'),
     rented: t('property.status.rented'),
@@ -626,10 +620,10 @@ function getStatusText(status) {
     maintenance: t('property.status.maintenance'),
   }
   return statusMap[status] || t('property.status.available')
-}
+} */
 
-function getStatusIcon(status) {
-  const iconMap = {
+function getStatusIcon(status: any) {
+  const iconMap: Record<string, string[]> = {
     available: ['fas', 'check-circle'],
     rented: ['fas', 'times-circle'],
     reserved: ['fas', 'clock'],
@@ -639,7 +633,7 @@ function getStatusIcon(status) {
   return iconMap[status] || ['fas', 'info-circle']
 }
 
-function getTypeText(type) {
+/* function getTypeText(type) {
   const typeMap = {
     casa: 'Casa',
     apartamento: 'Apartamento',
@@ -647,11 +641,11 @@ function getTypeText(type) {
     finca: 'Finca',
   }
   return typeMap[type] || 'Propiedad'
-}
+} */
 
-function timeAgo(dateString) {
+function timeAgo(dateString: any) {
   if (!dateString) return ''
-  const diff = Math.floor((Date.now() - new Date(dateString)) / 86400000)
+  const diff = Math.floor((Date.now() - new Date(dateString).getTime()) / 86400000)
   if (diff === 0) return t('time.today')
   if (diff === 1) return t('time.yesterday')
   if (diff < 7) return t('time.daysAgo', diff)

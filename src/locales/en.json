@@ -240,6 +240,7 @@
       "ownerRequests": "Requests (Owner)",
       "myRequests": "My Requests",
       "adminPanel": "Admin Panel",
+      "myReports": "My Reports",
       "settings": "Settings"
     },
     "alerts": {
@@ -745,7 +746,9 @@
     "locationModal": {
       "title": "Location",
       "department": "Department",
-      "city": "City"
+      "city": "City",
+      "selectDepartment": "Select a department",
+      "selectCity": "Select a city"
     }
   },
   "contracts": {
@@ -794,7 +797,7 @@
   },
   "notifications": {
     "title": "Notifications",
-    "markAll": "Mark all",
+    "markAll": "Mark all as read",
     "loading": "Loading notifications...",
     "empty": {
       "title": "No notifications",
@@ -803,15 +806,297 @@
     "dates": {
       "today": "Today",
       "yesterday": "Yesterday"
+    }
+  },
+  "payments": {
+    "eyebrow": "My Contracts",
+    "title": "Payment History",
+    "subtitle": "Payments made on your active lease contracts",
+    "actions": {
+      "payNow": "Make Payment",
+      "manageMethods": "Manage Cards"
     },
-    "newsEmails": "News emails",
-    "newsEmailsDesc": "Receive updates about new features",
-    "propertyAlerts": "Property alerts",
-    "propertyAlertsDesc": "Notifications about properties that match your criteria",
-    "reminders": "Reminders",
-    "remindersDesc": "Reminders about your scheduled appointments and activities",
-    "specialPromotions": "Special promotions",
-    "specialPromotionsDesc": "Exclusive offers and discounts"
+    "counters": {
+      "records": "Records",
+      "pending": "Pending"
+    },
+    "searchPlaceholder": "Search by contract ID or amount...",
+    "filters": {
+      "all": "All statuses",
+      "paid": "Paid",
+      "pending": "To be paid / Pending",
+      "failed": "Failed"
+    },
+    "states": {
+      "loading": "Loading payments...",
+      "empty": {
+        "title": "No payments found",
+        "description": "You don't have payment records yet or your search returned no results."
+      }
+    },
+    "table": {
+      "headers": {
+        "id": "ID",
+        "date": "Date",
+        "amount": "Amount",
+        "status": "Status",
+        "type": "Type",
+        "contract": "Contract"
+      },
+      "contractId": "Contract #"
+    },
+    "badges": {
+      "new": "NEW"
+    },
+    "status": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "failed": "Failed",
+      "refunded": "Refunded",
+      "unpaid": "TO BE PAID",
+      "completed": "Completed"
+    },
+    "type": {
+      "rental": "Rental",
+      "deposit": "Deposit",
+      "fee": "Fee",
+      "maintenance": "Maintenance"
+    },
+    "pagination": {
+      "prev": "Previous",
+      "next": "Next",
+      "info": "Page {page} of {total}"
+    },
+    "modals": {
+      "detail": {
+        "title": "Payment Detail",
+        "transactionId": "Transaction ID:",
+        "amount": "Total Amount",
+        "download": "Download Receipt PDF",
+        "status": "Status",
+        "date": "Date",
+        "type": "Type",
+        "reference": "Reference",
+        "method": "Payment Method",
+        "cardEnding": "Card ending in **** {lastFour}"
+      },
+      "methods": {
+        "title": "My Cards",
+        "subtitle": "Manage your saved payment methods",
+        "empty": "You have no saved cards",
+        "newCard": "New Card",
+        "expiring": "Expires: {date}",
+        "vence": "Expires {date}"
+      },
+      "payment": {
+        "title": "Make Payment",
+        "amountToPay": "Amount to pay",
+        "savedCard": "Saved Card",
+        "newCard": "New Card",
+        "holderName": "Cardholder Name",
+        "holderPlaceholder": "As it appears on the card",
+        "cardNumber": "Card Number",
+        "cardPlaceholder": "0000 0000 0000 0000",
+        "expiryDate": "Expiration Date",
+        "expiryPlaceholder": "MM/YY",
+        "cvv": "CVV",
+        "cvvPlaceholder": "***",
+        "saveCard": "Save card for future payments",
+        "confirm": "Confirm Payment {amount}",
+        "cancel": "Cancel"
+      },
+      "success": {
+        "title": "Payment Successful!",
+        "description": "Your payment has been processed correctly and the contract is now active.",
+        "done": "Got it"
+      },
+      "receipt": {
+        "labels": {
+          "id": "Payment ID:",
+          "date": "Date:",
+          "amount": "Amount:",
+          "contract": "Contract:",
+          "card": "Card:",
+          "status": "Status:"
+        }
+      }
+    },
+    "alerts": {
+      "fetchError": "Could not load payments. Try again.",
+      "methodsError": "Error loading payment methods.",
+      "deleteMethodConfirm": "Are you sure you want to delete this card?",
+      "deleteMethodSuccess": "Card deleted successfully",
+      "deleteMethodError": "Error deleting payment method.",
+      "validation": {
+        "holder": "Cardholder name is required",
+        "card": "Invalid card number",
+        "cvv": "Invalid CVV",
+        "expiry": "Invalid expiration date (MM/YY)",
+        "savedCard": "Select a saved card"
+      },
+      "paymentSuccess": "Payment processed successfully. Your contract is now ACTIVE.",
+      "pdfSuccess": "Receipt generated"
+    }
+  },
+  "maintenance": {
+    "eyebrow": "Operational Management",
+    "title": "Maintenance Requests",
+    "subtitle": "Monitor and manage each active report in your portfolio",
+    "counters": {
+      "results": "Results",
+      "pending": "Pending"
+    },
+    "actions": {
+      "new": "New Request",
+      "create": "Generate Report"
+    },
+    "tabs": {
+      "all": "All",
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "searchPlaceholder": "Search by title, property...",
+    "filters": {
+      "priorityAll": "All priorities"
+    },
+    "states": {
+      "loading": "Loading requests...",
+      "empty": {
+        "title": "No maintenance requests",
+        "description": "No reports match the filters. Create a new request to start."
+      }
+    },
+    "table": {
+      "headers": {
+        "id": "ID",
+        "date": "Date",
+        "property": "Property",
+        "title": "Title",
+        "priority": "Priority",
+        "status": "Status"
+      }
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "emergency": "Emergency",
+      "urgent": "Urgent"
+    },
+    "status": {
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "modals": {
+      "create": {
+        "title": "Maintenance Request",
+        "fields": {
+          "property": "Property / Building:",
+          "selectProperty": "Select a property",
+          "title": "Maintenance Subject:",
+          "titlePlaceholder": "Example: Water leak in the master bathroom",
+          "priority": "Priority:",
+          "description": "Problem Description:",
+          "descriptionPlaceholder": "Describe the problem in detail, exact location, and any relevant information...",
+          "attachImage": "Attach image of the problem (optional)",
+          "uploading": "Uploading: {progress}%",
+          "uploadSuccess": "Image uploaded successfully",
+          "viewImage": "View image"
+        },
+        "actions": {
+          "uploading": "Uploading image...",
+          "sending": "Sending request...",
+          "send": "Send Request"
+        }
+      }
+    },
+    "alerts": {
+      "fetchError": "Could not load requests. Try again.",
+      "submitSuccess": "Request sent successfully",
+      "submitSuccessFull": "Maintenance request sent successfully! We will contact you soon.",
+      "validationTitle": "Please enter a subject title",
+      "validationProperty": "Please select an affected property",
+      "validationDescription": "Please describe the problem",
+      "validationLength": "Description cannot exceed 500 characters",
+      "imageType": "Please select only images (JPEG, PNG, GIF)",
+      "imageSize": "Image must not exceed 10MB",
+      "imageError": "Could not upload image. Try again.",
+      "confirmDelete": "Are you sure you want to delete this card?"
+    }
+  },
+  "reports": {
+    "eyebrow": "Support & Community",
+    "title": "My Reports and Complaints",
+    "subtitle": "Make and track your claims about users or properties",
+    "actions": {
+      "new": "New Report",
+      "create": "Create Report",
+      "cancel": "Cancel",
+      "send": "Send Report"
+    },
+    "searchPlaceholder": "Search by detail...",
+    "filters": {
+      "all": "All statuses"
+    },
+    "states": {
+      "loading": "Loading reports...",
+      "empty": {
+        "title": "You haven't generated any report",
+        "description": "If you had any issue on the platform, you can create a report here."
+      }
+    },
+    "table": {
+      "headers": {
+        "id": "ID",
+        "date": "Date",
+        "type": "Type",
+        "detail": "Detail",
+        "status": "Status"
+      }
+    },
+    "status": {
+      "pending": "Pending",
+      "reviewed": "Under Review",
+      "resolved": "Resolved",
+      "dismissed": "Dismissed"
+    },
+    "type": {
+      "property": "Property",
+      "user": "User",
+      "review": "Review",
+      "other": "Other"
+    },
+    "pagination": {
+      "prev": "Previous",
+      "next": "Next",
+      "info": "Page {page} of {total}"
+    },
+    "modals": {
+      "create": {
+        "eyebrow": "New record",
+        "title": "Create Report",
+        "fields": {
+          "type": "Report Type",
+          "propertyId": "Property ID",
+          "propertyIdPlaceholder": "Ex: 123",
+          "userId": "User ID",
+          "userIdPlaceholder": "Ex: 42",
+          "optional": "(Optional)",
+          "description": "Occurrence detail",
+          "descriptionPlaceholder": "Please be as specific as possible...",
+          "charCount": "characters"
+        }
+      }
+    },
+    "alerts": {
+      "fetchError": "Could not load your reports.",
+      "submitSuccess": "Your report has been sent. It will be reviewed by an administrator.",
+      "submitError": "Could not send your report. Try again later."
+    }
   },
   "requests": {
     "title": "Rental Requests",
@@ -1024,6 +1309,7 @@
     "savePreferences": "Save preferences",
     "logout": "Logout",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "validation": "Validation"
   }
 }

@@ -56,6 +56,7 @@
 <script setup lang="ts">
 import { ref, watch, onUnmounted, nextTick } from 'vue';
 import AdminModal from '@/admin/components/AdminModal.vue';
+import api from '@/services/api';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import iconUrl from 'leaflet/dist/images/marker-icon.png';
@@ -96,8 +97,11 @@ const getAccuracyColor = (): string => { if (currentAccuracy.value <= 100) retur
 const geocodeAddress = async (address: string): Promise<{ lat: number; lng: number } | null> => {
   try {
     const query = `${address}, ${props.propertyData.city}, Colombia`;
-    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
-    const data = await response.json();
+    // Usar el proxy del backend (api service) para evitar CORS
+    const response = await api.get('/geocoding/search', {
+      params: { format: 'json', q: query, limit: 1 }
+    });
+    const data = response.data;
     if (data && data.length > 0) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
     return null;
   } catch (error) { console.error('Error en geocoding:', error); return null; }
@@ -109,8 +113,10 @@ const handleAddressSearch = () => {
   searchTimeout = setTimeout(async () => {
     try {
       const query = `${searchQuery.value}, ${props.propertyData.city}, Colombia`;
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
-      const data = await response.json();
+      const response = await api.get('/geocoding/search', {
+        params: { format: 'json', q: query, limit: 5 }
+      });
+      const data = response.data;
       searchResults.value = data.map((item: any) => ({ place_id: item.place_id, description: item.display_name, lat: parseFloat(item.lat), lng: parseFloat(item.lon) }));
     } catch (error) { console.error('Error buscando direcciones:', error); searchResults.value = []; }
   }, 500);

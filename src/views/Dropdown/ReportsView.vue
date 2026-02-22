@@ -10,13 +10,13 @@
       <!-- ── Header ── -->
       <header class="rv-header">
         <div class="rv-header__left">
-          <span class="rv-eyebrow"><span class="ew-pip"></span>Soporte & Comunidad</span>
-          <h1 class="rv-title">Mis Reportes y <em>Quejas</em></h1>
-          <p class="rv-subtitle">Realiza y haz seguimiento a tus reclamos sobre usuarios o propiedades</p>
+          <span class="rv-eyebrow">{{ $t('reports.eyebrow') }}</span>
+          <h1 class="rv-title" v-html="$t('reports.title')"></h1>
+          <p class="rv-subtitle">{{ $t('reports.subtitle') }}</p>
         </div>
         <button class="btn-gold" @click="openCreateModal">
           <svg viewBox="0 0 16 16" fill="none" width="13" height="13"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          Nuevo Reporte
+          {{ $t('reports.actions.new') }}
         </button>
       </header>
 
@@ -30,36 +30,36 @@
               <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/>
               <path d="M15 15l-3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
-            <input v-model="searchQuery" type="text" placeholder="Buscar por detalle..." @input="handleSearch" />
+            <input v-model="searchQuery" type="text" :placeholder="$t('reports.searchPlaceholder')" @input="handleSearch" />
           </div>
           <select v-model="statusFilter" class="rv-select" @change="fetchReports">
-            <option value="">Todos los estados</option>
-            <option value="pending">Pendiente</option>
-            <option value="reviewed">En Revisión</option>
-            <option value="resolved">Resuelto</option>
-            <option value="dismissed">Desestimado</option>
+            <option value="">{{ $t('reports.filters.all') }}</option>
+            <option value="pending">{{ $t('reports.status.pending') }}</option>
+            <option value="reviewed">{{ $t('reports.status.reviewed') }}</option>
+            <option value="resolved">{{ $t('reports.status.resolved') }}</option>
+            <option value="dismissed">{{ $t('reports.status.dismissed') }}</option>
           </select>
         </div>
 
         <!-- Loading -->
         <div v-if="loading" class="rv-state">
           <div class="rv-spinner"></div>
-          <p>Cargando reportes...</p>
+          <p>{{ $t('reports.states.loading') }}</p>
         </div>
 
         <!-- Empty -->
         <div v-else-if="reports.length === 0" class="rv-state">
           <div class="rv-empty-icon">
             <svg viewBox="0 0 48 48" fill="none" width="26" height="26">
-              <path d="M24 4L4 44h40L24 4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-              <path d="M24 20v10M24 34v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M24 10l-4 4-4-4m4 28l-4-4-4 4m20-14h10m-10 6h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <rect x="6" y="6" width="36" height="36" rx="4" stroke="currentColor" stroke-width="1.5"/>
             </svg>
           </div>
-          <h3>No has generado ningún reporte</h3>
-          <p>Si tuviste algún inconveniente en la plataforma, puedes crear un reporte aquí.</p>
+          <h3>{{ $t('reports.states.empty.title') }}</h3>
+          <p>{{ $t('reports.states.empty.description') }}</p>
           <button class="btn-gold btn-gold--sm" @click="openCreateModal" style="margin-top:1rem">
             <svg viewBox="0 0 16 16" fill="none" width="12" height="12"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            Crear Reporte
+            {{ $t('reports.actions.new') }}
           </button>
         </div>
 
@@ -68,11 +68,11 @@
           <table class="rv-table">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Fecha</th>
-                <th>Tipo</th>
-                <th>Detalle</th>
-                <th>Estado</th>
+                <th>{{ $t('reports.table.headers.id') }}</th>
+                <th>{{ $t('reports.table.headers.date') }}</th>
+                <th>{{ $t('reports.table.headers.type') }}</th>
+                <th>{{ $t('reports.table.headers.detail') }}</th>
+                <th>{{ $t('reports.table.headers.status') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -102,11 +102,11 @@
         <div v-if="meta && meta.last_page > 1" class="rv-pager">
           <button :disabled="meta.current_page === 1" @click="changePage(meta.current_page - 1)" class="pager-arrow">
             <svg viewBox="0 0 16 16" fill="none" width="13" height="13"><path d="M10 4L6 8l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Anterior
+            {{ $t('reports.pagination.prev') }}
           </button>
-          <span class="pager-info">Página {{ meta.current_page }} de {{ meta.last_page }}</span>
+          <span class="pager-info">{{ $t('reports.pagination.info', { page: meta.current_page, total: meta.last_page }) }}</span>
           <button :disabled="meta.current_page === meta.last_page" @click="changePage(meta.current_page + 1)" class="pager-arrow">
-            Siguiente
+            {{ $t('reports.pagination.next') }}
             <svg viewBox="0 0 16 16" fill="none" width="13" height="13"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
         </div>
@@ -121,8 +121,8 @@
           <div class="rv-modal">
             <header class="rv-modal__header">
               <div class="rv-modal__title-group">
-                <span class="rv-modal__eyebrow">Nuevo registro</span>
-                <h3 class="rv-modal__title">Crear Reporte</h3>
+                <span class="rv-modal__eyebrow">{{ $t('reports.modals.create.eyebrow') }}</span>
+                <h3 class="rv-modal__title">{{ $t('reports.modals.create.title') }}</h3>
               </div>
               <button class="rv-modal__close" @click="closeCreateModal" aria-label="Cerrar">
                 <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
@@ -134,45 +134,45 @@
             <div class="rv-modal__body">
 
               <div class="form-group">
-                <label>Tipo de Reporte</label>
+                <label>{{ $t('reports.modals.create.fields.type') }}</label>
                 <select v-model="newReport.type" class="form-select">
-                  <option value="property">🏠 Propiedad</option>
-                  <option value="user">👤 Usuario</option>
-                  <option value="review">⭐ Reseña</option>
-                  <option value="other">🔖 Otro</option>
+                  <option value="property">🏠 {{ $t('reports.type.property') }}</option>
+                  <option value="user">👤 {{ $t('reports.type.user') }}</option>
+                  <option value="review">⭐ {{ $t('reports.type.review') }}</option>
+                  <option value="other">🔖 {{ $t('reports.type.other') }}</option>
                 </select>
               </div>
 
               <div class="form-group" v-if="newReport.type === 'property'">
-                <label>ID de la Propiedad <span class="form-optional">(Opcional)</span></label>
-                <input v-model="newReport.property_id" type="number" class="form-input" placeholder="Ej: 123" />
+                <label>{{ $t('reports.modals.create.fields.propertyId') }} <span class="form-optional">{{ $t('reports.modals.create.fields.optional') }}</span></label>
+                <input v-model="newReport.property_id" type="number" class="form-input" :placeholder="$t('reports.modals.create.fields.propertyIdPlaceholder')" />
               </div>
 
               <div class="form-group" v-if="newReport.type === 'user'">
-                <label>ID del Usuario <span class="form-optional">(Opcional)</span></label>
-                <input v-model="newReport.reported_user_id" type="number" class="form-input" placeholder="Ej: 42" />
+                <label>{{ $t('reports.modals.create.fields.userId') }} <span class="form-optional">{{ $t('reports.modals.create.fields.optional') }}</span></label>
+                <input v-model="newReport.reported_user_id" type="number" class="form-input" :placeholder="$t('reports.modals.create.fields.userIdPlaceholder')" />
               </div>
 
               <div class="form-group">
-                <label>Detalle de lo ocurrido</label>
+                <label>{{ $t('reports.modals.create.fields.description') }}</label>
                 <textarea
                   v-model="newReport.description"
                   rows="4"
                   class="form-input form-textarea"
-                  placeholder="Por favor, sé lo más específico posible..."
+                  :placeholder="$t('reports.modals.create.fields.descriptionPlaceholder')"
                 ></textarea>
-                <span class="form-char">{{ newReport.description.length }} caracteres</span>
+                <span class="form-char">{{ newReport.description.length }} {{ $t('reports.modals.create.fields.charCount') }}</span>
               </div>
 
             </div>
 
             <footer class="rv-modal__footer">
-              <button class="btn-outline" @click="closeCreateModal">Cancelar</button>
+              <button class="btn-outline" @click="closeCreateModal">{{ $t('reports.actions.cancel') }}</button>
               <button class="btn-gold" @click="submitReport" :disabled="!isReportValid">
                 <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
                   <path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                Enviar Reporte
+                {{ $t('reports.actions.send') }}
               </button>
             </footer>
           </div>
@@ -187,6 +187,9 @@
 import { ref, onMounted, computed } from 'vue';
 import { useAlerts } from '@/composables/useAlerts';
 import api from '@/services/api';
+import { useI18n } from 'vue-i18n';
+
+const { t, locale } = useI18n();
 
 const { error, success } = useAlerts();
 
@@ -219,7 +222,7 @@ const fetchReports = async () => {
     reports.value = resData.data ?? (Array.isArray(resData) ? resData : []);
     meta.value = resData.meta ?? { current_page: 1, last_page: 1 };
   } catch (err: any) {
-    error('No se pudieron cargar tus reportes.', 'Error');
+    error(t('reports.alerts.fetchError'), 'Error');
   } finally {
     loading.value = false;
   }
@@ -246,18 +249,36 @@ const submitReport = async () => {
     if (payload.type !== 'property') delete payload.property_id;
     if (payload.type !== 'user') delete payload.reported_user_id;
     await api.post('/reports', payload);
-    success('Tu reporte ha sido enviado. Será revisado por un administrador.', 'Reporte Enviado');
+    success(t('reports.alerts.submitSuccess'), 'Success');
     closeCreateModal();
     currentPage.value = 1;
     fetchReports();
   } catch {
-    error('No pudimos enviar tu reporte. Intenta más tarde.', 'Error');
+    error(t('reports.alerts.submitError'));
   }
 };
 
-const formatDate = (d?: string) => d ? new Date(d).toLocaleDateString('es-CO', { dateStyle: 'medium' }) : 'N/A';
-const translateStatus = (s: string) => ({ pending: 'Pendiente', reviewed: 'En Revisión', resolved: 'Resuelto', dismissed: 'Desestimado' }[s?.toLowerCase()] || s);
-const translateType = (t: string) => ({ property: 'Propiedad', user: 'Usuario', review: 'Reseña', other: 'Otro' }[t?.toLowerCase()] || t);
+const formatDate = (d?: string) => d ? new Date(d).toLocaleDateString(locale.value, { dateStyle: 'medium' }) : '—';
+
+const translateStatus = (s: string) => {
+  const map: Record<string, string> = {
+    pending: t('reports.status.pending'),
+    reviewed: t('reports.status.reviewed'),
+    resolved: t('reports.status.resolved'),
+    dismissed: t('reports.status.dismissed')
+  };
+  return map[s?.toLowerCase()] || s;
+};
+
+const translateType = (type: string) => {
+  const map: Record<string, string> = {
+    property: t('reports.type.property'),
+    user: t('reports.type.user'),
+    review: t('reports.type.review'),
+    other: t('reports.type.other')
+  };
+  return map[type?.toLowerCase()] || type;
+};
 const getTypeColor = (t: string) => ({ property: '#da9c5f', user: '#a5b4fc', review: '#f59e0b', other: '#94a3b8' }[t?.toLowerCase()] || '#94a3b8');
 </script>
 

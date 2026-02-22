@@ -23,8 +23,15 @@ export const useUserStore = defineStore('user', () => {
 
     /**
      * Load the current user from the API and cache in store.
+     * @param force Force a refresh even if user is already loaded
      */
-    async function loadMe(): Promise<void> {
+    async function loadMe(force = false): Promise<void> {
+        // Avoid redundant calls while already loading
+        if (isLoading.value) return;
+
+        // Skip if already have user and not forcing refresh
+        if (user.value && !force) return;
+
         isLoading.value = true;
         error.value = null;
 

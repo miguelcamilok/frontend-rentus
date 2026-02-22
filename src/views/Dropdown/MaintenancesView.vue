@@ -11,25 +11,25 @@
       <!-- ── Header ── -->
       <header class="mx-header">
         <div class="mx-header__left">
-          <span class="mx-eyebrow"><span class="ew-pip"></span>Gestión Operativa</span>
-          <h1 class="mx-title">Solicitudes de <em>Mantenimiento</em></h1>
-          <p class="mx-subtitle">Supervisa y gestiona cada reporte activo de tu portafolio</p>
+          <span class="mx-eyebrow"><span class="ew-pip"></span>{{ $t('maintenance.eyebrow') }}</span>
+          <h1 class="mx-title" v-html="$t('maintenance.title')"></h1>
+          <p class="mx-subtitle">{{ $t('maintenance.subtitle') }}</p>
         </div>
         <div class="mx-header__right">
           <div class="mx-counters">
             <div class="mx-counter">
               <span class="mx-counter__val">{{ maintenances.length }}</span>
-              <span class="mx-counter__lbl">Resultados</span>
+              <span class="mx-counter__lbl">{{ $t('maintenance.counters.results') }}</span>
             </div>
             <div class="mx-counter-sep"></div>
             <div class="mx-counter">
               <span class="mx-counter__val">{{ maintenances.filter(m => m.status === 'pending').length }}</span>
-              <span class="mx-counter__lbl">Pendientes</span>
+              <span class="mx-counter__lbl">{{ $t('maintenance.counters.pending') }}</span>
             </div>
           </div>
           <button class="btn-gold" @click="openCreateModal">
             <svg viewBox="0 0 16 16" fill="none" width="13" height="13"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            Nueva Solicitud
+            {{ $t('maintenance.actions.new') }}
           </button>
         </div>
       </header>
@@ -54,14 +54,14 @@
             <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/>
             <path d="M15 15l-3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
-          <input v-model="searchQuery" type="text" placeholder="Buscar por título, propiedad..." @input="handleSearch" />
+          <input v-model="searchQuery" type="text" :placeholder="$t('maintenance.searchPlaceholder')" @input="handleSearch" />
         </div>
         <select v-model="priorityFilter" class="mx-select" @change="fetchMaintenances">
-          <option value="">Todas las prioridades</option>
-          <option value="low">Baja</option>
-          <option value="medium">Media</option>
-          <option value="high">Alta</option>
-          <option value="emergency">Emergencia</option>
+          <option value="">{{ $t('maintenance.filters.priorityAll') }}</option>
+          <option value="low">{{ $t('maintenance.priority.low') }}</option>
+          <option value="medium">{{ $t('maintenance.priority.medium') }}</option>
+          <option value="high">{{ $t('maintenance.priority.high') }}</option>
+          <option value="emergency">{{ $t('maintenance.priority.emergency') }}</option>
         </select>
       </div>
 
@@ -71,7 +71,7 @@
         <!-- Loading -->
         <div v-if="loading" class="mx-state">
           <div class="mx-spinner"></div>
-          <p>Cargando solicitudes...</p>
+          <p>{{ $t('maintenance.states.loading') }}</p>
         </div>
 
         <!-- Empty -->
@@ -83,11 +83,11 @@
               <path d="M24 8v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
           </div>
-          <h3>Sin solicitudes de mantenimiento</h3>
-          <p>No hay reportes que coincidan con los filtros. Crea una nueva solicitud para empezar.</p>
+          <h3>{{ $t('maintenance.states.empty.title') }}</h3>
+          <p>{{ $t('maintenance.states.empty.description') }}</p>
           <button class="btn-gold btn-gold--sm" @click="openCreateModal" style="margin-top:1rem">
             <svg viewBox="0 0 16 16" fill="none" width="12" height="12"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            Generar Reporte
+            {{ $t('maintenance.actions.create') }}
           </button>
         </div>
 
@@ -96,12 +96,12 @@
           <table class="mx-table">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Fecha</th>
-                <th>Propiedad</th>
-                <th>Título</th>
-                <th>Prioridad</th>
-                <th>Estado</th>
+                <th>{{ $t('maintenance.table.headers.id') }}</th>
+                <th>{{ $t('maintenance.table.headers.date') }}</th>
+                <th>{{ $t('maintenance.table.headers.property') }}</th>
+                <th>{{ $t('maintenance.table.headers.title') }}</th>
+                <th>{{ $t('maintenance.table.headers.priority') }}</th>
+                <th>{{ $t('maintenance.table.headers.status') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -155,6 +155,9 @@ import { ref, computed, onMounted } from 'vue';
 import { useAlerts } from '@/composables/useAlerts';
 import MaintenanceModal from '@/components/modals/Maintenance/MaintenanceModal.vue';
 import api from '@/services/api';
+import { useI18n } from 'vue-i18n';
+
+const { t, locale } = useI18n();
 
 const { error, success } = useAlerts();
 const maintenances = ref<any[]>([]);
@@ -168,11 +171,11 @@ const currentPage = ref(1);
 let searchTimeout: any = null;
 
 const statusTabs = computed(() => [
-  { value: '', label: 'Todos', color: '#a0aec0', count: maintenances.value.length },
-  { value: 'pending', label: 'Pendiente', color: '#f59e0b', count: maintenances.value.filter(m => m.status === 'pending').length },
-  { value: 'in_progress', label: 'En Progreso', color: '#6366f1', count: maintenances.value.filter(m => m.status === 'in_progress').length },
-  { value: 'completed', label: 'Completado', color: '#2ecc71', count: maintenances.value.filter(m => m.status === 'completed').length },
-  { value: 'cancelled', label: 'Cancelado', color: '#e74c3c', count: maintenances.value.filter(m => m.status === 'cancelled').length },
+  { value: '', label: t('maintenance.tabs.all'), color: '#a0aec0', count: maintenances.value.length },
+  { value: 'pending', label: t('maintenance.tabs.pending'), color: '#f59e0b', count: maintenances.value.filter(m => m.status === 'pending').length },
+  { value: 'in_progress', label: t('maintenance.tabs.in_progress'), color: '#6366f1', count: maintenances.value.filter(m => m.status === 'in_progress').length },
+  { value: 'completed', label: t('maintenance.tabs.completed'), color: '#2ecc71', count: maintenances.value.filter(m => m.status === 'completed').length },
+  { value: 'cancelled', label: t('maintenance.tabs.cancelled'), color: '#e74c3c', count: maintenances.value.filter(m => m.status === 'cancelled').length },
 ]);
 
 const visiblePages = computed(() => {
@@ -197,7 +200,7 @@ const fetchMaintenances = async () => {
     maintenances.value = resData.data ?? (Array.isArray(resData) ? resData : []);
     meta.value = resData.meta ?? { current_page: 1, last_page: 1 };
   } catch {
-    error('No se pudieron cargar las solicitudes. Intenta de nuevo.', 'Error');
+    error(t('maintenance.alerts.fetchError'), 'Error');
   } finally {
     loading.value = false;
   }
@@ -211,14 +214,14 @@ const changePage = (p: number) => { currentPage.value = p; fetchMaintenances(); 
 const openCreateModal = () => { showCreateModal.value = true; };
 const closeCreateModal = () => { showCreateModal.value = false; };
 const onMaintenanceSubmitted = () => {
-  success('Solicitud enviada correctamente', 'Éxito');
+  success(t('maintenance.alerts.submitSuccess'), 'Success');
   showCreateModal.value = false;
   currentPage.value = 1;
   fetchMaintenances();
 };
-const formatDate = (d?: string) => d ? new Date(d).toLocaleDateString('es-CO', { dateStyle: 'medium' }) : '—';
-const translateStatus = (s: string) => ({ pending: 'Pendiente', in_progress: 'En Progreso', completed: 'Completado', cancelled: 'Cancelado' }[s?.toLowerCase()] || s);
-const translatePriority = (p: string) => ({ low: 'Baja', medium: 'Media', high: 'Alta', emergency: 'Emergencia' }[p?.toLowerCase()] || p);
+const formatDate = (d?: string) => d ? new Date(d).toLocaleDateString(locale.value, { dateStyle: 'medium' }) : '—';
+const translateStatus = (s: string) => ({ pending: t('maintenance.status.pending'), in_progress: t('maintenance.status.in_progress'), completed: t('maintenance.status.completed'), cancelled: t('maintenance.status.cancelled') }[s?.toLowerCase()] || s);
+const translatePriority = (p: string) => ({ low: t('maintenance.priority.low'), medium: t('maintenance.priority.medium'), high: t('maintenance.priority.high'), emergency: t('maintenance.priority.emergency') }[p?.toLowerCase()] || p);
 </script>
 
 <style scoped>

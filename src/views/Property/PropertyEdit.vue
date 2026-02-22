@@ -209,24 +209,57 @@
             </div>
           </div>
 
-          <!-- Imagen -->
+          <!-- Gestión de Imágenes -->
           <div class="form-section">
             <div class="section-header">
-              <font-awesome-icon :icon="['fas', 'image']" />
+              <font-awesome-icon :icon="['fas', 'images']" />
               <h2>{{ $t('editProperty.sections.image') }}</h2>
             </div>
 
-            <div class="form-grid">
-              <div class="form-group full-width">
-                <label for="image_url">
-                  <font-awesome-icon :icon="['fas', 'link']" />
-                  {{ $t('editProperty.fields.imageUrl') }}
-                </label>
-                <input type="url" id="image_url" v-model="form.image_url"
-                  :placeholder="$t('editProperty.placeholders.imageUrl')" />
+            <!-- Imágenes Existentes -->
+            <div v-if="existingImages.length > 0" class="existing-images-section">
+              <h3>Imágenes Actuales</h3>
+              <div class="images-grid">
+                <div v-for="(image, index) in existingImages" :key="image.id" class="image-card" :class="{ 'is-main': image.is_main }">
+                  <div class="image-preview">
+                    <img :src="image.url" :alt="`Imagen ${index + 1}`" />
+                    <div v-if="image.is_main" class="main-badge">
+                      <font-awesome-icon :icon="['fas', 'star']" />
+                      Principal
+                    </div>
+                    <div class="image-overlay">
+                      <button type="button" @click="removeExistingImage(index)" class="btn-overlay btn-danger" title="Eliminar imagen">
+                        <font-awesome-icon :icon="['fas', 'trash']" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-                <div v-if="form.image_url" class="image-preview">
-                  <img :src="form.image_url" :alt="form.title" @error="onImgError" />
+            <!-- Nuevas Imágenes -->
+            <div class="new-images-section">
+              <h3>Agregar Nuevas Imágenes</h3>
+              <div class="image-upload-section">
+                <input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" multiple class="file-input-hidden" @change="handleImageSelection" />
+                <div class="upload-dropzone" :class="{ 'is-dragging': isDragging }" @click="triggerFileInput" @dragover.prevent="isDragging = true" @dragleave.prevent="isDragging = false" @drop.prevent="handleDrop">
+                  <div class="dropzone-content">
+                    <font-awesome-icon :icon="['fas', 'cloud-upload-alt']" class="upload-icon" />
+                    <h4>Arrastra nuevas imágenes aquí o haz clic</h4>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="newImages.length > 0" class="images-grid">
+                <div v-for="(image, index) in newImages" :key="image.id" class="image-card">
+                  <div class="image-preview">
+                    <img :src="image.preview" :alt="`Nueva Imagen ${index + 1}`" />
+                    <div class="image-overlay">
+                      <button type="button" @click="removeNewImage(index)" class="btn-overlay btn-danger">
+                        <font-awesome-icon :icon="['fas', 'trash']" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -267,24 +300,53 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import api from '../../services/api'
 
+// ==================== INTERFACES ====================
+interface PropertyImage {
+  id: number
+  url: string
+  is_main: boolean
+  order: number
+}
+
+interface NewImage {
+  id: string
+  file: File
+  preview: string
+}
+
+interface PropertyForm {
+  title: string
+  description: string
+  address: string
+  city: string
+  status: string
+  monthly_price: number
+  area_m2: number | null
+  num_bedrooms: number | null
+  num_bathrooms: number | null
+  parking_spaces: number | null
+  lat: number | null
+  lng: number | null
+}
+
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
 
-// State
-const property = ref(null)
+// ==================== STATE ====================
+const property = ref<any>(null)
 const loading = ref(true)
-const error = ref(null)
+const error = ref<string | null>(null)
 const isSaving = ref(false)
-const errors = reactive({})
+const errors = reactive<Record<string, string>>({})
 
-const form = reactive({
+const form = reactive<PropertyForm>({
   title: '',
   description: '',
   address: '',
@@ -295,27 +357,23 @@ const form = reactive({
   num_bedrooms: null,
   num_bathrooms: null,
   parking_spaces: null,
-  image_url: '',
   lat: null,
   lng: null
 })
 
-const selectedServices = ref([])
+const selectedServices = ref<string[]>([])
 const displayPrice = ref('')
 
+// Image Management State
+const existingImages = ref<PropertyImage[]>([])
+const newImages = ref<NewImage[]>([])
+const deletedImagesIds = ref<number[]>([])
+const fileInput = ref<HTMLInputElement | null>(null)
+const isDragging = ref(false)
+
 const availableServices = [
-  'water',
-  'electricity',
-  'gas',
-  'internet',
-  'cableTv',
-  'security',
-  'parking',
-  'gym',
-  'pool',
-  'bbqArea',
-  'laundry',
-  'elevator'
+  'water', 'electricity', 'gas', 'internet', 'cableTv', 'security',
+  'parking', 'gym', 'pool', 'bbqArea', 'laundry', 'elevator'
 ]
 
 const translatedServices = computed(() => {
@@ -325,24 +383,14 @@ const translatedServices = computed(() => {
   }))
 })
 
-const DEFAULT_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI2MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2Yzc1N2QiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZW4gbm8gZGlzcG9uaWJsZTwvdGV4dD48L3N2Zz4="
+// ==================== FORMATO DE PRECIO ====================
 
-// ========== FUNCIONES DE FORMATO DE PRECIO ==========
-
-/**
- * Formatear número con separadores de miles
- * Ejemplo: 1000000 -> "1.000.000"
- */
-const formatNumber = (value) => {
+const formatNumber = (value: number | string) => {
   if (!value) return ''
   return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 }
 
-/**
- * Formatear como moneda completa
- * Ejemplo: 1000000 -> "COP $1.000.000"
- */
-const formatCurrency = (value) => {
+const formatCurrency = (value: number) => {
   if (!value || value === 0) return 'COP $0'
   return new Intl.NumberFormat('es-CO', {
     style: 'currency',
@@ -352,44 +400,65 @@ const formatCurrency = (value) => {
   }).format(value)
 }
 
-/**
- * Manejar input de precio en tiempo real
- */
-const handlePriceInput = (event) => {
-  const input = event.target
+const handlePriceInput = (event: Event) => {
+  const input = event.target as HTMLInputElement
   let value = input.value
-
-  // Remover todo excepto números
   value = value.replace(/[^\d]/g, '')
-
-  // Convertir a número
   const numericValue = parseInt(value) || 0
-
-  // Actualizar valor real (sin formato)
   form.monthly_price = numericValue
-
-  // Actualizar display con formato
   displayPrice.value = formatNumber(numericValue)
-
-  // Mover cursor al final
   setTimeout(() => {
     const length = displayPrice.value.length
     input.setSelectionRange(length, length)
   }, 0)
 }
 
-/**
- * Formatear precio al perder el foco
- */
 const formatPriceOnBlur = () => {
-  if (form.monthly_price > 0) {
-    displayPrice.value = formatNumber(form.monthly_price)
-  } else {
-    displayPrice.value = ''
-  }
+  displayPrice.value = form.monthly_price > 0 ? formatNumber(form.monthly_price) : ''
 }
 
-// ========== MÉTODOS PRINCIPALES ==========
+// ==================== GESTIÓN DE IMÁGENES ====================
+
+const triggerFileInput = () => fileInput.value?.click()
+
+const handleImageSelection = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const files = Array.from(target.files || [])
+  processFiles(files)
+  if (fileInput.value) fileInput.value.value = ''
+}
+
+const handleDrop = (event: DragEvent) => {
+  isDragging.value = false
+  const files = Array.from(event.dataTransfer?.files || [])
+  processFiles(files)
+}
+
+const processFiles = (files: File[]) => {
+  files.forEach(file => {
+    if (file.type.startsWith('image/') && file.size < 5 * 1024 * 1024) {
+      const preview = URL.createObjectURL(file)
+      newImages.value.push({
+        id: Math.random().toString(36).substr(2, 9),
+        file,
+        preview
+      })
+    }
+  })
+}
+
+const removeExistingImage = (index: number) => {
+  const image = existingImages.value[index]
+  deletedImagesIds.value.push(image.id)
+  existingImages.value.splice(index, 1)
+}
+
+const removeNewImage = (index: number) => {
+  URL.revokeObjectURL(newImages.value[index].preview)
+  newImages.value.splice(index, 1)
+}
+
+// ==================== MÉTODOS PRINCIPALES ====================
 
 async function fetchProperty() {
   const propertyId = route.params.id
@@ -400,11 +469,8 @@ async function fetchProperty() {
     const response = await api.get(`/properties/${propertyId}`)
     property.value = response.data.data || response.data
 
-    console.log('🏠 Propiedad cargada:', property.value)
-
-    // ✅ VERIFICACIÓN DE PERMISOS MEJORADA
+    // Verificación de permisos
     const userStr = localStorage.getItem('user') || sessionStorage.getItem('user')
-    
     if (!userStr) {
       error.value = t('editProperty.errors.mustLogin')
       return
@@ -415,15 +481,6 @@ async function fetchProperty() {
     const propertyUserId = parseInt(property.value.user_id)
     const userRole = user.role?.toLowerCase()
 
-    console.log('👤 Verificación de permisos:', {
-      userId,
-      propertyUserId,
-      userRole,
-      isOwner: userId === propertyUserId,
-      isAdmin: ['admin', 'support'].includes(userRole)
-    })
-
-    // Permitir si es owner O admin/support
     const isOwner = userId === propertyUserId
     const isAdmin = ['admin', 'support'].includes(userRole)
 
@@ -434,19 +491,20 @@ async function fetchProperty() {
 
     // Llenar el formulario con los datos actuales
     Object.keys(form).forEach(key => {
+      const k = key as keyof PropertyForm
       if (property.value[key] !== undefined && property.value[key] !== null) {
-        form[key] = property.value[key]
+        (form as any)[k] = property.value[key]
       }
     })
 
-    // ✅ INICIALIZAR PRECIO CON FORMATO
+    // Llenar imágenes existentes
+    existingImages.value = property.value.images || []
+
     const priceValue = parseFloat(property.value.monthly_price) || 0
-    form.monthly_price = Math.round(priceValue) // Sin decimales
+    form.monthly_price = Math.round(priceValue)
     displayPrice.value = formatNumber(form.monthly_price)
 
-    // ✅ PROCESAR SERVICIOS INCLUIDOS CORRECTAMENTE
     selectedServices.value = []
-    
     if (property.value.included_services) {
       if (Array.isArray(property.value.included_services)) {
         selectedServices.value = [...property.value.included_services]
@@ -457,16 +515,13 @@ async function fetchProperty() {
         } catch {
           selectedServices.value = property.value.included_services
             .split(',')
-            .map(s => s.trim())
-            .filter(s => s.length > 0)
+            .map((s: string) => s.trim())
+            .filter((s: string) => s.length > 0)
         }
       }
     }
 
-    console.log('✅ Precio cargado:', form.monthly_price)
-    console.log('✅ Servicios cargados:', selectedServices.value)
-
-  } catch (err) {
+  } catch (err: any) {
     console.error('❌ Error al cargar la propiedad:', err)
     error.value = err.response?.data?.message || t('editProperty.errors.loadError')
   } finally {
@@ -475,36 +530,44 @@ async function fetchProperty() {
 }
 
 async function handleSubmit() {
-  // Limpiar errores previos
   Object.keys(errors).forEach(key => delete errors[key])
-
   isSaving.value = true
 
   try {
-    const payload = {
-      title: form.title,
-      description: form.description,
-      address: form.address,
-      city: form.city || null,
-      status: form.status,
-      monthly_price: form.monthly_price, // Enviar como número puro
-      area_m2: form.area_m2 || null,
-      num_bedrooms: form.num_bedrooms || null,
-      num_bathrooms: form.num_bathrooms || null,
-      parking_spaces: form.parking_spaces || null,
-      image_url: form.image_url || null,
-      lat: form.lat || null,
-      lng: form.lng || null,
-      included_services: JSON.stringify(selectedServices.value)
-    }
+    const formData = new FormData()
+    formData.append('_method', 'PUT')
 
-    console.log('📤 Enviando payload:', payload)
+    formData.append('title', form.title)
+    formData.append('description', form.description)
+    formData.append('address', form.address)
+    if (form.city) formData.append('city', form.city)
+    formData.append('status', form.status)
+    formData.append('monthly_price', form.monthly_price.toString())
+    if (form.area_m2) formData.append('area_m2', form.area_m2.toString())
+    if (form.num_bedrooms) formData.append('num_bedrooms', form.num_bedrooms.toString())
+    if (form.num_bathrooms) formData.append('num_bathrooms', form.num_bathrooms.toString())
+    if (form.parking_spaces) formData.append('parking_spaces', form.parking_spaces.toString())
+    if (form.lat) formData.append('lat', form.lat.toString())
+    if (form.lng) formData.append('lng', form.lng.toString())
+    
+    formData.append('included_services', JSON.stringify(selectedServices.value))
 
-    await api.put(`/properties/${property.value.id}`, payload)
+    newImages.value.forEach(img => {
+      formData.append('images[]', img.file)
+    })
+
+    deletedImagesIds.value.forEach(id => {
+      formData.append('delete_images[]', id.toString())
+    })
+
+    await api.post(`/properties/${property.value.id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 60000
+    })
     
     alert(t('editProperty.messages.updateSuccess'))
     router.push(`/properties/${property.value.id}`)
-  } catch (err) {
+  } catch (err: any) {
     console.error('❌ Error al actualizar la propiedad:', err)
 
     if (err.response?.status === 422) {
@@ -524,17 +587,11 @@ async function handleSubmit() {
 }
 
 function cancelEdit() {
-  const confirmed = confirm(t('editProperty.messages.cancelConfirm'))
-  if (confirmed) {
+  if (confirm(t('editProperty.messages.cancelConfirm'))) {
     router.push(`/properties/${property.value.id}`)
   }
 }
 
-function onImgError(event) {
-  event.target.src = DEFAULT_IMAGE
-}
-
-// Lifecycle
 onMounted(() => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
   fetchProperty()

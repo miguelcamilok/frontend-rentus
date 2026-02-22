@@ -415,7 +415,6 @@ interface PropertyImage {
   id: string
   file: File
   preview: string
-  base64: string
   size: number
 }
 
@@ -551,9 +550,8 @@ const processFiles = async (files: File[]) => {
       continue
     }
     try {
-      const base64 = await compressAndConvertToBase64(file)
       const preview = URL.createObjectURL(file)
-      images.value.push({ id: `${Date.now()}-${Math.random()}`, file, preview, base64, size: file.size })
+      images.value.push({ id: `${Date.now()}-${Math.random()}`, file, preview, size: file.size })
       processedFiles++
       uploadProgress.value = Math.round((processedFiles / totalFiles) * 100)
     } catch (error) {
@@ -563,32 +561,7 @@ const processFiles = async (files: File[]) => {
   setTimeout(() => { uploadProgress.value = 0 }, 1000)
 }
 
-const compressAndConvertToBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const img = new Image()
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const ctx = canvas.getContext('2d')
-        if (!ctx) { reject(new Error('No canvas context')); return }
-        const maxDim = 1920
-        let { width, height } = img
-        if (width > height ? width > maxDim : height > maxDim) {
-          if (width > height) { height *= maxDim / width; width = maxDim }
-          else { width *= maxDim / height; height = maxDim }
-        }
-        canvas.width = width; canvas.height = height
-        ctx.drawImage(img, 0, 0, width, height)
-        resolve(canvas.toDataURL('image/jpeg', 0.8))
-      }
-      img.onerror = () => reject(new Error('Error loading image'))
-      img.src = e.target?.result as string
-    }
-    reader.onerror = () => reject(new Error('Error reading file'))
-    reader.readAsDataURL(file)
-  })
-}
+// Eliminada compresión base64 por ser ineficiente
 
 const removeImage = (index: number) => {
   URL.revokeObjectURL(images.value[index].preview)
@@ -640,31 +613,48 @@ const handleLocationConfirm = async (locationData: { lat: number; lng: number; a
   errorMessage.value = ''
   success.value = false
 
+  const requestStartTime = performance.now()
+
   try {
-    const imagesBase64 = images.value.map(img => img.base64)
+    const formData = new FormData()
 
-    const payload = {
-      title: form.value.title,
-      description: form.value.description,
-      address: form.value.address,
-      city: form.value.city || null,
-      status: form.value.status,
-      monthly_price: form.value.monthly_price,
-      area_m2: form.value.area_m2 || null,
-      num_bedrooms: form.value.num_bedrooms || null,
-      num_bathrooms: form.value.num_bathrooms || null,
-      // ← se envía igual que EditProperty: JSON.stringify del array de valores
-      included_services: form.value.included_services.length > 0
-        ? JSON.stringify(form.value.included_services)
-        : null,
-      publication_date: form.value.publication_date || null,
-      lat: locationData.lat,
-      lng: locationData.lng,
-      accuracy: locationData.accuracy,
-      images: JSON.stringify(imagesBase64)
+    // Datos básicos
+    formData.append('title', form.value.title)
+    formData.append('description', form.value.description)
+    formData.append('address', form.value.address)
+    if (form.value.city) formData.append('city', form.value.city)
+    formData.append('status', form.value.status)
+    formData.append('monthly_price', form.value.monthly_price.toString())
+    if (form.value.area_m2) formData.append('area_m2', form.value.area_m2.toString())
+    if (form.value.num_bedrooms) formData.append('num_bedrooms', form.value.num_bedrooms.toString())
+    if (form.value.num_bathrooms) formData.append('num_bathrooms', form.value.num_bathrooms.toString())
+    
+    if (form.value.included_services.length > 0) {
+      formData.append('included_services', JSON.stringify(form.value.included_services))
     }
+    if (form.value.publication_date) formData.append('publication_date', form.value.publication_date)
 
-    await api.post('/properties', payload)
+    // Ubicación
+    formData.append('lat', locationData.lat.toString())
+    formData.append('lng', locationData.lng.toString())
+    formData.append('accuracy', locationData.accuracy.toString())
+
+    // Imágenes
+    images.value.forEach((img) => {
+      formData.append('images[]', img.file)
+    })
+
+    await api.post('/properties', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      timeout: 60000, // Aumentar timeout a 60s para subidas pesadas
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total) {
+          uploadProgress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+        }
+      }
+    })
 
     success.value = true
     successAlert(t('property.create.successMessage'), t('property.create.successTitle'))
@@ -674,14 +664,38 @@ const handleLocationConfirm = async (locationData: { lat: number; lng: number; a
     setTimeout(() => router.push('/propiedades'), 1500)
 
   } catch (err: any) {
-    if (err.response?.data?.errors) {
-      const errors = Object.values(err.response.data.errors).flat() as string[]
+    const errorData = err.response?.data
+    
+    // 🔥 DEBUGGING FRONTEND EXTREMO 🔥
+    if (err.response?.status === 500 && errorData && errorData.trace) {
+      console.error(
+        '%c🚨 [RENTUS DEBUG] FATAL 500 ERROR CAUGHT 🚨\n' +
+        `%cTime Taken: ${((performance.now() - requestStartTime) / 1000).toFixed(2)}s\n` +
+        `%cMessage:%c ${errorData.message}\n` +
+        `%cFile:%c ${errorData.file} (Line: ${errorData.line})\n` +
+        `%cInputs Sent:%c\n`,
+        'background: red; color: white; font-size: 16px; font-weight: bold; padding: 4px;',
+        'color: orange; font-weight: bold;',
+        'color: #ff4444; font-weight: bold;', 'color: inherit;',
+        'color: #ff4444; font-weight: bold;', 'color: inherit;',
+        'color: #ff4444; font-weight: bold;', 'color: inherit;'
+      )
+      console.error(errorData.input)
+      console.error('%c[STACK TRACE]:', 'color: red; font-weight: bold;', '\n' + errorData.trace)
+      
+      errorMessage.value = `Error 500 en el servidor. Por favor, revisa la consola (F12) para ver los detalles técnicos y pásaselos al equipo de desarrollo.`
+    } 
+    else if (errorData?.errors) {
+      const errors = Object.values(errorData.errors).flat() as string[]
       errorMessage.value = errors.join(', ')
-    } else if (err.response?.data?.message) {
-      errorMessage.value = err.response.data.message
-    } else {
+    } 
+    else if (errorData?.message) {
+      errorMessage.value = errorData.message
+    } 
+    else {
       errorMessage.value = t('property.create.errorMessage')
     }
+    
     errorAlert(errorMessage.value, t('property.create.errorTitle'))
   } finally {
     loading.value = false
