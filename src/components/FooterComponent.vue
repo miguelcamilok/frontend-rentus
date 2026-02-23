@@ -67,9 +67,9 @@
     <div class="footer-bottom">
       <p>{{ $t('footer.bottom.rights') }}</p>
       <div class="footer-links">
-        <a href="#">{{ $t('footer.bottom.legal') }}</a>
+        <router-link to="/aviso-legal">{{ $t('footer.bottom.legal') }}</router-link>
         <span>|</span>
-        <a href="#">{{ $t('footer.bottom.privacy') }}</a>
+        <router-link to="/politica-privacidad">{{ $t('footer.bottom.privacy') }}</router-link>
       </div>
     </div>
   </footer>
