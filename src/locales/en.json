@@ -923,6 +923,7 @@
         "title": "No payments found",
         "description": "You don't have payment records yet or your search returned no results."
       }
+      
     },
     "table": {
       "headers": {
@@ -931,7 +932,8 @@
         "amount": "Amount",
         "status": "Status",
         "type": "Type",
-        "contract": "Contract"
+        "contract": "Contract",
+        "property": "Property"
       },
       "contractId": "Contract #"
     },

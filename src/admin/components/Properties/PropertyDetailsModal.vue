@@ -15,8 +15,7 @@
     <div v-else-if="property" class="pdm-content">
       <!-- Image -->
       <div class="pdm-image-wrap">
-        <img v-if="property.image_url" :src="property.image_url" :alt="property.title" class="pdm-image" @error="handleImageError" />
-        <div v-else class="pdm-image-ph"><font-awesome-icon :icon="['fas', 'home']" /></div>
+        <img :src="getPropertyImage(property)" :alt="property.title" class="pdm-image" @error="handleImageError" />
         <div class="pdm-image-badges">
           <span class="rx-badge" :style="{ color: getStatusConfig(property.status).color, background: getStatusConfig(property.status).bg }">
             <font-awesome-icon :icon="['fas', getStatusConfig(property.status).icon]" /> {{ getStatusConfig(property.status).label }}
@@ -102,6 +101,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import AdminModal from '@/admin/components/AdminModal.vue';
+import { getPropertyImage as getPropertyImageUtil } from '../../../utils/propertyUtils';
 import { propertyManagementService } from '../../../services/propertyManagementService';
 import type { Property, PropertyApprovalStatus } from '../../../types/property';
 
@@ -141,6 +141,7 @@ const loadPropertyDetails = async () => {
 const closeModal = () => { emit('close'); };
 const editProperty = () => { if (property.value) emit('edit', property.value); };
 const handleImageError = (event: Event) => { (event.target as HTMLImageElement).style.display = 'none'; };
+const getPropertyImage = (property: any) => getPropertyImageUtil(property);
 const formatPrice = (price: number) => propertyManagementService.formatPrice(price);
 const formatDate = (date: string) => { if (!date) return 'N/A'; return new Date(date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }); };
 

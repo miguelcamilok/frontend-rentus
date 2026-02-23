@@ -336,6 +336,7 @@ import RequestVisitModal from '../../components/modals/ModalRequest/RequestVisit
 import MapView from '../../components/modals/Maps/MapView.vue'
 import api from '../../services/api'
 import { useI18n } from 'vue-i18n'
+import { getPropertyImages as getPropertyImagesUtil } from '../../utils/propertyUtils'
 
 const { t, locale } = useI18n()
 const router = useRouter()
@@ -354,38 +355,7 @@ const DEFAULT_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h
 const isAuthenticated = computed(() => !!(localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token")))
 
 const propertyImages = computed((): string[] => {
-  if (!property.value) return [DEFAULT_IMAGE]
-  const images: string[] = []
-  
-  if (property.value.images && Array.isArray(property.value.images) && property.value.images.length > 0) {
-    property.value.images.forEach((img: any) => {
-      const url = img.url || img.image_url
-      if (typeof url === 'string') images.push(url)
-    })
-  }
-  
-  if (images.length === 0 && property.value.image_url) {
-    const legacy = property.value.image_url
-    if (Array.isArray(legacy)) {
-      legacy.forEach((img: any) => {
-        if (typeof img === 'string') images.push(img)
-      })
-    } else if (typeof legacy === 'string') {
-      try {
-        const p = JSON.parse(legacy)
-        if (Array.isArray(p)) {
-          p.forEach((img: any) => {
-            if (typeof img === 'string') images.push(img)
-          })
-        } else {
-          images.push(legacy)
-        }
-      } catch (e) {
-        images.push(legacy)
-      }
-    }
-  }
-  return images.length > 0 ? images : [DEFAULT_IMAGE]
+  return getPropertyImagesUtil(property.value, DEFAULT_IMAGE)
 })
 
 const currentImage = computed(() => propertyImages.value[currentImageIndex.value] || DEFAULT_IMAGE)

@@ -200,10 +200,7 @@
               <td>
                 <div class="rx-cell-prop">
                   <div class="rx-cell-prop__img">
-                    <img v-if="property.image_url" :src="property.image_url" :alt="property.title" @error="handleImageError" />
-                    <div v-else class="rx-cell-prop__placeholder">
-                      <font-awesome-icon :icon="['fas', 'home']" />
-                    </div>
+                    <img :src="getPropertyImage(property)" :alt="property.title" @error="handleImageError" />
                   </div>
                   <div class="rx-cell-prop__info">
                     <span class="rx-cell-prop__name">{{ truncate(property.title, 28) }}</span>
@@ -317,6 +314,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
+import { getPropertyImage as getPropertyImageUtil } from '../../utils/propertyUtils';
 import { propertyManagementService, type Property, type PropertyStats } from '../../services/propertyManagementService';
 import { eventBus } from '../../events/eventBus';
 import { useAlerts } from '../../composables/useAlerts';
@@ -429,6 +427,7 @@ const visiblePages = computed(() => {
 const pctOf = (part: number, total: number) => total > 0 ? Math.round((part / total) * 100) : 0;
 const truncate = (text: string, max: number) => (!text ? '' : text.length > max ? text.substring(0, max) + '…' : text);
 const formatPrice = (price: number) => propertyManagementService.formatPrice(price);
+const getPropertyImage = (property: any) => getPropertyImageUtil(property);
 
 // Modal methods
 const openDetailsModal = (p: Property) => { selectedPropertyId.value = p.id; detailsModalOpen.value = true; };
