@@ -683,8 +683,10 @@ const processPayment = async () => {
 
     const response = await api.post('/payments/simulate', payload);
     if (response.data.success) {
-      // Actualizar estado del contrato en el backend para que sea 'active'
-      await api.patch(`/contracts/${selectedContract.value.id}`, { status: 'active' });
+      // Solo activamos el contrato si está pendiente (este es el pago del depósito inicial)
+      if (selectedContract.value.status === 'pending') {
+        await api.put(`/contracts/${selectedContract.value.id}/accept`);
+      }
       
       lastPaymentResult.value = {
         ...response.data.data,
