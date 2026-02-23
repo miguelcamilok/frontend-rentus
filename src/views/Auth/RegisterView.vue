@@ -220,13 +220,14 @@
               </div>-->
                         </div>
 
-                        <!-- Términos y condiciones -->
                         <div class="form-options">
                             <label class="checkbox-wrapper">
                                 <input type="checkbox" v-model="acceptTerms" id="terms-checkbox" />
                                 <span class="checkbox-label">
-                                    Acepto los
-                                    <a href="#" class="link-terms" @click.prevent="showTerms">términos y condiciones</a>
+                                    Acepto el
+                                    <router-link to="/aviso-legal" class="link-terms">Aviso Legal</router-link>
+                                    y la
+                                    <router-link to="/politica-privacidad" class="link-terms">Política de Privacidad</router-link>
                                 </span>
                             </label>
                         </div>
@@ -543,10 +544,6 @@ const setTab = (tab: string) => {
 
 const goBack = () => router.push("/");
 const socialRegister = (provider: string) => console.log(`Registro con ${provider}`);
-const showTerms = () => {
-    // Aquí puedes abrir un modal con términos y condiciones
-    alert("Términos y condiciones - Próximamente");
-};
 
 // ==================== Animación de mensajes ====================
 
