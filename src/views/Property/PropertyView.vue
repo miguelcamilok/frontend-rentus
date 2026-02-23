@@ -306,6 +306,7 @@
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
+import { getPropertyImage as getPropertyImageUtil } from "../../utils/propertyUtils";
 import api from "../../services/api";
 import PropertyCarousel from "./PropertyCarousel.vue";
 import PropertySearch from "../../components/search/PropertySearch.vue";
@@ -441,24 +442,7 @@ const friendlyStatus = (s: any) => {
 const truncateDescription = (d: any, max = 120) =>
   !d ? '' : d.length > max ? d.substring(0, max) + "..." : d;
 
-const getPropertyImage = (property: any) => {
-  if (!property) return DEFAULT_PROPERTY_IMAGE;
-  
-  // 1. Prioridad: relación images (nueva tabla)
-  if (property.images && Array.isArray(property.images) && property.images.length > 0) {
-    const main = property.images.find((img: any) => img.is_main) || property.images[0];
-    return main.url || main.image_url || DEFAULT_PROPERTY_IMAGE;
-  }
-  
-  // 2. Fallback: campo image_url antiguo (JSON array)
-  if (property.image_url) {
-    if (Array.isArray(property.image_url) && property.image_url.length > 0) {
-      return property.image_url[0];
-    }
-  }
-  
-  return DEFAULT_PROPERTY_IMAGE;
-};
+const getPropertyImage = (property: any) => getPropertyImageUtil(property, DEFAULT_PROPERTY_IMAGE);
 
 const clearFilters = () => {
   filters.value = { search: "", city: "", type: "", maxPrice: null };

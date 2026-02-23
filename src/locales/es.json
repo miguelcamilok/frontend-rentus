@@ -707,7 +707,8 @@
         "amount": "Monto",
         "status": "Estado",
         "type": "Tipo",
-        "contract": "Contrato"
+        "contract": "Contrato",
+        "property": "Propiedad"
       },
       "contractId": "Contrato #"
     },
