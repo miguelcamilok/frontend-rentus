@@ -120,7 +120,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import api from "../../services/api";
+import { authService } from "../../services/auth";
+import { useUserStore } from "../../stores/useUserStore";
+
+const userStore = useUserStore();
 
 const router = useRouter();
 const route = useRoute();
@@ -223,20 +226,17 @@ const handleVerify = async () => {
   successMessage.value = "";
 
   try {
-    const response = await api.post("/auth/verify-email", {
-      token,
+    const response = await authService.verifyEmail(
+      userEmail.value,
       code,
-      email: userEmail.value,
-    });
+      token
+    );
 
-
-    if (response.data.success) {
+    if (response.success) {
       successMessage.value = "¡Correo verificado exitosamente!";
 
-      // Guardar token si viene en la respuesta
-      if (response.data.token) {
-        localStorage.setItem("auth_token", response.data.token);
-      }
+      // Actualizar el estado global del usuario
+      await userStore.loadMe(true);
 
       // Limpiar email pendiente
       localStorage.removeItem("pending_email");
@@ -245,14 +245,10 @@ const handleVerify = async () => {
       setTimeout(() => {
         router.push("/");
       }, 1500);
-    } else {
-      errorMessage.value = response.data.message || "Código inválido o expirado";
     }
   } catch (err: any) {
     console.error("❌ Error en verificación:", err);
-
-    const responseData = err.response?.data;
-    errorMessage.value = responseData?.message || "Error al verificar el código. Intenta nuevamente";
+    errorMessage.value = err.message || "Error al verificar el código. Intenta nuevamente";
 
     // Limpiar OTP en caso de error
     otpDigits.value = ["", "", "", "", "", ""];
@@ -275,11 +271,9 @@ const handleResendCode = async () => {
   successMessage.value = "";
 
   try {
-    const response = await api.post("/auth/resend-code", {
-      email: userEmail.value,
-    });
+    const response = await authService.resendCode(userEmail.value);
 
-    if (response.data.success) {
+    if (response.success) {
       successMessage.value = "¡Código reenviado! Revisa tu correo";
 
       // Iniciar cooldown de 2 minutos (120 segundos)
@@ -289,20 +283,18 @@ const handleResendCode = async () => {
       otpDigits.value = ["", "", "", "", "", ""];
       otpInputs.value[0]?.focus();
     } else {
-      errorMessage.value = response.data.message || "Error al reenviar el código";
+      errorMessage.value = response.message || "Error al reenviar el código";
     }
   } catch (err: any) {
     console.error("❌ Error al reenviar código:", err);
 
-    const responseData = err.response?.data;
-
     // Manejar cooldown desde el backend
     if (err.response?.status === 429) {
-      const remainingSeconds = responseData?.remaining_seconds || 120;
+      const remainingSeconds = err.response?.data?.remaining_seconds || 120;
       startCooldown(remainingSeconds);
       errorMessage.value = `Debes esperar ${remainingSeconds} segundos antes de reenviar`;
     } else {
-      errorMessage.value = responseData?.message || "Error al reenviar el código";
+      errorMessage.value = err.response?.data?.message || "Error al reenviar el código";
     }
   } finally {
     isResending.value = false;
@@ -451,12 +443,8 @@ onMounted(async () => {
 
   // Token validation
   const token = route.query.token as string;
-  try {
-    const response = await api.post("/auth/check-token", { token });
-    if (!response.data.success) {
-      router.replace({ name: "NotFound" });
-    }
-  } catch {
+  const isValid = await authService.checkToken(token);
+  if (!isValid) {
     router.replace({ name: "NotFound" });
   }
 });
