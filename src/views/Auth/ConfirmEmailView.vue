@@ -452,7 +452,7 @@ onMounted(async () => {
   // Token validation
   const token = route.query.token as string;
   try {
-    const response = await api.post("/auth/verify-email-check", { token });
+    const response = await api.post("/auth/check-token", { token });
     if (!response.data.success) {
       router.replace({ name: "NotFound" });
     }
