@@ -53,14 +53,8 @@
                 {{ t('property.fields.title') }}
                 <span class="req">*</span>
               </label>
-              <input
-                id="title"
-                v-model="form.title"
-                type="text"
-                :placeholder="t('property.placeholders.title')"
-                maxlength="255"
-                required
-              />
+              <input id="title" v-model="form.title" type="text" :placeholder="t('property.placeholders.title')"
+                maxlength="255" required />
             </div>
 
             <div class="cp-field cp-field--full">
@@ -68,13 +62,8 @@
                 {{ t('property.fields.description') }}
                 <span class="req">*</span>
               </label>
-              <textarea
-                id="description"
-                v-model="form.description"
-                rows="5"
-                :placeholder="t('property.placeholders.description')"
-                required
-              ></textarea>
+              <textarea id="description" v-model="form.description" rows="5"
+                :placeholder="t('property.placeholders.description')" required></textarea>
             </div>
 
             <div class="cp-field">
@@ -111,24 +100,14 @@
                 {{ t('property.fields.address') }}
                 <span class="req">*</span>
               </label>
-              <input
-                id="address"
-                v-model="form.address"
-                type="text"
-                :placeholder="t('property.placeholders.address')"
-                required
-              />
+              <input id="address" v-model="form.address" type="text" :placeholder="t('property.placeholders.address')"
+                required />
             </div>
 
             <div class="cp-field">
               <label for="city">{{ t('property.fields.city') }}</label>
-              <input
-                id="city"
-                v-model="form.city"
-                type="text"
-                :placeholder="t('property.placeholders.city')"
-                maxlength="120"
-              />
+              <input id="city" v-model="form.city" type="text" :placeholder="t('property.placeholders.city')"
+                maxlength="120" />
             </div>
           </div>
 
@@ -158,15 +137,9 @@
               </label>
               <div class="cp-input-addon">
                 <span class="cp-addon cp-addon--left">$</span>
-                <input
-                  id="monthly_price"
-                  v-model="displayPrice"
-                  type="text"
-                  :placeholder="t('property.placeholders.price')"
-                  required
-                  @input="handlePriceInput"
-                  @blur="formatPriceOnBlur"
-                />
+                <input id="monthly_price" v-model="displayPrice" type="text"
+                  :placeholder="t('property.placeholders.price')" required @input="handlePriceInput"
+                  @blur="formatPriceOnBlur" />
               </div>
               <span class="cp-help">{{ formattedPrice }}</span>
             </div>
@@ -174,14 +147,8 @@
             <div class="cp-field">
               <label for="area_m2">{{ t('property.fields.area') }}</label>
               <div class="cp-input-addon">
-                <input
-                  id="area_m2"
-                  v-model.number="form.area_m2"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  :placeholder="t('property.placeholders.area')"
-                />
+                <input id="area_m2" v-model.number="form.area_m2" type="number" step="0.01" min="0"
+                  :placeholder="t('property.placeholders.area')" />
                 <span class="cp-addon cp-addon--right">m²</span>
               </div>
             </div>
@@ -190,13 +157,8 @@
               <label for="num_bedrooms">{{ t('property.fields.bedrooms') }}</label>
               <div class="cp-icon-input">
                 <font-awesome-icon :icon="['fas', 'bed']" class="cp-input-ico" />
-                <input
-                  id="num_bedrooms"
-                  v-model.number="form.num_bedrooms"
-                  type="number"
-                  min="0"
-                  :placeholder="t('property.placeholders.bedrooms')"
-                />
+                <input id="num_bedrooms" v-model.number="form.num_bedrooms" type="number" min="0"
+                  :placeholder="t('property.placeholders.bedrooms')" />
               </div>
             </div>
 
@@ -204,13 +166,8 @@
               <label for="num_bathrooms">{{ t('property.fields.bathrooms') }}</label>
               <div class="cp-icon-input">
                 <font-awesome-icon :icon="['fas', 'bath']" class="cp-input-ico" />
-                <input
-                  id="num_bathrooms"
-                  v-model.number="form.num_bathrooms"
-                  type="number"
-                  min="0"
-                  :placeholder="t('property.placeholders.bathrooms')"
-                />
+                <input id="num_bathrooms" v-model.number="form.num_bathrooms" type="number" min="0"
+                  :placeholder="t('property.placeholders.bathrooms')" />
               </div>
             </div>
           </div>
@@ -229,23 +186,14 @@
           </div>
 
           <div class="cp-services-grid">
-            <label
-              v-for="service in AVAILABLE_SERVICES"
-              :key="service.value"
-              :class="['cp-service', { 'cp-service--on': form.included_services.includes(service.value) }]"
-            >
-              <input
-                type="checkbox"
-                :value="service.value"
-                v-model="form.included_services"
-                class="cp-service__native"
-              />
+            <label v-for="service in AVAILABLE_SERVICES" :key="service.value"
+              :class="['cp-service', { 'cp-service--on': form.included_services.includes(service.value) }]">
+              <input type="checkbox" :value="service.value" v-model="form.included_services"
+                class="cp-service__native" />
               <span class="cp-service__check">
-                <font-awesome-icon
-                  :icon="form.included_services.includes(service.value)
-                    ? ['fas', 'circle-check']
-                    : ['far', 'circle']"
-                />
+                <font-awesome-icon :icon="form.included_services.includes(service.value)
+                  ? ['fas', 'circle-check']
+                  : ['far', 'circle']" />
               </span>
               <span class="cp-service__ico">
                 <font-awesome-icon :icon="['fas', service.faIcon]" />
@@ -258,7 +206,8 @@
             <span>
               <font-awesome-icon :icon="['fas', 'check']" />
               {{ form.included_services.length }}
-              {{ form.included_services.length === 1 ? t('property.create.serviceSelected') : t('property.create.servicesSelected') }}
+              {{ form.included_services.length === 1 ? t('property.create.serviceSelected') :
+                t('property.create.servicesSelected') }}
             </span>
             <button type="button" class="cp-btn-clear" @click="form.included_services = []">
               {{ t('property.create.clearSelection') }}
@@ -282,22 +231,11 @@
             </div>
           </div>
 
-          <input
-            ref="fileInput"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            multiple
-            class="cp-file-hidden"
-            @change="handleImageSelection"
-          />
+          <input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" multiple class="cp-file-hidden"
+            @change="handleImageSelection" />
 
-          <div
-            :class="['cp-dropzone', { 'cp-dropzone--dragging': isDragging }]"
-            @click="triggerFileInput"
-            @dragover.prevent="isDragging = true"
-            @dragleave.prevent="isDragging = false"
-            @drop.prevent="handleDrop"
-          >
+          <div :class="['cp-dropzone', { 'cp-dropzone--dragging': isDragging }]" @click="triggerFileInput"
+            @dragover.prevent="isDragging = true" @dragleave.prevent="isDragging = false" @drop.prevent="handleDrop">
             <font-awesome-icon :icon="['fas', 'cloud-arrow-up']" class="cp-dropzone__ico" />
             <h4>{{ t('property.create.dropzoneTitle') }}</h4>
             <p>{{ t('property.create.dropzoneDesc', { current: images.length }) }}</p>
@@ -310,11 +248,8 @@
 
           <!-- Grid de imágenes -->
           <TransitionGroup name="img-list" tag="div" class="cp-images-grid">
-            <div
-              v-for="(image, index) in images"
-              :key="image.id"
-              :class="['cp-img-card', { 'cp-img-card--main': index === 0 }]"
-            >
+            <div v-for="(image, index) in images" :key="image.id"
+              :class="['cp-img-card', { 'cp-img-card--main': index === 0 }]">
               <div class="cp-img-preview">
                 <img :src="image.preview" :alt="`Imagen ${index + 1}`" />
                 <div v-if="index === 0" class="cp-img-badge">
@@ -322,21 +257,12 @@
                   {{ t('property.create.mainImage') }}
                 </div>
                 <div class="cp-img-overlay">
-                  <button
-                    v-if="index !== 0"
-                    type="button"
-                    class="cp-img-btn"
-                    :title="t('property.create.setAsMain')"
-                    @click="setAsMain(index)"
-                  >
+                  <button v-if="index !== 0" type="button" class="cp-img-btn" :title="t('property.create.setAsMain')"
+                    @click="setAsMain(index)">
                     <font-awesome-icon :icon="['fas', 'star']" />
                   </button>
-                  <button
-                    type="button"
-                    class="cp-img-btn cp-img-btn--del"
-                    :title="t('property.create.deleteImage')"
-                    @click="removeImage(index)"
-                  >
+                  <button type="button" class="cp-img-btn cp-img-btn--del" :title="t('property.create.deleteImage')"
+                    @click="removeImage(index)">
                     <font-awesome-icon :icon="['fas', 'trash']" />
                   </button>
                 </div>
@@ -362,10 +288,7 @@
             {{ t('common.cancel') }}
           </button>
           <button type="submit" class="cp-btn-primary" :disabled="loading || images.length === 0">
-            <font-awesome-icon
-              :icon="loading ? ['fas', 'spinner'] : ['fas', 'map-location-dot']"
-              :spin="loading"
-            />
+            <font-awesome-icon :icon="loading ? ['fas', 'spinner'] : ['fas', 'map-location-dot']" :spin="loading" />
             {{ loading ? t('property.create.processing') : t('property.create.continueLocation') }}
           </button>
         </div>
@@ -374,12 +297,9 @@
     </main>
 
     <!-- Modal ubicación -->
-    <PropertyLocationModal
-      :show="showLocationModal"
-      :property-data="{ title: form.title, city: form.city, address: form.address }"
-      @confirm="handleLocationConfirm"
-      @close="handleLocationCancel"
-    />
+    <PropertyLocationModal :show="showLocationModal"
+      :property-data="{ title: form.title, city: form.city, address: form.address }" @confirm="handleLocationConfirm"
+      @close="handleLocationCancel" />
   </div>
 </template>
 
@@ -414,18 +334,18 @@ interface PropertyForm {
 
 // Font Awesome icons por servicio (sin emojis)
 const AVAILABLE_SERVICES = [
-  { value: 'water',       faIcon: 'droplet',        labelKey: 'editProperty.services.water' },
-  { value: 'electricity', faIcon: 'bolt',            labelKey: 'editProperty.services.electricity' },
-  { value: 'gas',         faIcon: 'fire',            labelKey: 'editProperty.services.gas' },
-  { value: 'internet',    faIcon: 'wifi',            labelKey: 'editProperty.services.internet' },
-  { value: 'cableTv',     faIcon: 'tv',              labelKey: 'editProperty.services.cableTv' },
-  { value: 'security',    faIcon: 'shield-halved',   labelKey: 'editProperty.services.security' },
-  { value: 'parking',     faIcon: 'square-parking',  labelKey: 'editProperty.services.parking' },
-  { value: 'gym',         faIcon: 'dumbbell',        labelKey: 'editProperty.services.gym' },
-  { value: 'pool',        faIcon: 'person-swimming', labelKey: 'editProperty.services.pool' },
-  { value: 'bbqArea',     faIcon: 'fire-burner',     labelKey: 'editProperty.services.bbqArea' },
-  { value: 'laundry',     faIcon: 'jug-detergent',   labelKey: 'editProperty.services.laundry' },
-  { value: 'elevator',    faIcon: 'elevator',        labelKey: 'editProperty.services.elevator' },
+  { value: 'water', faIcon: 'droplet', labelKey: 'editProperty.services.water' },
+  { value: 'electricity', faIcon: 'bolt', labelKey: 'editProperty.services.electricity' },
+  { value: 'gas', faIcon: 'fire', labelKey: 'editProperty.services.gas' },
+  { value: 'internet', faIcon: 'wifi', labelKey: 'editProperty.services.internet' },
+  { value: 'cableTv', faIcon: 'tv', labelKey: 'editProperty.services.cableTv' },
+  { value: 'security', faIcon: 'shield-halved', labelKey: 'editProperty.services.security' },
+  { value: 'parking', faIcon: 'square-parking', labelKey: 'editProperty.services.parking' },
+  { value: 'gym', faIcon: 'dumbbell', labelKey: 'editProperty.services.gym' },
+  { value: 'pool', faIcon: 'person-swimming', labelKey: 'editProperty.services.pool' },
+  { value: 'bbqArea', faIcon: 'fire-burner', labelKey: 'editProperty.services.bbqArea' },
+  { value: 'laundry', faIcon: 'jug-detergent', labelKey: 'editProperty.services.laundry' },
+  { value: 'elevator', faIcon: 'elevator', labelKey: 'editProperty.services.elevator' },
 ]
 
 const { t } = useI18n()
@@ -528,7 +448,7 @@ const cancelForm = () => {
   confirm(
     t('property.create.confirmCancel'),
     () => { images.value.forEach(i => URL.revokeObjectURL(i.preview)); router.back() },
-    () => {},
+    () => { },
     { title: t('property.create.cancelTitle'), confirmText: t('common.yes'), cancelText: t('common.no') }
   )
 }
@@ -604,6 +524,7 @@ const handleLocationCancel = () => { showLocationModal.value = false }
   overflow-x: hidden;
   background: linear-gradient(135deg, #1a0e0a 0%, #2e1d17 50%, #3b2416 100%);
 }
+
 .cp-page::before {
   content: '';
   position: absolute;
@@ -616,10 +537,36 @@ const handleLocationCancel = () => { showLocationModal.value = false }
 }
 
 /* Orbs */
-.cp-bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
-.cp-bg__orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.18; }
-.cp-bg__orb--1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(218,156,95,0.5), transparent); top: -200px; right: -200px; }
-.cp-bg__orb--2 { width: 380px; height: 380px; background: radial-gradient(circle, rgba(184,121,31,0.35), transparent); bottom: -120px; left: -120px; }
+.cp-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.cp-bg__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.18;
+}
+
+.cp-bg__orb--1 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(218, 156, 95, 0.5), transparent);
+  top: -200px;
+  right: -200px;
+}
+
+.cp-bg__orb--2 {
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, rgba(184, 121, 31, 0.35), transparent);
+  bottom: -120px;
+  left: -120px;
+}
 
 /* Shell */
 .cp-shell {
@@ -631,7 +578,10 @@ const handleLocationCancel = () => { showLocationModal.value = false }
 }
 
 /* ── Header ──────────────────────────────────────────────────── */
-.cp-header { margin-bottom: 2.5rem; }
+.cp-header {
+  margin-bottom: 2.5rem;
+}
+
 .cp-eyebrow {
   display: inline-flex;
   align-items: center;
@@ -643,7 +593,16 @@ const handleLocationCancel = () => { showLocationModal.value = false }
   color: #da9c5f;
   margin-bottom: 0.6rem;
 }
-.ew-pip { display: block; width: 6px; height: 6px; border-radius: 50%; background: #da9c5f; box-shadow: 0 0 8px rgba(218,156,95,0.7); }
+
+.ew-pip {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #da9c5f;
+  box-shadow: 0 0 8px rgba(218, 156, 95, 0.7);
+}
+
 .cp-title {
   font-size: clamp(2rem, 5vw, 2.8rem);
   font-weight: 800;
@@ -651,10 +610,20 @@ const handleLocationCancel = () => { showLocationModal.value = false }
   line-height: 1.15;
   margin: 0 0 0.4rem;
   letter-spacing: -0.02em;
-  text-shadow: 0 4px 20px rgba(218,156,95,0.35), 0 0 40px rgba(218,156,95,0.15);
+  text-shadow: 0 4px 20px rgba(218, 156, 95, 0.35), 0 0 40px rgba(218, 156, 95, 0.15);
 }
-.cp-title em { font-style: italic; color: #da9c5f; font-weight: 500; }
-.cp-subtitle { font-size: 0.95rem; color: rgba(240,229,219,0.5); margin: 0; }
+
+.cp-title em {
+  font-style: italic;
+  color: #da9c5f;
+  font-weight: 500;
+}
+
+.cp-subtitle {
+  font-size: 0.95rem;
+  color: rgba(240, 229, 219, 0.5);
+  margin: 0;
+}
 
 /* ── Alerts ──────────────────────────────────────────────────── */
 .cp-alert {
@@ -667,34 +636,56 @@ const handleLocationCancel = () => { showLocationModal.value = false }
   font-weight: 600;
   margin-bottom: 1.5rem;
 }
-.cp-alert--success { background: rgba(46,204,113,0.12); border: 1px solid rgba(46,204,113,0.3); color: #2ecc71; }
-.cp-alert--error   { background: rgba(231,76,60,0.12);  border: 1px solid rgba(231,76,60,0.3);  color: #e74c3c; }
-.alert-slide-enter-active, .alert-slide-leave-active { transition: all 0.3s ease; }
-.alert-slide-enter-from, .alert-slide-leave-to { opacity: 0; transform: translateY(-8px); }
+
+.cp-alert--success {
+  background: rgba(46, 204, 113, 0.12);
+  border: 1px solid rgba(46, 204, 113, 0.3);
+  color: #2ecc71;
+}
+
+.cp-alert--error {
+  background: rgba(231, 76, 60, 0.12);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  color: #e74c3c;
+}
+
+.alert-slide-enter-active,
+.alert-slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.alert-slide-enter-from,
+.alert-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
 
 /* ── Sections ────────────────────────────────────────────────── */
 .cp-section {
-  background: linear-gradient(135deg, rgba(62,36,24,0.95), rgba(46,29,23,0.95));
-  border: 1px solid rgba(218,156,95,0.2);
+  background: linear-gradient(135deg, rgba(62, 36, 24, 0.95), rgba(46, 29, 23, 0.95));
+  border: 1px solid rgba(218, 156, 95, 0.2);
   border-radius: 18px;
   padding: 1.75rem;
   margin-bottom: 1.5rem;
   backdrop-filter: blur(20px);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
+
 .cp-section__head {
   display: flex;
   align-items: flex-start;
   gap: 1rem;
   margin-bottom: 1.5rem;
   padding-bottom: 1.25rem;
-  border-bottom: 1px solid rgba(218,156,95,0.15);
+  border-bottom: 1px solid rgba(218, 156, 95, 0.15);
 }
+
 .cp-section__icon {
-  width: 40px; height: 40px;
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
-  background: rgba(218,156,95,0.12);
-  border: 1px solid rgba(218,156,95,0.25);
+  background: rgba(218, 156, 95, 0.12);
+  border: 1px solid rgba(218, 156, 95, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -702,8 +693,19 @@ const handleLocationCancel = () => { showLocationModal.value = false }
   flex-shrink: 0;
   font-size: 1rem;
 }
-.cp-section__title { font-size: 1rem; font-weight: 700; color: #f0e5db; margin: 0 0 0.2rem; }
-.cp-section__desc  { font-size: 0.82rem; color: rgba(240,229,219,0.4); margin: 0; }
+
+.cp-section__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f0e5db;
+  margin: 0 0 0.2rem;
+}
+
+.cp-section__desc {
+  font-size: 0.82rem;
+  color: rgba(240, 229, 219, 0.4);
+  margin: 0;
+}
 
 /* ── Grid & Fields ───────────────────────────────────────────── */
 .cp-grid {
@@ -711,24 +713,36 @@ const handleLocationCancel = () => { showLocationModal.value = false }
   grid-template-columns: 1fr 1fr;
   gap: 1.25rem;
 }
-.cp-field { display: flex; flex-direction: column; gap: 0.45rem; }
-.cp-field--full { grid-column: 1 / -1; }
+
+.cp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.cp-field--full {
+  grid-column: 1 / -1;
+}
 
 .cp-field label {
   font-size: 0.79rem;
   font-weight: 700;
-  color: rgba(240,229,219,0.55);
+  color: rgba(240, 229, 219, 0.55);
   text-transform: uppercase;
   letter-spacing: 0.07em;
 }
-.req { color: #e74c3c; margin-left: 3px; }
+
+.req {
+  color: #e74c3c;
+  margin-left: 3px;
+}
 
 .cp-field input,
 .cp-field textarea,
 .cp-field select {
   padding: 0.75rem 1rem;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(218,156,95,0.22);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(218, 156, 95, 0.22);
   border-radius: 10px;
   color: #f0e5db;
   font-family: inherit;
@@ -736,42 +750,74 @@ const handleLocationCancel = () => { showLocationModal.value = false }
   transition: all 0.2s;
   width: 100%;
 }
+
 .cp-field input::placeholder,
-.cp-field textarea::placeholder { color: rgba(240,229,219,0.25); }
+.cp-field textarea::placeholder {
+  color: rgba(240, 229, 219, 0.25);
+}
+
 .cp-field input:focus,
 .cp-field textarea:focus,
 .cp-field select:focus {
   outline: none;
-  border-color: rgba(218,156,95,0.6);
-  background: rgba(255,255,255,0.08);
-  box-shadow: 0 0 0 3px rgba(218,156,95,0.1);
+  border-color: rgba(218, 156, 95, 0.6);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(218, 156, 95, 0.1);
 }
-.cp-field select { cursor: pointer; }
-.cp-field select option { background: #2e1d17; color: #f0e5db; }
-.cp-field textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
-.cp-help { font-size: 0.78rem; color: #2ecc71; font-weight: 600; }
+
+.cp-field select {
+  cursor: pointer;
+}
+
+.cp-field select option {
+  background: #2e1d17;
+  color: #f0e5db;
+}
+
+.cp-field textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+.cp-help {
+  font-size: 0.78rem;
+  color: #2ecc71;
+  font-weight: 600;
+}
 
 /* Input con addon */
 .cp-input-addon {
   display: flex;
   align-items: stretch;
-  border: 1px solid rgba(218,156,95,0.22);
+  border: 1px solid rgba(218, 156, 95, 0.22);
   border-radius: 10px;
   overflow: hidden;
   transition: border-color 0.2s, box-shadow 0.2s;
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
 }
+
 .cp-input-addon:focus-within {
-  border-color: rgba(218,156,95,0.6);
-  box-shadow: 0 0 0 3px rgba(218,156,95,0.1);
+  border-color: rgba(218, 156, 95, 0.6);
+  box-shadow: 0 0 0 3px rgba(218, 156, 95, 0.1);
 }
-.cp-input-addon input { border: none; border-radius: 0; background: transparent; box-shadow: none; }
-.cp-input-addon input:focus { box-shadow: none; }
+
+.cp-input-addon input {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.cp-input-addon input:focus {
+  box-shadow: none;
+}
+
 .cp-addon {
   display: flex;
   align-items: center;
   padding: 0 0.85rem;
-  background: rgba(218,156,95,0.1);
+  background: rgba(218, 156, 95, 0.1);
   color: #da9c5f;
   font-size: 0.85rem;
   font-weight: 700;
@@ -779,17 +825,23 @@ const handleLocationCancel = () => { showLocationModal.value = false }
 }
 
 /* Input con icon */
-.cp-icon-input { position: relative; }
+.cp-icon-input {
+  position: relative;
+}
+
 .cp-input-ico {
   position: absolute;
   left: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: rgba(218,156,95,0.5);
+  color: rgba(218, 156, 95, 0.5);
   pointer-events: none;
   font-size: 0.9rem;
 }
-.cp-icon-input input { padding-left: 2.75rem; }
+
+.cp-icon-input input {
+  padding-left: 2.75rem;
+}
 
 /* Banner info */
 .cp-info-banner {
@@ -798,13 +850,17 @@ const handleLocationCancel = () => { showLocationModal.value = false }
   gap: 0.65rem;
   margin-top: 1rem;
   padding: 0.8rem 1rem;
-  background: rgba(218,156,95,0.08);
-  border: 1px solid rgba(218,156,95,0.2);
+  background: rgba(218, 156, 95, 0.08);
+  border: 1px solid rgba(218, 156, 95, 0.2);
   border-radius: 10px;
-  color: rgba(240,229,219,0.6);
+  color: rgba(240, 229, 219, 0.6);
   font-size: 0.84rem;
 }
-.cp-info-banner svg { color: #da9c5f; flex-shrink: 0; }
+
+.cp-info-banner svg {
+  color: #da9c5f;
+  flex-shrink: 0;
+}
 
 /* ── Servicios ───────────────────────────────────────────────── */
 .cp-services-grid {
@@ -813,53 +869,97 @@ const handleLocationCancel = () => { showLocationModal.value = false }
   gap: 0.65rem;
   margin-bottom: 1rem;
 }
+
 .cp-service {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   padding: 0.7rem 0.9rem;
-  border: 1px solid rgba(218,156,95,0.18);
+  border: 1px solid rgba(218, 156, 95, 0.18);
   border-radius: 10px;
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
   cursor: pointer;
   transition: all 0.2s;
   user-select: none;
 }
+
 .cp-service:hover {
-  border-color: rgba(218,156,95,0.4);
-  background: rgba(218,156,95,0.06);
+  border-color: rgba(218, 156, 95, 0.4);
+  background: rgba(218, 156, 95, 0.06);
   transform: translateY(-1px);
 }
+
 .cp-service--on {
-  border-color: rgba(218,156,95,0.55);
-  background: rgba(218,156,95,0.1);
-  box-shadow: 0 0 0 2px rgba(218,156,95,0.12);
+  border-color: rgba(218, 156, 95, 0.55);
+  background: rgba(218, 156, 95, 0.1);
+  box-shadow: 0 0 0 2px rgba(218, 156, 95, 0.12);
 }
-.cp-service__native { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
-.cp-service__check { color: rgba(240,229,219,0.25); font-size: 0.9rem; flex-shrink: 0; transition: color 0.2s; }
-.cp-service--on .cp-service__check { color: #da9c5f; }
-.cp-service__ico { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: rgba(240,229,219,0.4); font-size: 0.85rem; flex-shrink: 0; transition: color 0.2s; }
-.cp-service--on .cp-service__ico { color: #da9c5f; }
-.cp-service__name { font-size: 0.82rem; font-weight: 500; color: rgba(240,229,219,0.55); transition: color 0.2s; }
-.cp-service--on .cp-service__name { color: #f0e5db; font-weight: 600; }
+
+.cp-service__native {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.cp-service__check {
+  color: rgba(240, 229, 219, 0.25);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.cp-service--on .cp-service__check {
+  color: #da9c5f;
+}
+
+.cp-service__ico {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(240, 229, 219, 0.4);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.cp-service--on .cp-service__ico {
+  color: #da9c5f;
+}
+
+.cp-service__name {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: rgba(240, 229, 219, 0.55);
+  transition: color 0.2s;
+}
+
+.cp-service--on .cp-service__name {
+  color: #f0e5db;
+  font-weight: 600;
+}
 
 .cp-services-summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.7rem 1rem;
-  background: rgba(218,156,95,0.08);
-  border: 1px solid rgba(218,156,95,0.25);
+  background: rgba(218, 156, 95, 0.08);
+  border: 1px solid rgba(218, 156, 95, 0.25);
   border-radius: 10px;
   font-size: 0.85rem;
   font-weight: 600;
   color: #da9c5f;
   gap: 1rem;
 }
+
 .cp-btn-clear {
   background: none;
-  border: 1px solid rgba(218,156,95,0.3);
-  color: rgba(218,156,95,0.7);
+  border: 1px solid rgba(218, 156, 95, 0.3);
+  color: rgba(218, 156, 95, 0.7);
   font-family: inherit;
   font-size: 0.78rem;
   padding: 0.3rem 0.8rem;
@@ -867,54 +967,84 @@ const handleLocationCancel = () => { showLocationModal.value = false }
   cursor: pointer;
   transition: all 0.2s;
 }
-.cp-btn-clear:hover { color: #da9c5f; border-color: rgba(218,156,95,0.6); background: rgba(218,156,95,0.08); }
-.cp-services-hint { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: rgba(240,229,219,0.3); }
+
+.cp-btn-clear:hover {
+  color: #da9c5f;
+  border-color: rgba(218, 156, 95, 0.6);
+  background: rgba(218, 156, 95, 0.08);
+}
+
+.cp-services-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: rgba(240, 229, 219, 0.3);
+}
 
 /* ── Imágenes ────────────────────────────────────────────────── */
-.cp-file-hidden { display: none; }
+.cp-file-hidden {
+  display: none;
+}
 
 .cp-dropzone {
-  border: 2px dashed rgba(218,156,95,0.3);
+  border: 2px dashed rgba(218, 156, 95, 0.3);
   border-radius: 14px;
   padding: 3rem 2rem;
   text-align: center;
   cursor: pointer;
-  background: rgba(255,255,255,0.02);
+  background: rgba(255, 255, 255, 0.02);
   transition: all 0.3s;
   margin-bottom: 1.5rem;
 }
+
 .cp-dropzone:hover,
 .cp-dropzone--dragging {
-  border-color: rgba(218,156,95,0.65);
-  background: rgba(218,156,95,0.05);
+  border-color: rgba(218, 156, 95, 0.65);
+  background: rgba(218, 156, 95, 0.05);
   transform: translateY(-2px);
 }
+
 .cp-dropzone__ico {
   font-size: 2.8rem;
-  color: rgba(218,156,95,0.5);
+  color: rgba(218, 156, 95, 0.5);
   margin-bottom: 0.75rem;
   display: block;
 }
-.cp-dropzone h4 { font-size: 1rem; font-weight: 600; color: rgba(240,229,219,0.65); margin: 0 0 0.4rem; }
-.cp-dropzone p { font-size: 0.82rem; color: rgba(240,229,219,0.3); margin: 0; }
+
+.cp-dropzone h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(240, 229, 219, 0.65);
+  margin: 0 0 0.4rem;
+}
+
+.cp-dropzone p {
+  font-size: 0.82rem;
+  color: rgba(240, 229, 219, 0.3);
+  margin: 0;
+}
 
 .cp-progress {
   position: relative;
   height: 7px;
-  background: rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 100px;
   overflow: hidden;
   margin-bottom: 1.5rem;
 }
+
 .cp-progress__bar {
   height: 100%;
   background: linear-gradient(90deg, #da9c5f, #b8791f);
   border-radius: 100px;
   transition: width 0.3s;
 }
+
 .cp-progress span {
   position: absolute;
-  top: 50%; left: 50%;
+  top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%);
   font-size: 0.7rem;
   font-weight: 700;
@@ -926,20 +1056,41 @@ const handleLocationCancel = () => { showLocationModal.value = false }
   grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
   gap: 1.25rem;
 }
+
 .cp-img-card {
   border-radius: 14px;
   overflow: hidden;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(218,156,95,0.15);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(218, 156, 95, 0.15);
   transition: all 0.3s;
 }
-.cp-img-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
-.cp-img-card--main { border-color: #da9c5f; box-shadow: 0 0 0 2px rgba(218,156,95,0.35); }
-.cp-img-preview { position: relative; aspect-ratio: 4/3; overflow: hidden; }
-.cp-img-preview img { width: 100%; height: 100%; object-fit: cover; }
+
+.cp-img-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.cp-img-card--main {
+  border-color: #da9c5f;
+  box-shadow: 0 0 0 2px rgba(218, 156, 95, 0.35);
+}
+
+.cp-img-preview {
+  position: relative;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+}
+
+.cp-img-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .cp-img-badge {
   position: absolute;
-  top: 0.6rem; left: 0.6rem;
+  top: 0.6rem;
+  left: 0.6rem;
   background: linear-gradient(135deg, #da9c5f, #b8791f);
   color: #1a0e0a;
   padding: 0.3rem 0.65rem;
@@ -950,10 +1101,11 @@ const handleLocationCancel = () => { showLocationModal.value = false }
   align-items: center;
   gap: 4px;
 }
+
 .cp-img-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -961,11 +1113,16 @@ const handleLocationCancel = () => { showLocationModal.value = false }
   opacity: 0;
   transition: opacity 0.25s;
 }
-.cp-img-card:hover .cp-img-overlay { opacity: 1; }
+
+.cp-img-card:hover .cp-img-overlay {
+  opacity: 1;
+}
+
 .cp-img-btn {
-  width: 38px; height: 38px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.92);
+  background: rgba(255, 255, 255, 0.92);
   border: none;
   color: #1a0e0a;
   display: flex;
@@ -975,18 +1132,38 @@ const handleLocationCancel = () => { showLocationModal.value = false }
   transition: all 0.2s;
   font-size: 0.9rem;
 }
-.cp-img-btn:hover { transform: scale(1.1); }
-.cp-img-btn--del { background: rgba(231,76,60,0.92); color: #fff; }
-.cp-img-btn--del:hover { background: #e74c3c; }
+
+.cp-img-btn:hover {
+  transform: scale(1.1);
+}
+
+.cp-img-btn--del {
+  background: rgba(231, 76, 60, 0.92);
+  color: #fff;
+}
+
+.cp-img-btn--del:hover {
+  background: #e74c3c;
+}
+
 .cp-img-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.6rem 0.85rem;
-  border-top: 1px solid rgba(218,156,95,0.12);
+  border-top: 1px solid rgba(218, 156, 95, 0.12);
 }
-.cp-img-num { font-size: 0.8rem; font-weight: 700; color: #da9c5f; }
-.cp-img-size { font-size: 0.72rem; color: rgba(240,229,219,0.35); }
+
+.cp-img-num {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #da9c5f;
+}
+
+.cp-img-size {
+  font-size: 0.72rem;
+  color: rgba(240, 229, 219, 0.35);
+}
 
 .cp-no-images {
   display: flex;
@@ -994,19 +1171,48 @@ const handleLocationCancel = () => { showLocationModal.value = false }
   align-items: center;
   gap: 0.75rem;
   padding: 3rem 2rem;
-  border: 2px dashed rgba(218,156,95,0.15);
+  border: 2px dashed rgba(218, 156, 95, 0.15);
   border-radius: 14px;
   text-align: center;
 }
-.cp-no-images__ico { font-size: 3.5rem; color: rgba(218,156,95,0.2); }
-.cp-no-images h4 { font-size: 1rem; font-weight: 600; color: rgba(240,229,219,0.4); margin: 0; }
-.cp-no-images p { font-size: 0.85rem; color: rgba(240,229,219,0.25); margin: 0; }
+
+.cp-no-images__ico {
+  font-size: 3.5rem;
+  color: rgba(218, 156, 95, 0.2);
+}
+
+.cp-no-images h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(240, 229, 219, 0.4);
+  margin: 0;
+}
+
+.cp-no-images p {
+  font-size: 0.85rem;
+  color: rgba(240, 229, 219, 0.25);
+  margin: 0;
+}
 
 /* Transitions */
-.img-list-enter-active, .img-list-leave-active { transition: all 0.35s ease; }
-.img-list-enter-from { opacity: 0; transform: scale(0.85) translateY(16px); }
-.img-list-leave-to { opacity: 0; transform: scale(0.85) translateY(-16px); }
-.img-list-move { transition: transform 0.35s ease; }
+.img-list-enter-active,
+.img-list-leave-active {
+  transition: all 0.35s ease;
+}
+
+.img-list-enter-from {
+  opacity: 0;
+  transform: scale(0.85) translateY(16px);
+}
+
+.img-list-leave-to {
+  opacity: 0;
+  transform: scale(0.85) translateY(-16px);
+}
+
+.img-list-move {
+  transition: transform 0.35s ease;
+}
 
 /* ── Acciones ────────────────────────────────────────────────── */
 .cp-actions {
@@ -1015,23 +1221,32 @@ const handleLocationCancel = () => { showLocationModal.value = false }
   gap: 1rem;
   margin-top: 0.5rem;
 }
+
 .cp-btn-secondary {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   padding: 0.8rem 1.5rem;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(218,156,95,0.25);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(218, 156, 95, 0.25);
   border-radius: 11px;
-  color: rgba(240,229,219,0.6);
+  color: rgba(240, 229, 219, 0.6);
   font-family: inherit;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
 }
-.cp-btn-secondary:hover:not(:disabled) { background: rgba(218,156,95,0.08); color: #f0e5db; }
-.cp-btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.cp-btn-secondary:hover:not(:disabled) {
+  background: rgba(218, 156, 95, 0.08);
+  color: #f0e5db;
+}
+
+.cp-btn-secondary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 .cp-btn-primary {
   display: inline-flex;
@@ -1047,22 +1262,57 @@ const handleLocationCancel = () => { showLocationModal.value = false }
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 4px 16px rgba(218,156,95,0.4);
+  box-shadow: 0 4px 16px rgba(218, 156, 95, 0.4);
 }
-.cp-btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(218,156,95,0.55); background: linear-gradient(135deg, #e0a96a, #c9851f); }
-.cp-btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+.cp-btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(218, 156, 95, 0.55);
+  background: linear-gradient(135deg, #e0a96a, #c9851f);
+}
+
+.cp-btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
 
 /* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .cp-shell { padding: 2rem 1.25rem 4rem; }
-  .cp-grid { grid-template-columns: 1fr; }
-  .cp-field--full { grid-column: 1; }
-  .cp-images-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-  .cp-actions { flex-direction: column; }
-  .cp-btn-primary, .cp-btn-secondary { width: 100%; justify-content: center; }
+  .cp-shell {
+    padding: 2rem 1.25rem 4rem;
+  }
+
+  .cp-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cp-field--full {
+    grid-column: 1;
+  }
+
+  .cp-images-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .cp-actions {
+    flex-direction: column;
+  }
+
+  .cp-btn-primary,
+  .cp-btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
 }
+
 @media (max-width: 500px) {
-  .cp-shell { padding: 1.5rem 1rem 3.5rem; }
-  .cp-services-grid { grid-template-columns: 1fr 1fr; }
+  .cp-shell {
+    padding: 1.5rem 1rem 3.5rem;
+  }
+
+  .cp-services-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 </style>

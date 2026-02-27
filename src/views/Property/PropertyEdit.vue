@@ -73,7 +73,8 @@
                 <font-awesome-icon :icon="['fas', 'heading']" />
                 {{ $t('editProperty.fields.title') }} <span class="req">*</span>
               </label>
-              <input type="text" id="title" v-model="form.title" :placeholder="$t('editProperty.placeholders.title')" required />
+              <input type="text" id="title" v-model="form.title" :placeholder="$t('editProperty.placeholders.title')"
+                required />
               <span v-if="errors.title" class="ep-error">{{ errors.title }}</span>
             </div>
 
@@ -82,7 +83,8 @@
                 <font-awesome-icon :icon="['fas', 'file-lines']" />
                 {{ $t('editProperty.fields.description') }} <span class="req">*</span>
               </label>
-              <textarea id="description" v-model="form.description" rows="5" :placeholder="$t('editProperty.placeholders.description')" required></textarea>
+              <textarea id="description" v-model="form.description" rows="5"
+                :placeholder="$t('editProperty.placeholders.description')" required></textarea>
               <span v-if="errors.description" class="ep-error">{{ errors.description }}</span>
             </div>
 
@@ -105,7 +107,8 @@
               </label>
               <div class="ep-input-addon">
                 <span class="ep-addon">$</span>
-                <input type="text" id="monthly_price" v-model="displayPrice" @input="handlePriceInput" @blur="formatPriceOnBlur" placeholder="1.000.000" required />
+                <input type="text" id="monthly_price" v-model="displayPrice" @input="handlePriceInput"
+                  @blur="formatPriceOnBlur" placeholder="1.000.000" required />
               </div>
               <span v-if="form.monthly_price > 0" class="ep-price-help">{{ formatCurrency(form.monthly_price) }}</span>
               <span v-if="errors.monthly_price" class="ep-error">{{ errors.monthly_price }}</span>
@@ -125,19 +128,24 @@
 
           <div class="ep-grid">
             <div class="ep-field">
-              <label for="address"><font-awesome-icon :icon="['fas', 'road']" /> {{ $t('editProperty.fields.address') }} <span class="req">*</span></label>
-              <input type="text" id="address" v-model="form.address" :placeholder="$t('editProperty.placeholders.address')" required />
+              <label for="address"><font-awesome-icon :icon="['fas', 'road']" /> {{ $t('editProperty.fields.address') }}
+                <span class="req">*</span></label>
+              <input type="text" id="address" v-model="form.address"
+                :placeholder="$t('editProperty.placeholders.address')" required />
             </div>
             <div class="ep-field">
-              <label for="city"><font-awesome-icon :icon="['fas', 'city']" /> {{ $t('editProperty.fields.city') }}</label>
+              <label for="city"><font-awesome-icon :icon="['fas', 'city']" /> {{ $t('editProperty.fields.city')
+                }}</label>
               <input type="text" id="city" v-model="form.city" :placeholder="$t('editProperty.placeholders.city')" />
             </div>
             <div class="ep-field">
-              <label for="lat"><font-awesome-icon :icon="['fas', 'location-dot']" /> {{ $t('editProperty.fields.latitude') }}</label>
+              <label for="lat"><font-awesome-icon :icon="['fas', 'location-dot']" /> {{
+                $t('editProperty.fields.latitude') }}</label>
               <input type="number" id="lat" v-model.number="form.lat" step="0.000001" placeholder="2.4448" />
             </div>
             <div class="ep-field">
-              <label for="lng"><font-awesome-icon :icon="['fas', 'location-dot']" /> {{ $t('editProperty.fields.longitude') }}</label>
+              <label for="lng"><font-awesome-icon :icon="['fas', 'location-dot']" /> {{
+                $t('editProperty.fields.longitude') }}</label>
               <input type="number" id="lng" v-model.number="form.lng" step="0.000001" placeholder="-76.6147" />
             </div>
           </div>
@@ -155,22 +163,26 @@
 
           <div class="ep-grid">
             <div class="ep-field">
-              <label for="area_m2"><font-awesome-icon :icon="['fas', 'ruler-combined']" /> {{ $t('editProperty.fields.area') }}</label>
+              <label for="area_m2"><font-awesome-icon :icon="['fas', 'ruler-combined']" /> {{
+                $t('editProperty.fields.area') }}</label>
               <div class="ep-input-addon">
                 <input type="number" id="area_m2" v-model.number="form.area_m2" min="0" step="1" placeholder="100" />
                 <span class="ep-addon ep-addon--right">m²</span>
               </div>
             </div>
             <div class="ep-field">
-              <label for="num_bedrooms"><font-awesome-icon :icon="['fas', 'bed']" /> {{ $t('editProperty.fields.bedrooms') }}</label>
+              <label for="num_bedrooms"><font-awesome-icon :icon="['fas', 'bed']" /> {{
+                $t('editProperty.fields.bedrooms') }}</label>
               <input type="number" id="num_bedrooms" v-model.number="form.num_bedrooms" min="0" placeholder="3" />
             </div>
             <div class="ep-field">
-              <label for="num_bathrooms"><font-awesome-icon :icon="['fas', 'bath']" /> {{ $t('editProperty.fields.bathrooms') }}</label>
+              <label for="num_bathrooms"><font-awesome-icon :icon="['fas', 'bath']" /> {{
+                $t('editProperty.fields.bathrooms') }}</label>
               <input type="number" id="num_bathrooms" v-model.number="form.num_bathrooms" min="0" placeholder="2" />
             </div>
             <div class="ep-field">
-              <label for="parking_spaces"><font-awesome-icon :icon="['fas', 'square-parking']" /> {{ $t('editProperty.fields.parking') }}</label>
+              <label for="parking_spaces"><font-awesome-icon :icon="['fas', 'square-parking']" /> {{
+                $t('editProperty.fields.parking') }}</label>
               <input type="number" id="parking_spaces" v-model.number="form.parking_spaces" min="0" placeholder="1" />
             </div>
           </div>
@@ -194,11 +206,8 @@
               <span class="ep-imgs-count">{{ existingImages.length }}</span>
             </h3>
             <div class="ep-images-grid">
-              <div
-                v-for="(image, index) in existingImages"
-                :key="image.id"
-                :class="['ep-img-card', { 'ep-img-card--main': image.is_main }]"
-              >
+              <div v-for="(image, index) in existingImages" :key="image.id"
+                :class="['ep-img-card', { 'ep-img-card--main': image.is_main }]">
                 <div class="ep-img-preview">
                   <img :src="image.url" :alt="`Imagen ${index + 1}`" />
                   <div v-if="image.is_main" class="ep-img-badge">
@@ -206,7 +215,8 @@
                     {{ t('editProperty.images.principal') }}
                   </div>
                   <div class="ep-img-overlay">
-                    <button type="button" class="ep-img-btn ep-img-btn--del" @click="removeExistingImage(index)" :title="t('editProperty.images.delete')">
+                    <button type="button" class="ep-img-btn ep-img-btn--del" @click="removeExistingImage(index)"
+                      :title="t('editProperty.images.delete')">
                       <font-awesome-icon :icon="['fas', 'trash']" />
                     </button>
                   </div>
@@ -227,15 +237,11 @@
               <span v-if="newImages.length" class="ep-imgs-count">+{{ newImages.length }}</span>
             </h3>
 
-            <input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" multiple class="ep-file-hidden" @change="handleImageSelection" />
+            <input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" multiple class="ep-file-hidden"
+              @change="handleImageSelection" />
 
-            <div
-              :class="['ep-dropzone', { 'ep-dropzone--dragging': isDragging }]"
-              @click="triggerFileInput"
-              @dragover.prevent="isDragging = true"
-              @dragleave.prevent="isDragging = false"
-              @drop.prevent="handleDrop"
-            >
+            <div :class="['ep-dropzone', { 'ep-dropzone--dragging': isDragging }]" @click="triggerFileInput"
+              @dragover.prevent="isDragging = true" @dragleave.prevent="isDragging = false" @drop.prevent="handleDrop">
               <font-awesome-icon :icon="['fas', 'cloud-arrow-up']" class="ep-dropzone__ico" />
               <h4>{{ t('editProperty.images.dropzone.title') }}</h4>
               <p>{{ t('editProperty.images.dropzone.description') }}</p>
@@ -270,14 +276,12 @@
           </div>
 
           <div class="ep-services-grid">
-            <label
-              v-for="service in AVAILABLE_SERVICES"
-              :key="service.value"
-              :class="['ep-service', { 'ep-service--on': selectedServices.includes(service.value) }]"
-            >
+            <label v-for="service in AVAILABLE_SERVICES" :key="service.value"
+              :class="['ep-service', { 'ep-service--on': selectedServices.includes(service.value) }]">
               <input type="checkbox" :value="service.value" v-model="selectedServices" class="ep-service__native" />
               <span class="ep-service__check">
-                <font-awesome-icon :icon="selectedServices.includes(service.value) ? ['fas', 'circle-check'] : ['far', 'circle']" />
+                <font-awesome-icon
+                  :icon="selectedServices.includes(service.value) ? ['fas', 'circle-check'] : ['far', 'circle']" />
               </span>
               <span class="ep-service__ico">
                 <font-awesome-icon :icon="['fas', service.faIcon]" />
@@ -319,18 +323,18 @@ interface PropertyForm {
 }
 
 const AVAILABLE_SERVICES = [
-  { value: 'water',       faIcon: 'droplet' },
+  { value: 'water', faIcon: 'droplet' },
   { value: 'electricity', faIcon: 'bolt' },
-  { value: 'gas',         faIcon: 'fire' },
-  { value: 'internet',    faIcon: 'wifi' },
-  { value: 'cableTv',     faIcon: 'tv' },
-  { value: 'security',    faIcon: 'shield-halved' },
-  { value: 'parking',     faIcon: 'square-parking' },
-  { value: 'gym',         faIcon: 'dumbbell' },
-  { value: 'pool',        faIcon: 'person-swimming' },
-  { value: 'bbqArea',     faIcon: 'fire-burner' },
-  { value: 'laundry',     faIcon: 'jug-detergent' },
-  { value: 'elevator',    faIcon: 'elevator' },
+  { value: 'gas', faIcon: 'fire' },
+  { value: 'internet', faIcon: 'wifi' },
+  { value: 'cableTv', faIcon: 'tv' },
+  { value: 'security', faIcon: 'shield-halved' },
+  { value: 'parking', faIcon: 'square-parking' },
+  { value: 'gym', faIcon: 'dumbbell' },
+  { value: 'pool', faIcon: 'person-swimming' },
+  { value: 'bbqArea', faIcon: 'fire-burner' },
+  { value: 'laundry', faIcon: 'jug-detergent' },
+  { value: 'elevator', faIcon: 'elevator' },
 ]
 
 const router = useRouter()
@@ -508,6 +512,7 @@ onMounted(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); fetchProperty
   overflow-x: hidden;
   background: linear-gradient(135deg, #1a0e0a 0%, #2e1d17 50%, #3b2416 100%);
 }
+
 .ep-page::before {
   content: '';
   position: absolute;
@@ -520,10 +525,36 @@ onMounted(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); fetchProperty
 }
 
 /* Orbs */
-.ep-bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
-.ep-bg__orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.18; }
-.ep-bg__orb--1 { width: 480px; height: 480px; background: radial-gradient(circle, rgba(218,156,95,0.45), transparent); top: -180px; right: -180px; }
-.ep-bg__orb--2 { width: 360px; height: 360px; background: radial-gradient(circle, rgba(184,121,31,0.3), transparent); bottom: -120px; left: -120px; }
+.ep-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.ep-bg__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.18;
+}
+
+.ep-bg__orb--1 {
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, rgba(218, 156, 95, 0.45), transparent);
+  top: -180px;
+  right: -180px;
+}
+
+.ep-bg__orb--2 {
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(circle, rgba(184, 121, 31, 0.3), transparent);
+  bottom: -120px;
+  left: -120px;
+}
 
 /* State screens */
 .ep-state {
@@ -538,11 +569,47 @@ onMounted(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); fetchProperty
   text-align: center;
   padding: 2rem;
 }
-.ep-spinner { width: 42px; height: 42px; border-radius: 50%; border: 2px solid rgba(218,156,95,0.2); border-top-color: #da9c5f; animation: spin 0.9s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.ep-state p { font-size: 0.95rem; color: rgba(240,229,219,0.5); }
-.ep-state h2 { font-size: 1.4rem; font-weight: 700; color: #f0e5db; margin: 0; }
-.ep-state__icon { width: 64px; height: 64px; border-radius: 50%; background: rgba(231,76,60,0.12); border: 1px solid rgba(231,76,60,0.3); display: flex; align-items: center; justify-content: center; color: #e74c3c; font-size: 1.5rem; }
+
+.ep-spinner {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid rgba(218, 156, 95, 0.2);
+  border-top-color: #da9c5f;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ep-state p {
+  font-size: 0.95rem;
+  color: rgba(240, 229, 219, 0.5);
+}
+
+.ep-state h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #f0e5db;
+  margin: 0;
+}
+
+.ep-state__icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(231, 76, 60, 0.12);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e74c3c;
+  font-size: 1.5rem;
+}
+
 .ep-btn-back {
   display: inline-flex;
   align-items: center;
@@ -569,7 +636,10 @@ onMounted(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); fetchProperty
 }
 
 /* Header */
-.ep-header { margin-bottom: 2.5rem; }
+.ep-header {
+  margin-bottom: 2.5rem;
+}
+
 .ep-breadcrumb {
   display: flex;
   align-items: center;
@@ -577,25 +647,79 @@ onMounted(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); fetchProperty
   flex-wrap: wrap;
   margin-bottom: 1.5rem;
 }
+
 .ep-bc-item {
   font-size: 0.8rem;
-  color: rgba(240,229,219,0.4);
+  color: rgba(240, 229, 219, 0.4);
   text-decoration: none;
   transition: color 0.2s;
 }
-.ep-bc-item:hover { color: #da9c5f; }
-.ep-bc-sep { font-size: 0.65rem; color: rgba(240,229,219,0.2); }
-.ep-bc-current { font-size: 0.8rem; color: #da9c5f; font-weight: 600; }
-.ep-header__content { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
-.ep-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #da9c5f; margin-bottom: 0.6rem; }
-.ew-pip { display: block; width: 6px; height: 6px; border-radius: 50%; background: #da9c5f; box-shadow: 0 0 8px rgba(218,156,95,0.7); }
-.ep-title { font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 800; color: #f0e5db; line-height: 1.15; margin: 0 0 0.4rem; letter-spacing: -0.02em; text-shadow: 0 4px 20px rgba(218,156,95,0.35); }
-.ep-subtitle { font-size: 0.9rem; color: rgba(240,229,219,0.5); margin: 0; }
+
+.ep-bc-item:hover {
+  color: #da9c5f;
+}
+
+.ep-bc-sep {
+  font-size: 0.65rem;
+  color: rgba(240, 229, 219, 0.2);
+}
+
+.ep-bc-current {
+  font-size: 0.8rem;
+  color: #da9c5f;
+  font-weight: 600;
+}
+
+.ep-header__content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.ep-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #da9c5f;
+  margin-bottom: 0.6rem;
+}
+
+.ew-pip {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #da9c5f;
+  box-shadow: 0 0 8px rgba(218, 156, 95, 0.7);
+}
+
+.ep-title {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  font-weight: 800;
+  color: #f0e5db;
+  line-height: 1.15;
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.02em;
+  text-shadow: 0 4px 20px rgba(218, 156, 95, 0.35);
+}
+
+.ep-subtitle {
+  font-size: 0.9rem;
+  color: rgba(240, 229, 219, 0.5);
+  margin: 0;
+}
+
 .ep-header__badge {
-  width: 56px; height: 56px;
+  width: 56px;
+  height: 56px;
   border-radius: 14px;
-  background: linear-gradient(135deg, rgba(218,156,95,0.2), rgba(184,121,31,0.1));
-  border: 1px solid rgba(218,156,95,0.35);
+  background: linear-gradient(135deg, rgba(218, 156, 95, 0.2), rgba(184, 121, 31, 0.1));
+  border: 1px solid rgba(218, 156, 95, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -606,23 +730,66 @@ onMounted(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); fetchProperty
 
 /* Sections */
 .ep-section {
-  background: linear-gradient(135deg, rgba(62,36,24,0.95), rgba(46,29,23,0.95));
-  border: 1px solid rgba(218,156,95,0.2);
+  background: linear-gradient(135deg, rgba(62, 36, 24, 0.95), rgba(46, 29, 23, 0.95));
+  border: 1px solid rgba(218, 156, 95, 0.2);
   border-radius: 18px;
   padding: 1.75rem;
   margin-bottom: 1.5rem;
   backdrop-filter: blur(20px);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
-.ep-section__head { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid rgba(218,156,95,0.15); }
-.ep-section__ico { width: 40px; height: 40px; border-radius: 10px; background: rgba(218,156,95,0.12); border: 1px solid rgba(218,156,95,0.25); display: flex; align-items: center; justify-content: center; color: #da9c5f; flex-shrink: 0; }
-.ep-section__title { font-size: 1rem; font-weight: 700; color: #f0e5db; margin: 0 0 0.2rem; }
-.ep-section__desc  { font-size: 0.82rem; color: rgba(240,229,219,0.4); margin: 0; }
+
+.ep-section__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(218, 156, 95, 0.15);
+}
+
+.ep-section__ico {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(218, 156, 95, 0.12);
+  border: 1px solid rgba(218, 156, 95, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #da9c5f;
+  flex-shrink: 0;
+}
+
+.ep-section__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f0e5db;
+  margin: 0 0 0.2rem;
+}
+
+.ep-section__desc {
+  font-size: 0.82rem;
+  color: rgba(240, 229, 219, 0.4);
+  margin: 0;
+}
 
 /* Grid & Fields */
-.ep-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
-.ep-field { display: flex; flex-direction: column; gap: 0.45rem; }
-.ep-field--full { grid-column: 1 / -1; }
+.ep-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.ep-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.ep-field--full {
+  grid-column: 1 / -1;
+}
 
 .ep-field label {
   display: flex;
@@ -630,18 +797,21 @@ onMounted(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); fetchProperty
   gap: 0.45rem;
   font-size: 0.79rem;
   font-weight: 700;
-  color: rgba(240,229,219,0.55);
+  color: rgba(240, 229, 219, 0.55);
   text-transform: uppercase;
   letter-spacing: 0.07em;
 }
-.req { color: #e74c3c; }
+
+.req {
+  color: #e74c3c;
+}
 
 .ep-field input,
 .ep-field textarea,
 .ep-field select {
   padding: 0.75rem 1rem;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(218,156,95,0.22);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(218, 156, 95, 0.22);
   border-radius: 10px;
   color: #f0e5db;
   font-family: inherit;
@@ -649,121 +819,437 @@ onMounted(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); fetchProperty
   transition: all 0.2s;
   width: 100%;
 }
-.ep-field input::placeholder, .ep-field textarea::placeholder { color: rgba(240,229,219,0.25); }
-.ep-field input:focus, .ep-field textarea:focus, .ep-field select:focus {
-  outline: none;
-  border-color: rgba(218,156,95,0.6);
-  background: rgba(255,255,255,0.08);
-  box-shadow: 0 0 0 3px rgba(218,156,95,0.1);
+
+.ep-field input::placeholder,
+.ep-field textarea::placeholder {
+  color: rgba(240, 229, 219, 0.25);
 }
-.ep-field select { cursor: pointer; }
-.ep-field select option { background: #2e1d17; color: #f0e5db; }
-.ep-field textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
 
-.ep-input-addon { display: flex; align-items: stretch; border: 1px solid rgba(218,156,95,0.22); border-radius: 10px; overflow: hidden; background: rgba(255,255,255,0.05); transition: border-color 0.2s, box-shadow 0.2s; }
-.ep-input-addon:focus-within { border-color: rgba(218,156,95,0.6); box-shadow: 0 0 0 3px rgba(218,156,95,0.1); }
-.ep-input-addon input { border: none; border-radius: 0; background: transparent; box-shadow: none; flex: 1; }
-.ep-input-addon input:focus { box-shadow: none; }
-.ep-addon { display: flex; align-items: center; padding: 0 0.85rem; background: rgba(218,156,95,0.1); color: #da9c5f; font-size: 0.85rem; font-weight: 700; flex-shrink: 0; }
-.ep-addon--right { border-left: 1px solid rgba(218,156,95,0.15); }
+.ep-field input:focus,
+.ep-field textarea:focus,
+.ep-field select:focus {
+  outline: none;
+  border-color: rgba(218, 156, 95, 0.6);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(218, 156, 95, 0.1);
+}
 
-.ep-price-help { font-size: 0.78rem; color: #2ecc71; font-weight: 600; }
-.ep-error { font-size: 0.78rem; color: #e74c3c; font-weight: 500; }
+.ep-field select {
+  cursor: pointer;
+}
+
+.ep-field select option {
+  background: #2e1d17;
+  color: #f0e5db;
+}
+
+.ep-field textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+.ep-input-addon {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid rgba(218, 156, 95, 0.22);
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ep-input-addon:focus-within {
+  border-color: rgba(218, 156, 95, 0.6);
+  box-shadow: 0 0 0 3px rgba(218, 156, 95, 0.1);
+}
+
+.ep-input-addon input {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  flex: 1;
+}
+
+.ep-input-addon input:focus {
+  box-shadow: none;
+}
+
+.ep-addon {
+  display: flex;
+  align-items: center;
+  padding: 0 0.85rem;
+  background: rgba(218, 156, 95, 0.1);
+  color: #da9c5f;
+  font-size: 0.85rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.ep-addon--right {
+  border-left: 1px solid rgba(218, 156, 95, 0.15);
+}
+
+.ep-price-help {
+  font-size: 0.78rem;
+  color: #2ecc71;
+  font-weight: 600;
+}
+
+.ep-error {
+  font-size: 0.78rem;
+  color: #e74c3c;
+  font-weight: 500;
+}
 
 /* Images */
-.ep-imgs-block { margin-bottom: 1.75rem; }
-.ep-imgs-block:last-child { margin-bottom: 0; }
+.ep-imgs-block {
+  margin-bottom: 1.75rem;
+}
+
+.ep-imgs-block:last-child {
+  margin-bottom: 0;
+}
+
 .ep-imgs-label {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   font-size: 0.88rem;
   font-weight: 700;
-  color: rgba(240,229,219,0.65);
+  color: rgba(240, 229, 219, 0.65);
   margin: 0 0 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(218,156,95,0.12);
+  border-bottom: 1px solid rgba(218, 156, 95, 0.12);
 }
+
 .ep-imgs-count {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 22px; height: 22px;
+  min-width: 22px;
+  height: 22px;
   padding: 0 6px;
-  background: rgba(218,156,95,0.2);
-  border: 1px solid rgba(218,156,95,0.35);
+  background: rgba(218, 156, 95, 0.2);
+  border: 1px solid rgba(218, 156, 95, 0.35);
   border-radius: 6px;
   font-size: 0.72rem;
   color: #da9c5f;
   font-weight: 700;
 }
 
-.ep-file-hidden { display: none; }
+.ep-file-hidden {
+  display: none;
+}
+
 .ep-dropzone {
-  border: 2px dashed rgba(218,156,95,0.28);
+  border: 2px dashed rgba(218, 156, 95, 0.28);
   border-radius: 12px;
   padding: 2.5rem 2rem;
   text-align: center;
   cursor: pointer;
-  background: rgba(255,255,255,0.02);
+  background: rgba(255, 255, 255, 0.02);
   transition: all 0.3s;
 }
-.ep-dropzone:hover, .ep-dropzone--dragging {
-  border-color: rgba(218,156,95,0.6);
-  background: rgba(218,156,95,0.04);
+
+.ep-dropzone:hover,
+.ep-dropzone--dragging {
+  border-color: rgba(218, 156, 95, 0.6);
+  background: rgba(218, 156, 95, 0.04);
   transform: translateY(-2px);
 }
-.ep-dropzone__ico { font-size: 2.5rem; color: rgba(218,156,95,0.45); margin-bottom: 0.65rem; display: block; }
-.ep-dropzone h4 { font-size: 0.95rem; font-weight: 600; color: rgba(240,229,219,0.55); margin: 0 0 0.3rem; }
-.ep-dropzone p { font-size: 0.8rem; color: rgba(240,229,219,0.28); margin: 0; }
+
+.ep-dropzone__ico {
+  font-size: 2.5rem;
+  color: rgba(218, 156, 95, 0.45);
+  margin-bottom: 0.65rem;
+  display: block;
+}
+
+.ep-dropzone h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(240, 229, 219, 0.55);
+  margin: 0 0 0.3rem;
+}
+
+.ep-dropzone p {
+  font-size: 0.8rem;
+  color: rgba(240, 229, 219, 0.28);
+  margin: 0;
+}
 
 .ep-images-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 1rem;
 }
-.ep-img-card { border-radius: 12px; overflow: hidden; background: rgba(255,255,255,0.04); border: 1px solid rgba(218,156,95,0.15); transition: all 0.25s; }
-.ep-img-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
-.ep-img-card--main { border-color: #da9c5f; box-shadow: 0 0 0 2px rgba(218,156,95,0.3); }
-.ep-img-preview { position: relative; aspect-ratio: 4/3; overflow: hidden; }
-.ep-img-preview img { width: 100%; height: 100%; object-fit: cover; }
-.ep-img-badge { position: absolute; top: 0.5rem; left: 0.5rem; background: linear-gradient(135deg, #da9c5f, #b8791f); color: #1a0e0a; padding: 0.25rem 0.55rem; border-radius: 6px; font-size: 0.67rem; font-weight: 700; display: flex; align-items: center; gap: 4px; }
-.ep-img-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.25s; }
-.ep-img-card:hover .ep-img-overlay { opacity: 1; }
-.ep-img-btn { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.9); border: none; color: #1a0e0a; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; }
-.ep-img-btn--del { background: rgba(231,76,60,0.92); color: #fff; }
-.ep-img-btn--del:hover { background: #e74c3c; transform: scale(1.1); }
-.ep-img-footer { display: flex; justify-content: space-between; align-items: center; padding: 0.55rem 0.8rem; border-top: 1px solid rgba(218,156,95,0.1); }
-.ep-img-num { font-size: 0.75rem; font-weight: 700; color: rgba(240,229,219,0.4); }
-.ep-img-main-tag { font-size: 0.67rem; font-weight: 700; color: #da9c5f; }
+
+.ep-img-card {
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(218, 156, 95, 0.15);
+  transition: all 0.25s;
+}
+
+.ep-img-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.ep-img-card--main {
+  border-color: #da9c5f;
+  box-shadow: 0 0 0 2px rgba(218, 156, 95, 0.3);
+}
+
+.ep-img-preview {
+  position: relative;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+}
+
+.ep-img-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ep-img-badge {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background: linear-gradient(135deg, #da9c5f, #b8791f);
+  color: #1a0e0a;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.67rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ep-img-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.ep-img-card:hover .ep-img-overlay {
+  opacity: 1;
+}
+
+.ep-img-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  color: #1a0e0a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.85rem;
+}
+
+.ep-img-btn--del {
+  background: rgba(231, 76, 60, 0.92);
+  color: #fff;
+}
+
+.ep-img-btn--del:hover {
+  background: #e74c3c;
+  transform: scale(1.1);
+}
+
+.ep-img-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.55rem 0.8rem;
+  border-top: 1px solid rgba(218, 156, 95, 0.1);
+}
+
+.ep-img-num {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(240, 229, 219, 0.4);
+}
+
+.ep-img-main-tag {
+  font-size: 0.67rem;
+  font-weight: 700;
+  color: #da9c5f;
+}
 
 /* Services */
-.ep-services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 0.65rem; }
-.ep-service { display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 0.9rem; border: 1px solid rgba(218,156,95,0.18); border-radius: 10px; background: rgba(255,255,255,0.03); cursor: pointer; transition: all 0.2s; user-select: none; }
-.ep-service:hover { border-color: rgba(218,156,95,0.4); background: rgba(218,156,95,0.06); transform: translateY(-1px); }
-.ep-service--on { border-color: rgba(218,156,95,0.55); background: rgba(218,156,95,0.1); box-shadow: 0 0 0 2px rgba(218,156,95,0.12); }
-.ep-service__native { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
-.ep-service__check { color: rgba(240,229,219,0.25); font-size: 0.9rem; flex-shrink: 0; transition: color 0.2s; }
-.ep-service--on .ep-service__check { color: #da9c5f; }
-.ep-service__ico { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; color: rgba(240,229,219,0.4); font-size: 0.82rem; flex-shrink: 0; transition: color 0.2s; }
-.ep-service--on .ep-service__ico { color: #da9c5f; }
-.ep-service__name { font-size: 0.82rem; font-weight: 500; color: rgba(240,229,219,0.55); transition: color 0.2s; }
-.ep-service--on .ep-service__name { color: #f0e5db; font-weight: 600; }
+.ep-services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 0.65rem;
+}
+
+.ep-service {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgba(218, 156, 95, 0.18);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.ep-service:hover {
+  border-color: rgba(218, 156, 95, 0.4);
+  background: rgba(218, 156, 95, 0.06);
+  transform: translateY(-1px);
+}
+
+.ep-service--on {
+  border-color: rgba(218, 156, 95, 0.55);
+  background: rgba(218, 156, 95, 0.1);
+  box-shadow: 0 0 0 2px rgba(218, 156, 95, 0.12);
+}
+
+.ep-service__native {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.ep-service__check {
+  color: rgba(240, 229, 219, 0.25);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.ep-service--on .ep-service__check {
+  color: #da9c5f;
+}
+
+.ep-service__ico {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(240, 229, 219, 0.4);
+  font-size: 0.82rem;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.ep-service--on .ep-service__ico {
+  color: #da9c5f;
+}
+
+.ep-service__name {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: rgba(240, 229, 219, 0.55);
+  transition: color 0.2s;
+}
+
+.ep-service--on .ep-service__name {
+  color: #f0e5db;
+  font-weight: 600;
+}
 
 /* Actions */
-.ep-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 0.5rem; }
-.ep-btn-cancel { display: inline-flex; align-items: center; gap: 7px; padding: 0.8rem 1.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(218,156,95,0.25); border-radius: 11px; color: rgba(240,229,219,0.6); font-family: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-.ep-btn-cancel:hover { background: rgba(218,156,95,0.08); color: #f0e5db; }
-.ep-btn-submit { display: inline-flex; align-items: center; gap: 7px; padding: 0.8rem 1.75rem; background: linear-gradient(135deg, #da9c5f, #b8791f); border: none; border-radius: 11px; color: #1a0e0a; font-family: inherit; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 16px rgba(218,156,95,0.4); }
-.ep-btn-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(218,156,95,0.55); background: linear-gradient(135deg, #e0a96a, #c9851f); }
-.ep-btn-submit:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+.ep-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.ep-btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0.8rem 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(218, 156, 95, 0.25);
+  border-radius: 11px;
+  color: rgba(240, 229, 219, 0.6);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ep-btn-cancel:hover {
+  background: rgba(218, 156, 95, 0.08);
+  color: #f0e5db;
+}
+
+.ep-btn-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0.8rem 1.75rem;
+  background: linear-gradient(135deg, #da9c5f, #b8791f);
+  border: none;
+  border-radius: 11px;
+  color: #1a0e0a;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 16px rgba(218, 156, 95, 0.4);
+}
+
+.ep-btn-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(218, 156, 95, 0.55);
+  background: linear-gradient(135deg, #e0a96a, #c9851f);
+}
+
+.ep-btn-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
 
 /* Responsive */
 @media (max-width: 768px) {
-  .ep-shell { padding: 2rem 1.25rem 4rem; }
-  .ep-grid { grid-template-columns: 1fr; }
-  .ep-field--full { grid-column: 1; }
-  .ep-actions { flex-direction: column; }
-  .ep-btn-submit, .ep-btn-cancel { width: 100%; justify-content: center; }
+  .ep-shell {
+    padding: 2rem 1.25rem 4rem;
+  }
+
+  .ep-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ep-field--full {
+    grid-column: 1;
+  }
+
+  .ep-actions {
+    flex-direction: column;
+  }
+
+  .ep-btn-submit,
+  .ep-btn-cancel {
+    width: 100%;
+    justify-content: center;
+  }
 }
 </style>

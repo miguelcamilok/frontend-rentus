@@ -52,10 +52,10 @@ export function clusterProperties(
   zoom: number
 ): PropertyCluster[] {
   const gridSize =
-    zoom < 8  ? 4   :
-    zoom < 10 ? 2   :
-    zoom < 12 ? 0.8 :
-    zoom < 13 ? 0.3 : 0;
+    zoom < 8 ? 4 :
+      zoom < 10 ? 2 :
+        zoom < 12 ? 0.8 :
+          zoom < 13 ? 0.3 : 0;
 
   if (gridSize === 0) {
     return properties.map(p => ({
@@ -99,7 +99,7 @@ export function clusterProperties(
 // ─────────────────────────────────────────────
 export function formatPriceShort(price: number): string {
   if (price >= 1_000_000) return `$${(price / 1_000_000).toFixed(1)}M`;
-  if (price >= 1_000)     return `$${Math.round(price / 1_000)}k`;
+  if (price >= 1_000) return `$${Math.round(price / 1_000)}k`;
   return `$${price}`;
 }
 
@@ -172,7 +172,10 @@ export const propertyMapService = {
         ...p,
         lat: parseFloat(p.lat),
         lng: parseFloat(p.lng),
-        monthly_price: parseFloat(p.monthly_price)
+        monthly_price: parseFloat(p.monthly_price),
+        // Normalizar campos para búsqueda
+        _normalizedCity: (p.city || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
+        _normalizedAddress: (p.address || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
       }))
       .filter((p: MapProperty) =>
         !isNaN(p.lat) && !isNaN(p.lng) &&
@@ -184,7 +187,11 @@ export const propertyMapService = {
       console.warn(`⚠️ ${withoutCoords} propiedades descartadas por no tener coordenadas válidas`);
     }
 
-    console.log(`✅ ${withCoords.length} propiedades con coordenadas válidas`);
+    console.log(`✅ ${withCoords.length} propiedades con coordenadas cargadas exitosamente`);
+
+    if (withCoords.length === 0) {
+      console.error('❌ No se cargaron propiedades con coordenadas. Verifica la base de datos.');
+    }
 
     // Cachear solo sin filtros
     if (!hasFilters) {
