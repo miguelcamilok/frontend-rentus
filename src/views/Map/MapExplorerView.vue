@@ -47,6 +47,63 @@
               Búsqueda Geográfica
             </div>
 
+            <!-- DIRECCIÓN / BÚSQUEDA -->
+            <div class="filter-group relative">
+              <label class="filter-label">Dirección específica</label>
+              <div class="search-input-wrapper">
+                <input v-model="filters.address" type="text" placeholder="Ej: Calle 10 #5-2..."
+                  class="filter-input search-input" @input="onAddressInput" @keyup.enter="searchAddressOnMap"
+                  @blur="hideSuggestionsWithDelay" @focus="showSuggestions = true" />
+                <button class="search-map-btn" :class="{ 'searching': searchState === 'searching' }"
+                  @click="searchAddressOnMap" title="Buscar en el mapa">
+                  <font-awesome-icon v-if="searchState !== 'searching'" icon="search-location" />
+                  <div v-else class="btn-spinner"></div>
+                </button>
+              </div>
+
+              <!-- Autocomplete Suggestions -->
+              <Transition name="fade">
+                <div v-if="showSuggestions && addressSuggestions.length > 0" class="suggestions-dropdown">
+                  <div v-for="(sug, idx) in addressSuggestions" :key="idx" class="suggestion-item"
+                    @click="selectSuggestion(sug)">
+                    <font-awesome-icon icon="map-marker-alt" class="sug-icon" />
+                    <span class="sug-text">{{ sug.display_name }}</span>
+                  </div>
+                </div>
+              </Transition>
+
+              <p v-if="searchState === 'error'" class="search-error-msg">
+                No encontramos esa dirección exacta.
+                <button @click="exploreNearMe" class="text-link">Ver lo más cercano</button>
+              </p>
+              <p v-else class="filter-hint">Presiona Enter para buscar en el mapa</p>
+            </div>
+
+            <!-- Nearest Property Banner -->
+            <Transition name="slide-up">
+              <div v-if="userLatLng && nearestProperty" class="proximity-banner" @click="exploreNearMe">
+                <div class="proximity-icon">
+                  <font-awesome-icon icon="route" />
+                </div>
+                <div class="proximity-content">
+                  <div class="proximity-title">
+                    <font-awesome-icon icon="location-arrow" class="text-brand-light mr-1" />
+                    {{ userCity ? `Estás al ${getPointZone(userLatLng.lat, userLatLng.lng, userCity)} de ${userCity}` :
+                    'Ubicación detectada' }}
+                  </div>
+                  <div class="proximity-dist" v-if="nearestProperty">
+                    La propiedad más cercana a ti está a <strong>{{ nearestProperty.distance.toFixed(1) }} km</strong>
+                    y ubicada al <strong>{{ getPointZone(nearestProperty.lat, nearestProperty.lng, nearestProperty.city)
+                      }}</strong>
+                    de <strong>{{ nearestProperty.city }}</strong>
+                  </div>
+                </div>
+                <button class="proximity-go">
+                  Ir <font-awesome-icon icon="chevron-right" />
+                </button>
+              </div>
+            </Transition>
+
             <!-- DEPARTAMENTO -->
             <div class="filter-group">
               <label class="filter-label">Departamento</label>
@@ -69,6 +126,24 @@
                     <option v-for="city in cityList" :key="city" :value="city">{{ city }}</option>
                   </select>
                   <font-awesome-icon icon="chevron-down" class="select-arrow-fa" />
+                </div>
+              </div>
+            </Transition>
+
+            <!-- ZONA (Norte, Sur, etc) -->
+            <Transition name="filter-slide">
+              <div v-if="filters.city" class="filter-group">
+                <label class="filter-label">Zona / Sector</label>
+                <div class="select-wrapper">
+                  <select v-model="filters.zone" class="filter-select" @change="debouncedApplyFilters">
+                    <option value="">Todas las zonas</option>
+                    <option value="Norte">Norte</option>
+                    <option value="Sur">Sur</option>
+                    <option value="Centro">Centro</option>
+                    <option value="Este">Este / Oriente</option>
+                    <option value="Oeste">Oeste / Occidente</option>
+                  </select>
+                  <font-awesome-icon icon="compass" class="select-arrow-fa" />
                 </div>
               </div>
             </Transition>
@@ -197,6 +272,9 @@
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
                     </svg>
+                    {{ getPointZone(property.lat, property.lng, property.city) ? `Propiedad al
+                    ${getPointZone(property.lat,
+                      property.lng, property.city)}: ` : '' }}
                     {{ property.city || property.address }}
                   </p>
                 </div>
@@ -564,6 +642,7 @@ const COLOMBIA_CENTER = { lat: 4.5709, lng: -74.2973 }; // Center point of Colom
 const DEFAULT_ZOOM = 6;
 const DEBOUNCE_DELAY = 400;
 const DEFAULT_IMAGE = '/img/default.webp';
+const GPS_SETTLE_TIME = 12000; // 12 seconds
 
 // ──────────────────────────────────────────────
 // ROUTER
@@ -585,11 +664,18 @@ const geoAccuracy = ref<number | null>(null);
 const userLocationMarker = ref<L.Marker | L.CircleMarker | null>(null);
 const userAccuracyCircle = ref<L.Circle | null>(null);
 const userLatLng = ref<L.LatLng | null>(null);
+const userCity = ref<string>('');
+const addressSuggestions = ref<any[]>([]);
+const showSuggestions = ref(false);
+const searchState = ref<'idle' | 'searching' | 'error' | 'success'>('idle');
+let suggestionTimer: any = null;
 
 const filters = ref({
   department: '',
   city: '',
   neighborhood: '',
+  zone: '',
+  address: '',
   status: '',
   min_price: undefined as number | undefined,
   max_price: undefined as number | undefined,
@@ -647,7 +733,14 @@ const neighborhoodList = computed<string[]>(() => {
 
 const filteredProperties = computed<MapProperty[]>(() => {
   return allProperties.value.filter(p => {
-    // 1. Barrio (highest precision)
+    // 1. Dirección (text search)
+    if (filters.value.address) {
+      const search = normalize(filters.value.address);
+      const propAddr = normalize(p.address || '');
+      const propTitle = normalize(p.title || '');
+      if (!propAddr.includes(search) && !propTitle.includes(search)) return false;
+    }
+    // 2. Barrio (highest precision)
     if (filters.value.neighborhood) {
       const nb = normalize(filters.value.neighborhood);
       const propAddr = normalize(p.address || '');
@@ -661,6 +754,16 @@ const filteredProperties = computed<MapProperty[]>(() => {
       const propAddr = normalize(p.address || '');
       if (!propCity.includes(targetCity) && !propAddr.includes(targetCity)) return false;
     }
+
+    // 2.5 Zone
+    if (filters.value.zone) {
+      const z = filters.value.zone.toLowerCase();
+      const propZone = (p as any).zone ? (p as any).zone.toLowerCase() : '';
+      const propAddr = normalize(p.address || '');
+      // If data has explicit zone, use it. Otherwise, look for the word in address
+      if (!propZone.includes(z) && !propAddr.includes(z)) return false;
+    }
+
     // 3. Department
     else if (filters.value.department) {
       const deptCities = Object.keys(COLOMBIA_GEO[filters.value.department] || {}).map(c => normalize(c));
@@ -721,6 +824,49 @@ const geoAccuracyClass = computed(() => {
   return 'geo-accuracy--poor';
 });
 
+const nearestProperty = computed(() => {
+  if (!userLatLng.value || allProperties.value.length === 0) return null;
+  let minD = Infinity;
+  let closest: any = null;
+  allProperties.value.forEach(p => {
+    const d = getDistance(userLatLng.value!.lat, userLatLng.value!.lng, p.lat, p.lng);
+    if (d < minD) { minD = d; closest = p; }
+  });
+  return closest ? { ...closest, distance: minD } : null;
+});
+
+const cityCenters = computed(() => {
+  const centers: Record<string, { lat: number, lng: number, count: number }> = {};
+  allProperties.value.forEach(p => {
+    const city = p.city || 'Unknown';
+    if (!centers[city]) centers[city] = { lat: 0, lng: 0, count: 0 };
+    centers[city].lat += p.lat;
+    centers[city].lng += p.lng;
+    centers[city].count++;
+  });
+  Object.keys(centers).forEach(city => {
+    centers[city].lat /= centers[city].count;
+    centers[city].lng /= centers[city].count;
+  });
+  return centers;
+});
+
+/**
+ * Reverse geocodes the user's lat/lng to get the city name
+ */
+async function reverseGeocodeUser(lat: number, lng: number) {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`);
+    const data = await res.json();
+    if (data.address) {
+      userCity.value = data.address.city || data.address.town || data.address.village || data.address.municipality || '';
+    }
+  } catch (e) {
+    console.error('Error in reverse geocoding:', e);
+  }
+}
+
+
 // ──────────────────────────────────────────────
 // HELPERS
 // ──────────────────────────────────────────────
@@ -739,6 +885,26 @@ function statusLabel(status: string): string {
     maintenance: 'Mantenimiento',
   };
   return labels[status] ?? status;
+}
+
+/**
+ * Heuristic to determine the zone of a point within a city
+ */
+function getPointZone(lat: number, lng: number, city?: string): string {
+  if (!city || !cityCenters.value[city]) return '';
+  const center = cityCenters.value[city];
+  const dLat = lat - center.lat;
+  const dLng = lng - center.lng;
+
+  // Small threshold for "Centro"
+  const threshold = 0.006;
+  if (Math.abs(dLat) < threshold && Math.abs(dLng) < threshold) return 'Centro';
+
+  if (Math.abs(dLat) > Math.abs(dLng)) {
+    return dLat > 0 ? 'Norte' : 'Sur';
+  } else {
+    return dLng > 0 ? 'Este' : 'Oeste';
+  }
 }
 
 function countByStatus(status: string): number {
@@ -767,6 +933,7 @@ function onDepartmentChange() {
 
 function onCityChange() {
   filters.value.neighborhood = '';
+  filters.value.zone = '';
   applyFilters();
 
   // Fly to city
@@ -786,8 +953,145 @@ function toggleStatus(val: string) {
   applyFilters();
 }
 
+function onAddressInput() {
+  debouncedApplyFilters();
+  autoAssociateFilters();
+  if (suggestionTimer) clearTimeout(suggestionTimer);
+  suggestionTimer = setTimeout(fetchSuggestions, 600);
+}
+
+/**
+ * Smart Parser: Automatically updates dropdown filters if they are mentioned 
+ * in the search text area.
+ */
+function autoAssociateFilters() {
+  const text = normalize(filters.value.address);
+  if (text.length < 3) return;
+
+  // 1. Check Department
+  for (const dep of departmentList.value) {
+    if (text.includes(normalize(dep)) && filters.value.department !== dep) {
+      filters.value.department = dep;
+      // We don't clear city here to allow full string parsing in one go
+    }
+  }
+
+  // 2. Check City within current or detected department
+  if (filters.value.department) {
+    const cities = Object.keys(COLOMBIA_GEO[filters.value.department] || {});
+    for (const city of cities) {
+      if (text.includes(normalize(city)) && filters.value.city !== city) {
+        filters.value.city = city;
+      }
+    }
+  }
+
+  // 2.5 Check Zone
+  const zones = ['norte', 'sur', 'centro', 'este', 'oriente', 'oeste', 'occidente'];
+  for (const z of zones) {
+    if (text.includes(z)) {
+      if (z === 'oriente') filters.value.zone = 'Este';
+      else if (z === 'occidente') filters.value.zone = 'Oeste';
+      else filters.value.zone = z.charAt(0).toUpperCase() + z.slice(1);
+    }
+  }
+
+  // 3. Check Neighborhood within detected city
+  if (filters.value.city) {
+    const neighborhoods = neighborhoodList.value;
+    for (const nb of neighborhoods) {
+      if (text.includes(normalize(nb)) && filters.value.neighborhood !== nb) {
+        filters.value.neighborhood = nb;
+      }
+    }
+  }
+}
+
+async function fetchSuggestions() {
+  if (!filters.value.address || filters.value.address.length < 3) {
+    addressSuggestions.value = [];
+    return;
+  }
+  try {
+    // Inject context into Suggestions
+    const context = `${filters.value.city ? filters.value.city + ',' : ''} ${filters.value.department ? filters.value.department + ',' : ''} Colombia`;
+    const q = `${filters.value.address}, ${context}`;
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=5&countrycodes=co`);
+    addressSuggestions.value = await res.json();
+    showSuggestions.value = true;
+  } catch (e) { console.error(e); }
+}
+
+function selectSuggestion(sug: any) {
+  filters.value.address = sug.display_name;
+  showSuggestions.value = false;
+  searchAddressOnMap();
+}
+
+function hideSuggestionsWithDelay() {
+  setTimeout(() => { showSuggestions.value = false; }, 250);
+}
+
+/**
+ * Searches for a physical address on the map (Geocoding)
+ */
+async function searchAddressOnMap() {
+  if (!filters.value.address || !map) return;
+
+  // Vague Search Protection
+  const isVague = filters.value.address.length < 10 && !filters.value.city;
+  const commonTerms = ['calle', 'carrera', 'avenida', 'cl', 'cr', 'av', 'diag', 'dg', 'trans'];
+  const hasCommon = commonTerms.some(t => filters.value.address.toLowerCase().includes(t));
+
+  if (isVague && hasCommon) {
+    searchState.value = 'error';
+    alert('La búsqueda es muy general. Por favor, selecciona una ciudad o sé más específico (Ej: Calle 13, Popayán).');
+    return;
+  }
+
+  searchState.value = 'searching';
+  showSuggestions.value = false;
+
+  try {
+    // Priority 1: Full context query
+    const query = `${filters.value.address}, ${filters.value.neighborhood || ''} ${filters.value.city || ''} ${filters.value.department || ''}, Colombia`;
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=co`);
+    const data = await response.json();
+
+    if (data && data.length > 0) {
+      const { lat, lon } = data[0];
+      map.flyTo([parseFloat(lat), parseFloat(lon)], 17, { duration: 1.5 });
+      searchState.value = 'success';
+    } else {
+      // Priority 2: Try just the input if context failed
+      const simpleRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(filters.value.address)}&limit=1&countrycodes=co`);
+      const simpleData = await simpleRes.json();
+      if (simpleData && simpleData.length > 0) {
+        map.flyTo([parseFloat(simpleData[0].lat), parseFloat(simpleData[0].lon)], 17, { duration: 1.5 });
+        searchState.value = 'success';
+      } else {
+        searchState.value = 'error';
+        setTimeout(exploreNearMe, 1500);
+      }
+    }
+  } catch (error) {
+    console.error('Error geocoding address:', error);
+    searchState.value = 'error';
+  }
+}
+
+function exploreNearMe() {
+  if (!userLatLng.value && !isLocating.value) {
+    locateUser();
+    return;
+  }
+  if (nearestProperty.value && map) {
+    selectProperty(nearestProperty.value);
+  }
+}
+
 function clearFilters() {
-  filters.value = { department: '', city: '', neighborhood: '', status: '', min_price: undefined, max_price: undefined };
+  filters.value = { department: '', city: '', neighborhood: '', zone: '', address: '', status: '', min_price: undefined, max_price: undefined };
   applyFilters();
 }
 
@@ -803,10 +1107,12 @@ function locateUser() {
 
   isLocating.value = true;
   geoAccuracy.value = null;
+  userCity.value = ''; // Clear previous city
 
   let watchId: number | null = null;
   let hasLocked = false;
   let bestAccuracy = Infinity;
+  let bestPoint: { lat: number, lng: number } | null = null;
   let startTime = Date.now();
   let pointsCount = 0;
 
@@ -814,6 +1120,18 @@ function locateUser() {
     enableHighAccuracy: true,
     timeout: 15000,
     maximumAge: 0
+  };
+
+  const finalize = (finalPoint: { lat: number, lng: number } | null) => {
+    if (watchId !== null) {
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+    }
+    isLocating.value = false;
+    setTimeout(() => { geoAccuracy.value = null; }, 5000);
+    if (finalPoint) {
+      reverseGeocodeUser(finalPoint.lat, finalPoint.lng);
+    }
   };
 
   const updateUI = (pos: GeolocationPosition) => {
@@ -872,6 +1190,7 @@ function locateUser() {
 
         map.flyTo([lat, lng], zoomLevel, { duration: 1.5 });
         hasLocked = true;
+        bestPoint = { lat, lng }; // Update bestPoint when we center
       }
     }
 
@@ -879,22 +1198,13 @@ function locateUser() {
     pointsCount++;
   };
 
-  const finalize = () => {
-    if (watchId !== null) {
-      navigator.geolocation.clearWatch(watchId);
-      watchId = null;
-    }
-    isLocating.value = false;
-    setTimeout(() => { geoAccuracy.value = null; }, 5000);
-  };
-
   watchId = navigator.geolocation.watchPosition(
     (pos) => {
       updateUI(pos);
 
       // Wait for ultra-precision OR 10 seconds of signal collection
-      if (pos.coords.accuracy < 8 || (Date.now() - startTime > 10000)) {
-        finalize();
+      if (pos.coords.accuracy < 8 || (Date.now() - startTime > GPS_SETTLE_TIME)) {
+        finalize(bestPoint);
       }
     },
     (err) => {
@@ -908,15 +1218,15 @@ function locateUser() {
         };
         alert(messages[err.code] || 'Error de ubicación.');
       }
-      finalize();
+      finalize(bestPoint);
     },
     options
   );
 
   // Safety global timeout
   setTimeout(() => {
-    if (isLocating.value) finalize();
-  }, 15000);
+    if (isLocating.value) finalize(bestPoint);
+  }, GPS_SETTLE_TIME);
 }
 
 // ──────────────────────────────────────────────
@@ -1464,6 +1774,181 @@ onUnmounted(() => {
 
 .filter-group {
   margin-bottom: 18px;
+}
+
+.filter-hint {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+.search-input-wrapper {
+  display: flex;
+  gap: 8px;
+}
+
+.search-input {
+  padding-right: 10px !important;
+}
+
+.search-map-btn {
+  background: var(--brand);
+  color: white;
+  border: none;
+  border-radius: 9px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.search-map-btn:hover {
+  background: var(--brand-dark);
+  transform: scale(1.05);
+}
+
+.search-map-btn.searching {
+  background: #94a3b8;
+  cursor: wait;
+}
+
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+.suggestions-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  margin-top: 5px;
+  z-index: 1000;
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item:hover {
+  background: #f8fafc;
+}
+
+.sug-icon {
+  color: var(--brand-light);
+  font-size: 12px;
+}
+
+.sug-text {
+  font-size: 12px;
+  color: #334155;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-error-msg {
+  font-size: 11px;
+  color: #ef4444;
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+.text-link {
+  background: none;
+  border: none;
+  color: var(--brand);
+  text-decoration: underline;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Proximity Banner */
+.proximity-banner {
+  margin: 10px 0 18px;
+  background: linear-gradient(135deg, #fef7f0 0%, #fff 100%);
+  border: 1.5px solid var(--brand-light);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(200, 169, 126, 0.15);
+}
+
+.proximity-banner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(200, 169, 126, 0.25);
+  border-color: var(--brand);
+}
+
+.proximity-icon {
+  width: 38px;
+  height: 38px;
+  background: var(--brand-light);
+  color: white;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.proximity-content {
+  flex: 1;
+}
+
+.proximity-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--brand);
+}
+
+.proximity-dist {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.proximity-go {
+  background: none;
+  border: none;
+  color: var(--brand-light);
+  font-weight: 800;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
 }
 
 .filter-label {
