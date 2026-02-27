@@ -819,9 +819,7 @@ const hasActiveFilters = computed(() =>
     filters.value.status || filters.value.min_price !== undefined || filters.value.max_price !== undefined)
 );
 
-const propertiesWithCoords = computed(() =>
-  allProperties.value.filter(p => !isNaN(p.lat) && !isNaN(p.lng) && p.lat !== 0 && p.lng !== 0).length
-);
+
 
 const geoAccuracyClass = computed(() => {
   if (geoAccuracy.value === null) return '';
