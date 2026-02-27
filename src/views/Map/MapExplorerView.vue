@@ -89,7 +89,7 @@
                   <div class="proximity-title">
                     <font-awesome-icon icon="location-arrow" class="text-brand-light mr-1" />
                     {{ userCity ? `Estás al ${getPointZone(userLatLng.lat, userLatLng.lng, userCity)} de ${userCity}` :
-                    'Ubicación detectada' }}
+                      'Ubicación detectada' }}
                   </div>
                   <div class="proximity-dist" v-if="nearestProperty">
                     La propiedad más cercana a ti está a <strong>{{ nearestProperty.distance.toFixed(1) }} km</strong>
@@ -383,10 +383,8 @@
         <!-- Property Preview Card -->
         <Transition name="slide-up">
           <div v-if="selectedProperty" class="preview-card">
-            <button class="preview-card__close" @click="closePreview">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M18 6L6 18M6 6l12 12" />
-              </svg>
+            <button class="preview-card__close" @click="closePreview" aria-label="Cerrar">
+              <font-awesome-icon icon="times" />
             </button>
 
             <div class="preview-card__inner">
@@ -394,36 +392,45 @@
                 <img :src="getPropertyImage(selectedProperty)" :alt="selectedProperty.title"
                   @error="handleImgError($event)" />
                 <div class="preview-card__img-overlay"></div>
-                <span class="preview-card__status-badge" :class="`status--${selectedProperty.status}`">
-                  <span class="s-dot"></span>
-                  {{ statusLabel(selectedProperty.status) }}
-                </span>
+                <div class="preview-card__top-badges">
+                  <span class="preview-card__status-badge" :class="`status--${selectedProperty.status}`">
+                    <span class="s-dot"></span>
+                    {{ statusLabel(selectedProperty.status) }}
+                  </span>
+                </div>
               </div>
 
               <div class="preview-card__content">
-                <h3 class="preview-card__title">{{ selectedProperty.title }}</h3>
-                <p class="preview-card__city">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-                  </svg>
-                  {{ selectedProperty.city || selectedProperty.address }}
-                </p>
-                <div class="preview-card__features">
-                  <span v-if="selectedProperty.num_bedrooms">🛏 {{ selectedProperty.num_bedrooms }} hab.</span>
-                  <span v-if="selectedProperty.num_bathrooms">🚿 {{ selectedProperty.num_bathrooms }}</span>
-                  <span v-if="selectedProperty.area_m2">📐 {{ selectedProperty.area_m2 }}m²</span>
+                <div class="preview-card__header">
+                  <h3 class="preview-card__title" :title="selectedProperty.title">{{ selectedProperty.title }}</h3>
+                  <p class="preview-card__location">
+                    <font-awesome-icon icon="map-marker-alt" class="mr-1" />
+                    {{ getPointZone(selectedProperty.lat, selectedProperty.lng, selectedProperty.city) ? `Zona
+                    ${getPointZone(selectedProperty.lat, selectedProperty.lng, selectedProperty.city)} • ` : '' }}
+                    {{ selectedProperty.city || selectedProperty.address }}
+                  </p>
                 </div>
+
+                <div class="preview-card__features">
+                  <div v-if="selectedProperty.num_bedrooms" class="p-feat">
+                    <font-awesome-icon icon="bed" /> <span>{{ selectedProperty.num_bedrooms }}</span>
+                  </div>
+                  <div v-if="selectedProperty.num_bathrooms" class="p-feat">
+                    <font-awesome-icon icon="bath" /> <span>{{ selectedProperty.num_bathrooms }}</span>
+                  </div>
+                  <div v-if="selectedProperty.area_m2" class="p-feat">
+                    <font-awesome-icon icon="ruler-combined" /> <span>{{ selectedProperty.area_m2 }}m²</span>
+                  </div>
+                </div>
+
                 <div class="preview-card__footer">
                   <div class="preview-price">
-                    <span>{{ formatPriceFull(selectedProperty.monthly_price) }}</span>
-                    <small>/mes</small>
+                    <span class="p-val">{{ formatPriceFull(selectedProperty.monthly_price) }}</span>
+                    <span class="p-period">/mes</span>
                   </div>
                   <button class="preview-cta" @click="goToDetail(selectedProperty.id)">
-                    Ver detalle
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                      stroke-width="2.5">
-                      <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
+                    Explorar
+                    <font-awesome-icon icon="arrow-right" class="ml-2" />
                   </button>
                 </div>
               </div>
@@ -1237,41 +1244,45 @@ function createImageMarker(property: MapProperty, isSelected: boolean): L.DivIco
   const price = formatPriceShort(property.monthly_price);
 
   const statusColorMap: Record<string, string> = {
-    available: '#10b981', // More vibrant emerald
-    rented: '#f43f5e',    // More vibrant rose
-    maintenance: '#f59e0b', // Vibrant amber
+    available: '#10b981', // Emerald
+    rented: '#f43f5e',    // Rose
+    maintenance: '#f59e0b', // Amber
   };
   const statusColor = statusColorMap[property.status] ?? '#4D2F24';
-  const selectedClass = isSelected ? 'vibrant-marker--selected' : '';
+  const selectedClass = isSelected ? 'marker-modern--selected' : '';
 
   return L.divIcon({
     className: '',
     html: `
-      <div class="vibrant-marker ${selectedClass}" style="--accent-color:${statusColor}">
-        <div class="vibrant-marker__wrapper">
-          <div class="vibrant-marker__photo">
+      <div class="marker-modern ${selectedClass}" style="--accent-color:${statusColor}">
+        <div class="marker-modern__glow"></div>
+        <div class="marker-modern__wrapper">
+          <div class="marker-modern__photo">
             <img src="${imgSrc}" alt="" onerror="this.src='${DEFAULT_IMAGE}'" />
           </div>
-          <div class="vibrant-marker__content">
-            <span class="vibrant-marker__price">${price}</span>
+          <div class="marker-modern__price">
+            <span class="currency">$</span>${price}
           </div>
-          <div class="vibrant-marker__indicator" style="background:${statusColor}"></div>
+          <div class="marker-modern__indicator" style="background:${statusColor}"></div>
         </div>
-        <div class="vibrant-marker__stem"></div>
+        <div class="marker-modern__tip"></div>
       </div>`,
-    iconAnchor: [50, 58],
-    iconSize: [100, 58],
+    iconAnchor: [50, 60],
+    iconSize: [100, 60],
   });
 }
 
 function createClusterMarker(count: number, avgPrice: number): L.DivIcon {
   const price = formatPriceShort(avgPrice);
-  const size = count > 50 ? 56 : count > 20 ? 48 : 40;
+  const size = count > 50 ? 64 : count > 20 ? 54 : 44;
   return L.divIcon({
     className: '',
-    html: `<div class="cluster-bubble" style="width:${size}px;height:${size}px">
-             <span class="cluster-num">${count}</span>
-             <span class="cluster-price">${price}</span>
+    html: `<div class="cluster-modern" style="width:${size}px;height:${size}px">
+             <div class="cluster-modern__inner">
+               <span class="cluster-modern__count">${count}</span>
+               <span class="cluster-modern__price">${price}</span>
+             </div>
+             <div class="cluster-modern__ring"></div>
            </div>`,
     iconAnchor: [size / 2, size / 2],
     iconSize: [size, size],
@@ -2611,56 +2622,60 @@ onUnmounted(() => {
 }
 
 /* ══════════════════════════════════════════
-   PREVIEW CARD
+   PREVIEW CARD (MODERN)
 ══════════════════════════════════════════ */
 .preview-card {
   position: absolute;
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 400;
-  width: 460px;
-  max-width: calc(100% - 24px);
-  background: #fff;
-  border-radius: 20px;
+  z-index: 4000;
+  width: 520px;
+  max-width: calc(100% - 32px);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .preview-card__close {
   position: absolute;
   top: 12px;
   right: 12px;
-  z-index: 10;
-  width: 32px;
-  height: 32px;
+  z-index: 50;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  color: #1a1c1e;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  color: #1e293b;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: all 0.2s;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .preview-card__close:hover {
-  background: #fff;
-  transform: scale(1.1);
+  background: #ef4444;
+  color: white;
+  transform: rotate(90deg) scale(1.1);
 }
 
 .preview-card__inner {
   display: flex;
-  height: 140px;
+  height: 180px;
+  /* Increased height to accommodate long titles comfortably */
 }
 
 .preview-card__img-section {
-  width: 170px;
-  min-width: 170px;
-  height: 140px;
+  width: 190px;
+  min-width: 190px;
+  height: 100%;
   position: relative;
   overflow: hidden;
 }
@@ -2669,111 +2684,144 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+.preview-card:hover .preview-card__img-section img {
+  transform: scale(1.1);
 }
 
 .preview-card__img-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.2), transparent);
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.3), transparent 60%);
+}
+
+.preview-card__top-badges {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
 }
 
 .preview-card__status-badge {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 9px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 6px;
-  backdrop-filter: blur(8px);
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .preview-card__content {
   flex: 1;
-  padding: 18px 24px;
+  padding: 16px 20px;
+  /* More compact padding to save vertical space */
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 6px;
+  justify-content: space-between;
   min-width: 0;
+  /* Important for ellipsis */
+}
+
+.preview-card__header {
+  margin-bottom: 4px;
+  /* Reduced gap */
+  min-height: 0;
 }
 
 .preview-card__title {
-  font-size: 16px;
-  font-weight: 800;
-  color: #1a1c1e;
-  margin: 0;
-  line-height: 1.2;
+  font-size: 17px;
+  /* Slightly smaller to fit more text */
+  font-weight: 900;
+  color: #0f172a;
+  margin: 0 0 2px 0;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.preview-card__city {
+.preview-card__location {
   display: flex;
   align-items: center;
-  gap: 3px;
   font-size: 12px;
-  color: #a8a29e;
+  font-weight: 600;
+  color: #64748b;
   margin: 0;
-  font-weight: 500;
 }
 
 .preview-card__features {
   display: flex;
-  gap: 12px;
-  font-size: 12px;
-  color: #64748b;
+  gap: 8px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
-  margin-bottom: 4px;
+}
+
+.p-feat {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 8px;
 }
 
 .preview-card__footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: auto;
+  gap: 15px;
 }
 
 .preview-price {
   display: flex;
-  align-items: baseline;
-  gap: 3px;
+  flex-direction: column;
+  line-height: 1;
 }
 
-.preview-price span {
-  font-size: 16px;
-  font-weight: 800;
+.preview-price .p-val {
+  font-size: 18px;
+  font-weight: 900;
   color: var(--brand);
 }
 
-.preview-price small {
+.preview-price .p-period {
   font-size: 11px;
-  color: #a8a29e;
-  font-weight: 500;
+  color: #94a3b8;
+  font-weight: 600;
 }
 
 .preview-cta {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
-  background: #4D2F24;
+  padding: 10px 18px;
+  background: #0f172a;
   color: #fff;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(77, 47, 36, 0.2);
-  font-family: inherit;
+  transition: all 0.3s cubic-bezier(0.2, 1, 0.3, 1);
+  box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.3);
 }
 
 .preview-cta:hover {
-  transform: translateY(-2px);
-  background: #3b251d;
-  box-shadow: 0 6px 16px rgba(77, 47, 36, 0.3);
+  transform: translateY(-2px) scale(1.02);
+  background: #1e293b;
+  box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.4);
 }
 
 /* ══════════════════════════════════════════
@@ -3156,6 +3204,208 @@ onUnmounted(() => {
 
 .vibrant-marker--selected .vibrant-marker__indicator {
   border-color: #4D2F24 !important;
+}
+
+/* ══════════════════════════════════════════
+   MODERN MAP MARKERS
+══════════════════════════════════════════ */
+.marker-modern {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15));
+  transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+  animation: marker-float 3s ease-in-out infinite;
+  cursor: pointer;
+}
+
+@keyframes marker-float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.marker-modern__glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  background: var(--accent-color);
+  opacity: 0.2;
+  filter: blur(20px);
+  border-radius: 50%;
+  z-index: -1;
+  transition: all 0.3s;
+}
+
+.marker-modern__wrapper {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  padding: 4px 5px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4),
+    0 10px 25px rgba(0, 0, 0, 0.12);
+  min-width: 85px;
+  height: 44px;
+}
+
+.marker-modern__photo {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #fff;
+  background: #f1f5f9;
+  flex-shrink: 0;
+}
+
+.marker-modern__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.marker-modern__price {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+  padding-right: 8px;
+  white-space: nowrap;
+}
+
+.marker-modern__price .currency {
+  font-size: 10px;
+  color: #64748b;
+  margin-right: 1px;
+}
+
+.marker-modern__indicator {
+  position: absolute;
+  bottom: 0px;
+  right: 12px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2.5px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.marker-modern__tip {
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid rgba(255, 255, 255, 0.85);
+  margin-top: -2px;
+  backdrop-filter: blur(10px);
+}
+
+/* Selected State */
+.marker-modern--selected {
+  transform: scale(1.25) translateY(-10px) !important;
+  animation: none !important;
+  z-index: 9999 !important;
+}
+
+.marker-modern--selected .marker-modern__wrapper {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.marker-modern--selected .marker-modern__price {
+  color: #fff;
+}
+
+.marker-modern--selected .marker-modern__glow {
+  opacity: 0.5;
+  filter: blur(25px);
+  transform: translate(-50%, -50%) scale(2);
+}
+
+.marker-modern--selected .marker-modern__tip {
+  border-top-color: #0f172a;
+}
+
+/* Cluster Modern */
+.cluster-modern {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.cluster-modern:hover {
+  transform: scale(1.15) rotate(5deg);
+}
+
+.cluster-modern__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3),
+    inset 0 0 15px rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  z-index: 2;
+  text-align: center;
+}
+
+.cluster-modern__count {
+  font-size: 16px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.cluster-modern__price {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.cluster-modern__ring {
+  position: absolute;
+  inset: -4px;
+  border: 2px solid rgba(200, 169, 126, 0.3);
+  border-radius: 50%;
+  animation: cluster-pulse 2s linear infinite;
+  z-index: 1;
+}
+
+@keyframes cluster-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
 }
 
 /* ── Clusters ── */
