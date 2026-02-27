@@ -498,6 +498,7 @@ import RequestVisitModal from "../components/modals/ModalRequest/RequestVisitMod
 import PropertySearch from '../components/search/PropertySearch.vue';
 import { usePropertyTypes } from '../types/usePropertyTypes';
 import api from "../services/api";
+import { getPropertyImage as getPropertyImageUtil } from "../utils/propertyUtils";
 
 const DEFAULT_PROPERTY_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI2MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2Yzc1N2QiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZW4gbm8gZGlzcG9uaWJsZTwvdGV4dD48L3N2Zz4=";
 
@@ -806,26 +807,7 @@ function getServicesArray(services: any) {
 }
 
 function getPropertyImage(property: any) {
-  if (!property) return DEFAULT_PROPERTY_IMAGE;
-  
-  if (property.images && Array.isArray(property.images) && property.images.length > 0) {
-    const main = property.images.find((img: any) => img.is_main) || property.images[0];
-    return main.url || main.image_url || DEFAULT_PROPERTY_IMAGE;
-  }
-  
-  if (property.image_url) {
-    if (Array.isArray(property.image_url) && property.image_url.length > 0) return property.image_url[0];
-    if (typeof property.image_url === 'string') {
-      try {
-        const parsed = JSON.parse(property.image_url);
-        return Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : property.image_url;
-      } catch {
-        return property.image_url;
-      }
-    }
-  }
-  
-  return property.image_url || DEFAULT_PROPERTY_IMAGE;
+  return getPropertyImageUtil(property, DEFAULT_PROPERTY_IMAGE);
 }
 
 function viewPropertyDetails(property: any) {

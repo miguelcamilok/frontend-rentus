@@ -372,6 +372,7 @@ import {
   formatPriceFull,
   type MapProperty
 } from '../../services/propertyMapService';
+import { getPropertyImage as getPropertyImageUtil } from '../../utils/propertyUtils';
 
 // ──────────────────────────────────────────────
 // COLOMBIA GEO DATA
@@ -724,11 +725,7 @@ const geoAccuracyClass = computed(() => {
 // HELPERS
 // ──────────────────────────────────────────────
 function getPropertyImage(property: MapProperty): string {
-  if (property.images?.length) {
-    const main = property.images.find(i => i.is_main) ?? property.images[0];
-    return main?.image_url ?? DEFAULT_IMAGE;
-  }
-  return property.image_url ?? DEFAULT_IMAGE;
+  return getPropertyImageUtil(property, DEFAULT_IMAGE);
 }
 
 function handleImgError(e: Event) {

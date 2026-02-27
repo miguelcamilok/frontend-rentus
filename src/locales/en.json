@@ -931,7 +931,8 @@
         "amount": "Amount",
         "status": "Status",
         "type": "Type",
-        "contract": "Contract"
+        "contract": "Contract",
+        "property": "Property"
       },
       "contractId": "Contract #"
     },
@@ -1402,6 +1403,74 @@
     "yes": "Yes",
     "no": "No",
     "validation": "Validation",
-    "success": "Success"
+    "success": "Success",
+    "backToHome": "Back to Home"
+  },
+  "legal": {
+    "lastUpdated": "Last updated: {date}",
+    "notice": {
+      "eyebrow": "Legal",
+      "title": "Legal Notice",
+      "sections": {
+        "identification": {
+          "title": "1. Application Identification",
+          "content": "<p>RENTUS is a digital Software as a Service (SaaS) platform designed for the comprehensive management of real estate assets, facilitating connection and communication between owners, landlords, and tenants.</p><p>Use of this application implies full acceptance of the terms described herein.</p>"
+        },
+        "usage": {
+          "title": "2. Conditions of Use",
+          "content": "<p>The user agrees to make lawful, diligent, and correct use of the platform. The following are prohibited:</p><ul><li>Using the system for fraudulent or illegal purposes.</li><li>Impersonating other users or providing false property information.</li><li>Interfering with the technical operation of RENTUS servers.</li></ul>"
+        },
+        "responsibilities": {
+          "title": "3. User Responsibilities",
+          "content": "<p><strong>Owners/Landlords:</strong> They are responsible for the truthfulness of the information regarding published properties and for possessing the legal rights for their marketing.</p><p><strong>Tenants:</strong> They are responsible for the truthfulness of their personal and financial information provided for lease applications.</p>"
+        },
+        "liability": {
+          "title": "4. Limitations of Liability",
+          "content": "<p>RENTUS acts as a technological facilitator. We are not a party to the final contractual relationship between landlord and tenant, nor are we responsible for:</p><ul><li>Non-payment by tenants.</li><li>Physical damage to properties.</li><li>100% uninterrupted service availability (although we work to guarantee 99.9%).</li></ul>"
+        },
+        "intellectual": {
+          "title": "5. Intellectual Property",
+          "content": "<p>The software, design, logos, texts, and architecture of RENTUS are the exclusive property of its original developers. Total or partial reproduction is prohibited without express written authorization.</p>"
+        },
+        "termination": {
+          "title": "6. Suspension and Cancellation",
+          "content": "<p>RENTUS reserves the right to suspend or cancel user accounts that violate these terms, engage in spam, or use the platform for suspicious fraudulent activities.</p>"
+        }
+      }
+    },
+    "privacy": {
+      "eyebrow": "Privacy",
+      "title": "Privacy Policy",
+      "sections": {
+        "responsible": {
+          "title": "1. Data Controller",
+          "content": "<p>RENTUS is responsible for the processing of personal data collected through this platform, ensuring compliance with Law 1581 of 2012 on the Protection of Personal Data in Colombia.</p>"
+        },
+        "dataCollected": {
+          "title": "2. Data Collected",
+          "content": "<p>We collect the following information necessary for real estate management:</p><ul><li><strong>Personal Data:</strong> Name, ID document, email, phone.</li><li><strong>Property Data:</strong> Address, photos, tradition certificate, services.</li><li><strong>Financial Data:</strong> Payment history and payment methods (processed through secure gateways).</li></ul>"
+        },
+        "purpose": {
+          "title": "3. Purpose of Processing",
+          "content": "<p>Your data is used exclusively for:</p><ul><li>Managing digital lease agreements.</li><li>Processing rent collection and payments.</li><li>Facilitating technical and administrative communication between parties.</li><li>Generating statistical maintenance and financial reports.</li></ul>"
+        },
+        "security": {
+          "title": "4. Storage and Security",
+          "content": "<p>Information is stored in high-security cloud infrastructures with 256-bit SSL encryption and daily backups to ensure the integrity of your sensitive assets.</p>"
+        },
+        "providers": {
+          "title": "5. External Providers",
+          "content": "<p>RENTUS uses trusted third-party services (e.g., payment gateways and cloud storage services) to operate. These providers only have access to the minimum necessary information and comply with high security standards.</p>"
+        },
+        "rights": {
+          "title": "6. User Rights",
+          "content": "<p>You have the right to know, update, rectify, and delete your personal data at any time through the Settings section or by contacting our support team.</p>"
+        },
+        "retention": {
+          "title": "7. Data Retention",
+          "content": "<p>We will retain your data as long as you maintain an active account or for the time required by applicable tax and commercial laws for the validity of signed contracts.</p>"
+        }
+      }
+    }
   }
 }

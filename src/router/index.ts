@@ -29,6 +29,8 @@ const MapExplorerView = () => import("@/views/Map/MapExplorerView.vue");
 const MapView = () => import("@/components/modals/Maps/MapView.vue");
 const NotFoundView = () => import("@/views/NotFoundView.vue");
 const FaqView = () => import("@/views/FaqView.vue");
+const LegalNoticeView = () => import("@/views/Legal/LegalNoticeView.vue");
+const PrivacyPolicyView = () => import("@/views/Legal/PrivacyPolicyView.vue");
 
 // ── Admin routes ──────────────────────────────────────────────────────────
 import { adminRoutes } from "@/admin/router/admin.routes";
@@ -117,6 +119,18 @@ const routes: RouteRecordRaw[] = [
         name: "FaqView",
         component: FaqView,
         meta: { title: "Preguntas Frecuentes" },
+      },
+      {
+        path: "/aviso-legal",
+        name: "LegalNotice",
+        component: LegalNoticeView,
+        meta: { title: "Aviso Legal" },
+      },
+      {
+        path: "/politica-privacidad",
+        name: "PrivacyPolicy",
+        component: PrivacyPolicyView,
+        meta: { title: "Política de Privacidad" },
       },
     ],
   },

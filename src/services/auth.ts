@@ -64,6 +64,7 @@ export interface AuthResponse {
     verification_required?: boolean;
     verification_token?: string;
     email?: string;
+    token?: string;
     [key: string]: unknown;
   };
 }
@@ -212,6 +213,67 @@ class AuthService {
         throw new Error(data?.message ?? "Error en el registro");
       }
       throw new Error("Error desconocido en el registro");
+    }
+  }
+
+  /**
+   * Verifies a user's email with an OTP code.
+   */
+  async verifyEmail(email: string, code: string, token: string): Promise<AuthResponse> {
+    try {
+      const response = await api.post<AuthResponse>("/auth/verify-email", {
+        email,
+        code,
+        token,
+      });
+
+      if (response.data.success) {
+        // Backend returns token/user inside 'data' property
+        const innerData = response.data.data;
+        const authToken = (innerData?.token as string | undefined) ?? response.data.token;
+        const user = (innerData?.user as User | undefined) ?? response.data.user;
+
+        if (authToken) {
+          this.saveToken(authToken, false);
+        }
+        if (user) {
+          this.saveUser(user, false);
+        }
+
+        return response.data;
+      }
+
+      throw new Error(response.data.message ?? "Error en la verificación");
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        const data = error.response?.data as ErrorResponse | undefined;
+        throw new Error(data?.message ?? "Error en la verificación");
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Resends the verification code to the user's email.
+   */
+  async resendCode(email: string): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>("/auth/resend-code", {
+      email,
+    });
+    return response.data;
+  }
+
+  /**
+   * Checks if a verification token is still valid.
+   */
+  async checkToken(token: string): Promise<boolean> {
+    try {
+      const response = await api.post<AuthResponse>("/auth/check-token", {
+        token,
+      });
+      return response.data.success;
+    } catch {
+      return false;
     }
   }
 

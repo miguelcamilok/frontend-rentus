@@ -707,7 +707,8 @@
         "amount": "Monto",
         "status": "Estado",
         "type": "Tipo",
-        "contract": "Contrato"
+        "contract": "Contrato",
+        "property": "Propiedad"
       },
       "contractId": "Contrato #"
     },
@@ -1178,6 +1179,74 @@
     "yes": "Sí",
     "no": "No",
     "validation": "Validación",
-    "success": "Éxito"
+    "success": "Éxito",
+    "backToHome": "Volver al inicio"
+  },
+  "legal": {
+    "lastUpdated": "Última actualización: {date}",
+    "notice": {
+      "eyebrow": "Legal",
+      "title": "Aviso Legal",
+      "sections": {
+        "identification": {
+          "title": "1. Identificación del Aplicativo",
+          "content": "<p>RENTUS es una plataforma digital de Software as a Service (SaaS) diseñada para la gestión integral de activos inmobiliarios, facilitando la conexión y comunicación entre propietarios, arrendadores e inquilinos.</p><p>El uso de este aplicativo implica la aceptación plena de los términos aquí descritos.</p>"
+        },
+        "usage": {
+          "title": "2. Condiciones de Uso",
+          "content": "<p>El usuario se compromete a hacer un uso lícito, diligente y correcto de la plataforma. Queda prohibido:</p><ul><li>Utilizar el sistema para fines fraudulentos o ilícitos.</li><li>Suplantar la identidad de otros usuarios o proporcionar información falsa sobre propiedades.</li><li>Interferir con el funcionamiento técnico de los servidores de RENTUS.</li></ul>"
+        },
+        "responsibilities": {
+          "title": "3. Responsabilidades del Usuario",
+          "content": "<p><strong>Propietarios/Arrendadores:</strong> Son responsables de la veracidad de la información de las propiedades publicadas y de poseer los derechos legales para su comercialización.</p><p><strong>Inquilinos:</strong> Son responsables de la veracidad de su información personal y financiera proporcionada para la postulación a arriendos.</p>"
+        },
+        "liability": {
+          "title": "4. Limitaciones de Responsabilidad",
+          "content": "<p>RENTUS actúa como un facilitador tecnológico. No somos parte de la relación contractual final entre arrendador e inquilino, ni nos responsabilizamos por:</p><ul><li>Incumplimientos en los pagos por parte de los inquilinos.</li><li>Daños físicos en las propiedades.</li><li>Disponibilidad 100% ininterrumpida del servicio (aunque trabajamos para garantizar el 99.9%).</li></ul>"
+        },
+        "intellectual": {
+          "title": "5. Propiedad Intelectual",
+          "content": "<p>El software, diseño, logotipos, textos y arquitectura de RENTUS son propiedad exclusiva de sus desarrolladores originales. Queda prohibida la reproducción total o parcial sin autorización expresa por escrito.</p>"
+        },
+        "termination": {
+          "title": "6. Suspensión y Cancelación",
+          "content": "<p>RENTUS se reserva el derecho de suspender o cancelar cuentas de usuarios que infrinjan estos términos, realicen spam o utilicen la plataforma para actividades sospechosas de fraude.</p>"
+        }
+      }
+    },
+    "privacy": {
+      "eyebrow": "Privacidad",
+      "title": "Política de Privacidad",
+      "sections": {
+        "responsible": {
+          "title": "1. Responsable del Tratamiento",
+          "content": "<p>RENTUS es el responsable del tratamiento de los datos personales recopilados a través de esta plataforma, garantizando el cumplimiento de la Ley 1581 de 2012 de Protección de Datos Personales en Colombia.</p>"
+        },
+        "dataCollected": {
+          "title": "2. Datos Recopilados",
+          "content": "<p>Recopilamos la siguiente información necesaria para la gestión inmobiliaria:</p><ul><li><strong>Datos Personales:</strong> Nombre, documento de identidad, correo electrónico, teléfono.</li><li><strong>Datos de Propiedad:</strong> Dirección, fotos, certificado de tradición, servicios.</li><li><strong>Datos Financieros:</strong> Historial de pagos y métodos de pago (procesados a través de pasarelas seguras).</li></ul>"
+        },
+        "purpose": {
+          "title": "3. Finalidad del Tratamiento",
+          "content": "<p>Sus datos son utilizados exclusivamente para:</p><ul><li>Gestionar contratos de arrendamiento digitales.</li><li>Procesar cobros y pagos de canon de arrendamiento.</li><li>Facilitar la comunicación técnica y administrativa entre las partes.</li><li>Generar reportes estadísticos de mantenimiento y finanzas.</li></ul>"
+        },
+        "security": {
+          "title": "4. Almacenamiento y Seguridad",
+          "content": "<p>La información se almacena en infraestructuras de nube de alta seguridad con encriptación SSL de 256 bits y copias de seguridad diarias para garantizar la integridad de sus activos sensibles.</p>"
+        },
+        "providers": {
+          "title": "5. Proveedores Externos",
+          "content": "<p>RENTUS utiliza servicios de terceros de confianza (por ejemplo, pasarelas de pago y servicios de almacenamiento en la nube) para operar. Estos proveedores solo tienen acceso a la información mínima necesaria y cumplen con altos estándares de seguridad.</p>"
+        },
+        "rights": {
+          "title": "6. Derechos del Usuario",
+          "content": "<p>Usted tiene derecho a conocer, actualizar, rectificar y suprimir sus datos personales en cualquier momento a través de la sección de Ajustes o contactando a nuestro equipo de soporte.</p>"
+        },
+        "retention": {
+          "title": "7. Conservación de Datos",
+          "content": "<p>Conservaremos sus datos mientras mantenga una cuenta activa o durante el tiempo que exijan las leyes fiscales y comerciales aplicables para la validez de contratos firmados.</p>"
+        }
+      }
+    }
   }
 }
